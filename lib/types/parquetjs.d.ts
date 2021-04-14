@@ -46,7 +46,25 @@ declare module "parquetjs" {
         setRowGroupSize(cnt:number): void
         setPageSize(cnt:number): void
     }
+    export type Block = Uint32Array;
+
+    export class SplitBlockBloomFilter {
+        static getBlockIndex(h: Long, z: number): number
+        static optimalNumOfBits(numDistinct: Long, falsePositiveProbability: number): number
+        static mask(hashValue: number): Block
+        static blockInsert(b: Block, hashValue: number): void
+        static blockCheck(b: Block, hashValue: number): boolean
+        setOptFalsePositiveRate(percent: number): SplitBlockBloomFilter
+        setOptNumBits(numBits: number): SplitBlockBloomFilter
+        init(): SplitBlockBloomFilter
+        filter(): Array<Block>
+        numBitsPerBlock(): number
+        numDistinctExpected(): Long
+        insert(hashValue: Long): void
+        check(hashValue: Long): boolean
+    }
 }
+
 
 
 
