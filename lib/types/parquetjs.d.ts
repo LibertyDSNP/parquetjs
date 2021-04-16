@@ -58,8 +58,10 @@ declare module "parquetjs" {
         setOptNumBits(numBits: number): SplitBlockBloomFilter
         init(): SplitBlockBloomFilter
         filter(): Array<Block>
-        numBitsPerBlock(): number
-        numDistinctExpected(): Long
+        numDistinctExpected(): number
+        falsePositiveRate(): number
+        numFilterBlocks(): number
+        numFilterBytes(): number
         insert(hashValue: Long): void
         check(hashValue: Long): boolean
     }
