@@ -1,12 +1,7 @@
 import Long = require('long')
-// const parquet_thrift = require('../gen-nodejs/parquet_types')
-
+const parquet_thrift = require('../../gen-nodejs/parquet_types')
+import XxHasher from "./xxhasher"
 type Block = Uint32Array
-
-//
-//
-//
-//
 
 /**
  * @class SplitBlockBloomFilter
@@ -40,7 +35,7 @@ class SplitBlockBloomFilter {
         0x2df1424b,
         0x9efc4947,
         0x5c6bfb31
-    ];
+    ]
 
     // How many bits are in a single block:
     // - Blocks are UInt32 arrays
@@ -192,7 +187,7 @@ class SplitBlockBloomFilter {
     private desiredFalsePositiveRate: number = SplitBlockBloomFilter.DEFAULT_FALSE_POSITIVE_RATE
     private numBlocks: number = 0
     private numDistinctValues: number = SplitBlockBloomFilter.UPPER_BOUND_BYTES
-    // hashStrategy =  new parquet_thrift.BloomFilterHash(parquet_thrift.XxHash)
+    private hashStrategy = new parquet_thrift.BloomFilterHash(parquet_thrift.XxHash)
 
     private isInitialized(): boolean { return this.splitBlockFilter.length > 0 }
 
@@ -288,8 +283,6 @@ class SplitBlockBloomFilter {
         return this
     }
 
-    // TODO: include an option to set hash strategy later even though there's only one valid one
-
     // is numBits the correct value to use?
     /**
      * @function initFilter
@@ -307,6 +300,11 @@ class SplitBlockBloomFilter {
             console.error("filter already initialized.")
             return this
         }
+
+        if (!this.hashStrategy.hasOwnProperty("XXHASH")) {
+            throw new Error("unsupported hash strategy")
+        }
+
         if (this.numBlocks === 0) {
             this.numBlocks = SplitBlockBloomFilter.optimalNumOfBlocks(this.numDistinctValues, this.desiredFalsePositiveRate) >>> 3
         }
@@ -315,18 +313,18 @@ class SplitBlockBloomFilter {
         return this
     }
 
-    // TBD
-    // hash(value: any): Long {
-    //     return this.hashStrategy(value)
-    // }
+    hash(value: any): Long {
+        if (!this.hashStrategy.hasOwnProperty("XXHASH")) {
+            throw new Error("unsupported hash strategy")
+        }
+        return Long.fromString(XxHasher.hash64(value), true, 16)
+    }
 
     /**
-     * @function insert
-     * @description add a hash value to this filter
+     *
      * @param hashValue: an unsigned Long, the hash value to add
-     * @return void
      */
-    insert(hashValue: Long): void {
+    private insertHash(hashValue: Long): void {
         if (!hashValue.unsigned) throw new Error("hashValue must be an unsigned Long")
         if (!this.isInitialized()) throw new Error("filter has not been initialized. call init() first")
         const i = SplitBlockBloomFilter.getBlockIndex(hashValue, this.splitBlockFilter.length)
@@ -334,17 +332,37 @@ class SplitBlockBloomFilter {
     }
 
     /**
-     * @function check
-     * @description check if a hashValue exists for this filter
-     * @param hashValue: an unsigned Long,  the hash value to check for
-     * @return true if hashed item is found in the data set represented by this filter
-     * @return false if it is __definitely not__ in the data set.
+     * @function insert
+     * @description add a hash value to this filter
+     * @param value: an unsigned Long, the value to add. If not a string, will be JSON.stringified
+     * @return void
      */
-    check(hashValue: Long): boolean {
+    insert(value: any): void {
+        if (!this.isInitialized()) throw new Error("filter has not been initialized. call init() first")
+        this.insertHash(this.hash(value))
+    }
+
+    /**
+     *
+     * @param hashValue: an unsigned Long,  the hash value to check for
+     * @private
+     */
+    private checkHash(hashValue: Long): boolean {
         if (!hashValue.unsigned) throw new Error("hashValue must be an unsigned Long")
         if (!this.isInitialized()) throw new Error("filter has not been initialized")
         const i = SplitBlockBloomFilter.getBlockIndex(hashValue, this.splitBlockFilter.length)
         return SplitBlockBloomFilter.blockCheck(this.splitBlockFilter[i], hashValue.getLowBitsUnsigned());
+    }
+    /**
+     * @function check
+     * @description check if a hashValue exists for this filter
+     * @param value: the value to check for. If not a string, will be JSON.stringified
+     * @return true if hashed item is found in the data set represented by this filter
+     * @return false if it is __definitely not__ in the data set.
+     */
+    check(value: any): boolean {
+        if (!this.isInitialized()) throw new Error("filter has not been initialized")
+        return this.checkHash(this.hash(value))
     }
 }
 

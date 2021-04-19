@@ -1,10 +1,9 @@
 import Long = require('long')
 import {assert, expect} from "chai"
 import * as sinon from "sinon"
-
 import {generateHexString, makeListN, randInt, times} from "./util/general";
 import SplitBlockBloomFilter from "../lib/bloom/sbbf";
-const XxHash = require("xxhash")
+
 describe("Split Block Bloom Filters", () => {
     it("Mask works", () => {
         const testMaskX = Number("0xdeadbeef");
@@ -206,9 +205,41 @@ describe("Split Block Bloom Filters", () => {
                 if (!filter.check(notInFilter)) falsePositive++
             })
 
-            if (falsePositive > 0) console.log(falsePositive)
+            if (falsePositive > 0) console.log("Found false positive: ", falsePositive)
             expect(falsePositive < (numDistinct * fpr))
             done()
-        }).timeout(5000)
+        }).timeout(10000)
+    })
+    describe("insert, check", () => {
+        const strVal ="Hello Hello Hello"
+
+        it("works with multiple types", () => {
+            const filter = new SplitBlockBloomFilter().setOptionNumDistinct(10000).init()
+
+            const strVal ="Hello Hello Hello"
+            filter.insert(strVal)
+            expect(filter.check(strVal))
+
+            const longVal = new Long(randInt(2 ** 30), randInt(2 ** 30), true)
+            filter.insert(longVal)
+            expect(filter.check(longVal))
+
+            const aruint32 = new Uint32Array(8).fill(39383)
+            filter.insert(aruint32)
+            expect(filter.check(aruint32))
+
+            const someObj = {
+                name: "William Shakespeare",
+                preferredName: "Shakesey",
+                url: "http://placekitten.com/800/600"
+            }
+            filter.insert(someObj)
+            expect(filter.check(someObj))
+
+            const ary = [383838, 222, 5898, 1, 0]
+            filter.insert(ary)
+            expect(filter.check(ary))
+
+        })
     })
 })
