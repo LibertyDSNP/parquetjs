@@ -4,7 +4,6 @@
  */
 export const generateHexString = (length: number): string => {
     return (
-        "0x" +
         [...Array(length)]
             .map(() => Math.floor(Math.random() * 16).toString(16))
             .join("")

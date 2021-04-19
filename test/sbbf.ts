@@ -2,25 +2,10 @@ import Long = require('long')
 import {assert, expect} from "chai"
 import * as sinon from "sinon"
 
-import {generateHexString, makeListN} from "./util/general";
+import {generateHexString, makeListN, randInt, times} from "./util/general";
 import SplitBlockBloomFilter from "../lib/bloom/sbbf";
-
+const XxHash = require("xxhash")
 describe("Split Block Bloom Filters", () => {
-    it("try long.js", () => {
-        const h = new Long(0xFFFFFFFF, 0x7FFFFFFF);
-        const h2 = new Long(793516929, -2061372197, true) // regression test
-
-        // generate index
-        const zees = [1, 2, 3, 4, 7, 8, 15, 16, 1023, 1024, 32767, 32768]
-        zees.forEach((z) => {
-            const longZ = new Long(z)
-            let index = SplitBlockBloomFilter.getBlockIndex(h, z)
-            assert.isTrue(longZ.greaterThan(index))
-            index = SplitBlockBloomFilter.getBlockIndex(h2, z)
-            assert.isTrue(longZ.greaterThan(index))
-        })
-    })
-
     it("Mask works", () => {
         const testMaskX = Number("0xdeadbeef");
         const testMaskRes = SplitBlockBloomFilter.mask(testMaskX)
@@ -123,20 +108,20 @@ describe("Split Block Bloom Filters", () => {
             filter = new SplitBlockBloomFilter().setOptionNumFilterBytes(1025).init()
             expect(filter.optNumFilterBytes()).to.eq(2048)
 
-            const below2 = 2**12 - 1
+            const below2 = 2 ** 12 - 1
             filter = new SplitBlockBloomFilter().setOptionNumFilterBytes(below2).init()
-            expect(filter.optNumFilterBytes()).to.eq(2**12)
+            expect(filter.optNumFilterBytes()).to.eq(2 ** 12)
         })
         it("can't be set twice after initializing", () => {
             const spy = sinon.spy(console, "error")
             const filter = new SplitBlockBloomFilter()
                 .setOptionNumFilterBytes(333333)
-                .setOptionNumFilterBytes(2**20)
+                .setOptionNumFilterBytes(2 ** 20)
                 .init()
             expect(spy.notCalled)
             filter.setOptionNumFilterBytes(44444)
             expect(spy.calledOnce)
-            expect(filter.optNumFilterBytes()).to.eq(2**20)
+            expect(filter.optNumFilterBytes()).to.eq(2 ** 20)
             spy.restore()
         })
     })
@@ -192,12 +177,38 @@ describe("Split Block Bloom Filters", () => {
         })
     })
     describe("optimal number of blocks", () => {
-        it("sets correct values", () =>{
-            let filter = new SplitBlockBloomFilter()
-                .setOptionNumDistinct(32767)
-                .setOptionFalsePositiveRate(.001)
-                .init()
-            expect(filter.numFilterBlocks()).to.eq(1825)
+        // Some general ideas of what size filters are needed for different parameters
+        it("can be called", () => {
+            expect(SplitBlockBloomFilter.optimalNumOfBlocks(20000, 0.001)).to.eq(1143)
+            expect(SplitBlockBloomFilter.optimalNumOfBlocks(20000, 0.0001)).to.eq(1645)
+            expect(SplitBlockBloomFilter.optimalNumOfBlocks(50000, 0.0001)).to.eq(4111)
+            expect(SplitBlockBloomFilter.optimalNumOfBlocks(50000, 0.00001)).to.eq(5773)
+            expect(SplitBlockBloomFilter.optimalNumOfBlocks(100000, 0.000001)).to.eq(15961)
         })
+
+        it("sets good values", (done) => {
+            const numDistinct = 100000
+            const fpr = 0.01
+            const filter = new SplitBlockBloomFilter()
+                .setOptionNumDistinct(numDistinct)
+                .setOptionFalsePositiveRate(fpr)
+                .init()
+
+            times(numDistinct, () => {
+                const hashValue = new Long(randInt(2 ** 30), randInt(2 ** 30), true)
+                filter.insert(hashValue)
+                expect(filter.check(hashValue))
+            })
+
+            let falsePositive = 0
+            times(numDistinct, () => {
+                const notInFilter = new Long(randInt(2 ** 30), randInt(2 ** 30), true)
+                if (!filter.check(notInFilter)) falsePositive++
+            })
+
+            if (falsePositive > 0) console.log(falsePositive)
+            expect(falsePositive < (numDistinct * fpr))
+            done()
+        }).timeout(5000)
     })
 })

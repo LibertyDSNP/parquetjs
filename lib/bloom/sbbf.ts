@@ -3,6 +3,33 @@ import Long = require('long')
 
 type Block = Uint32Array
 
+//
+//
+//
+//
+
+/**
+ * @class SplitBlockBloomFilter
+ * @overview  Parquet spec implementation of Split Block Bloom Filtering
+ * @description Much of this code was pulled from apache/parquet Java implementation
+ *     https://github.com/apache/parquet-mr
+ *     See also Cache-, Hash- and Space-Efficient Bloom Filters:
+ *     http://algo2.iti.kit.edu/documents/cacheefficientbloomfilters-jea.pdf
+ *
+ *     Default filter size is ~16.8MB, using 0.001 FPR and 128M rows
+ *
+ * @constructor   SplitBlockBloomFilter()
+ *      Once desired options are set, call init() to set up the filter array
+ * @example This calculates and sets the optimal filter size based on the options:
+ *   const filter = new SplitBLockBloomFilter()
+ *      .setOptionNumDistinct(100000)
+ *      .setOptionFalsePositiveRate(0.00001)
+ *      .init()
+ *
+ * @example This uses the default values to initialize the filter:
+ *  const filter = new SplitBlockBloomFilter().init()
+ */
+
 class SplitBlockBloomFilter {
     private static salt: Array<number> = [
         0x47b6137b,
@@ -22,14 +49,14 @@ class SplitBlockBloomFilter {
     private static WORD_SIZE = 32
 
     // How many bits are in a single block: 256
-    private static BITS_SET_PER_BLOCK: number = SplitBlockBloomFilter.WORDS_PER_BLOCK * SplitBlockBloomFilter.WORD_SIZE
+    private static BITS_PER_BLOCK: number = SplitBlockBloomFilter.WORDS_PER_BLOCK * SplitBlockBloomFilter.WORD_SIZE
 
     // Default number of blocks in a Split Block Bloom filter (SBBF)
     private static NUMBER_OF_BLOCKS: number = 32
 
     // The lower bound of SBBF size in bytes.
     // Currently this is 1024
-    private static LOWER_BOUND_BYTES = SplitBlockBloomFilter.NUMBER_OF_BLOCKS * SplitBlockBloomFilter.BITS_SET_PER_BLOCK / 8;
+    private static LOWER_BOUND_BYTES = SplitBlockBloomFilter.NUMBER_OF_BLOCKS * SplitBlockBloomFilter.BITS_PER_BLOCK / 8;
 
     // The upper bound of SBBF size, set to default row group size in bytes.
     // Note that the subsquent requirements for an effective bloom filter on a row group this size would mean this
@@ -43,7 +70,7 @@ class SplitBlockBloomFilter {
     }
 
     /**
-     * getBlockIndex: get a block index to insert a hash value for
+     * @function getBlockIndex: get a block index to insert a hash value for
      * @param h: the hash from which to derive a block index (?)
      * @param z: the number of blocks in the filter
      *
@@ -56,49 +83,47 @@ class SplitBlockBloomFilter {
     }
 
     /**
-     * Calculate optimal size according to the number of distinct values and false positive probability.
-     * Using a Bloom filter calculator, the upper bound is far too large for client applications.
-     * More reasonable settings, if what's desired is:
-     *   - n = Upper bound row group size = 32kB
-     *   - p = .001, 1 in 1000 chance of false positive
-     *   - k = 8, number of hash functions
+     * @function optimalNumOfBlocks
      *
-     *   means m, number of bits in the filter needs to be:
-     *   - m = 467447 (57.06KiB) , which means
-     *   - m/BITS_SET_PER_BLOCK = m/256 = just over 1825 blocks.
+     * @description Calculate optimal number of blocks, according to the number of distinct
+     * values and false positive probability.  Using a Bloom filter calculator, the upper bound is
+     * far too large for client applications. Sourced from:
+     * https://github.com/apache/parquet-mr/blob/5608695f5777de1eb0899d9075ec9411cfdf31d3/parquet-column/src/main/java/org/apache/parquet/column/values/bloomfilter/BlockSplitBloomFilter.java#L285
      *
      * @param numDistinct: The number of distinct values.
-     * @param falsePositiveProbability: The false positive probability.
+     * @param falsePositiveRate: The false positive rate, a number between 0 and 1 exclusive
      *
-     * @return optimal number of bits of given n and p.
+     * @return number: number of bits of given n and p.
      */
-    static optimalNumOfBlocks(numDistinct: number, falsePositiveProbability: number): number {
-        const foo = Math.pow(falsePositiveProbability, 1.0 / 8);
-        let something = Math.log(1 - foo);
-        const m = numDistinct * -8 / something
+    static optimalNumOfBlocks(numDistinct: number, falsePositiveRate: number): number {
+        let m = -8 * numDistinct / Math.log(1 - Math.pow(falsePositiveRate, 1.0 / 8))
 
-        let numBits = (m + SplitBlockBloomFilter.NUMBER_OF_BLOCKS - 1) & (~SplitBlockBloomFilter.NUMBER_OF_BLOCKS);
+        m = (m + SplitBlockBloomFilter.NUMBER_OF_BLOCKS - 1) & (~SplitBlockBloomFilter.NUMBER_OF_BLOCKS);
 
         // Handle overflow:
         const upperShiftL3 = SplitBlockBloomFilter.UPPER_BOUND_BYTES << 3
         if (m > upperShiftL3 || m < 0 ) {
-            numBits = upperShiftL3;
-        }
-        // Round numBits up to (k * NUMBER_OF_BLOCKS)?
-        const lowerBoundShiftL3 = SplitBlockBloomFilter.LOWER_BOUND_BYTES << 3
-        if (numBits < lowerBoundShiftL3 ) {
-            numBits = lowerBoundShiftL3;
+            m = upperShiftL3;
         }
 
-        return numBits / this.BITS_SET_PER_BLOCK;
+        // Round numBits up
+        m = (m + SplitBlockBloomFilter.BITS_PER_BLOCK -1) & ~SplitBlockBloomFilter.BITS_PER_BLOCK
+
+        const lowerBoundShiftL3 = SplitBlockBloomFilter.LOWER_BOUND_BYTES << 3
+        if (m < lowerBoundShiftL3 ) {
+            m = lowerBoundShiftL3;
+        }
+
+        return Math.ceil(m / this.BITS_PER_BLOCK)
     }
 
     /**
-     * mask: generate a mask block for a bloom filter block
+     * @function mask
+     * @description generate a mask block for a bloom filter block
      * @param hashValue: the hash value to generate the mask from
      * @private
      *
-     * @return the mask Block
+     * @return mask Block
      */
     static mask(hashValue: number): Block {
         let result: Block = SplitBlockBloomFilter.initBlock()
@@ -110,7 +135,8 @@ class SplitBlockBloomFilter {
     }
 
     /**
-     * blockInsert: insert a hash into a Bloom filter Block
+     * @function blockInsert
+     * @description insert a hash into a Bloom filter Block
      * @param b: the block to flip a bit for: is changed
      * @param hashValue: the hash value to insert into b
      * @private
@@ -132,7 +158,8 @@ class SplitBlockBloomFilter {
     }
 
     /**
-     * blockCheck: check if a hashValue exists for this filter
+     * @function blockCheck
+     * @description check if a hashValue exists for this filter
      * @param b: the block to check for inclusion
      * @param hashValue: the hash to check for  should be long
      * @private
@@ -174,16 +201,15 @@ class SplitBlockBloomFilter {
     optNumDistinct(): number { return this.numDistinctValues }
     filter(): Array<Block> { return this.splitBlockFilter }
 
-    // numFilterBytes
-    // default:  256 * 4
     optNumFilterBytes(): number {
-        return this.numBlocks * SplitBlockBloomFilter.BITS_SET_PER_BLOCK >>> 3
+        return this.numBlocks * SplitBlockBloomFilter.BITS_PER_BLOCK >>> 3
     }
 
     /**
-     * setOptionFalsePositiveRate: set the desired false positive percentage for this Bloom filter.
-     * defaults to SplitBlockBLoomFilter.DEFAULT_FALSE_POSITIVE_RATE
-     * This function does nothing if the filter has already been allocated.
+     * @function setOptionFalsePositiveRate
+     * @description set the desired false positive percentage for this Bloom filter.
+     *     defaults to SplitBlockBLoomFilter.DEFAULT_FALSE_POSITIVE_RATE
+     *     This function does nothing if the filter has already been allocated.
      * @param proportion: number, between 0.0 and 1.0, exclusive
      */
     setOptionFalsePositiveRate(proportion: number): SplitBlockBloomFilter {
@@ -200,10 +226,11 @@ class SplitBlockBloomFilter {
     }
 
     /**
-     * setOptionNumDistinct: set the number of expected distinct values for the filter.
-     *  this should generally be <= to the row group size. Defaults to
-     *  SplitBlockBloomFilter.UPPER_BOUND_BYTES
-     *  This function does nothing if the filter has already been allocated.
+     *  @function setOptionNumDistinct
+     *  @description set the number of expected distinct values for the filter.
+     *     this should generally be <= to the row group size. Defaults to
+     *     SplitBlockBloomFilter.UPPER_BOUND_BYTES
+     *     This function does nothing if the filter has already been allocated.
      * @param numDistinct
      */
     setOptionNumDistinct(numDistinct: number): SplitBlockBloomFilter {
@@ -221,8 +248,11 @@ class SplitBlockBloomFilter {
 
 
     /**
-     * nextPwr2: return the next highest power of 2 above v
-     * see  https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
+     * @function nextPwr2
+     * @description return the next highest power of 2 above v
+     *     see  https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
+     *     NOTE: cannot use values > 2**31. We are not expecting these values internally,
+     *     so this works as intended.
      * @param v: the number to increase
      * @returns the new number
      */
@@ -238,10 +268,10 @@ class SplitBlockBloomFilter {
     }
 
     /**
-     * setOptionNumBytes: set the bytes for this Bloom filter. Set this if you don't want an
-     * optimal value calculated for you.  Rounds up to nearest power of 2
-     * This function does nothing if the filter has already been allocated.
-     *
+     * @function setOptionNumBytes
+     * @description set the bytes for this Bloom filter. Set this if you don't want an
+     *     optimal value calculated for you.  Rounds up to nearest power of 2
+     *     This function does nothing if the filter has already been allocated.
      * @param numBytes: number, the desired bit size.
      */
     setOptionNumFilterBytes(numBytes: number): SplitBlockBloomFilter {
@@ -254,7 +284,7 @@ class SplitBlockBloomFilter {
             return this
         }
         // numBlocks = Bytes * 8b/Byte * 1Block/256b
-        this.numBlocks =  SplitBlockBloomFilter.nextPwr2(numBytes) * 8 / SplitBlockBloomFilter.BITS_SET_PER_BLOCK
+        this.numBlocks =  SplitBlockBloomFilter.nextPwr2(numBytes) * 8 / SplitBlockBloomFilter.BITS_PER_BLOCK
         return this
     }
 
@@ -262,13 +292,15 @@ class SplitBlockBloomFilter {
 
     // is numBits the correct value to use?
     /**
-     * initFilter: initialize the Bloom filter using the options previously provided.
-     * If numBlocks has not been calculated and set via setOptionNumBytes, we calculate
-     * the optimal filter size based on number of distinct values and
-     * percent false positive rate. See setOptionNumDistinct and setOptionFalsePositiveRate
+     * @function initFilter
+     * @description initialize the Bloom filter using the options previously provided.
+     *     If numBlocks has not been calculated and set via setOptionNumBytes, we calculate
+     *     the optimal filter size based on number of distinct values and
+     *     percent false positive rate. See setOptionNumDistinct and setOptionFalsePositiveRate
      *
-     * Repeated calls to init do nothing to avoid multiple memory allocations or
-     * accidental loss of filters.
+     *     Repeated calls to init do nothing to avoid multiple memory allocations or
+     *     accidental loss of filters.
+     * @return void
      */
     init(): SplitBlockBloomFilter {
         if (this.isInitialized()) {
@@ -283,29 +315,34 @@ class SplitBlockBloomFilter {
         return this
     }
 
-    //
+    // TBD
     // hash(value: any): Long {
     //     return this.hashStrategy(value)
     // }
 
     /**
-     * insert: add a hash value to this filter
-     * @param hashValue: Long, the hash value to add
+     * @function insert
+     * @description add a hash value to this filter
+     * @param hashValue: an unsigned Long, the hash value to add
+     * @return void
      */
     insert(hashValue: Long): void {
         if (!hashValue.unsigned) throw new Error("hashValue must be an unsigned Long")
+        if (!this.isInitialized()) throw new Error("filter has not been initialized. call init() first")
         const i = SplitBlockBloomFilter.getBlockIndex(hashValue, this.splitBlockFilter.length)
         SplitBlockBloomFilter.blockInsert(this.splitBlockFilter[i], hashValue.getLowBitsUnsigned());
     }
 
     /**
-     * check: blockCheck: check if a hashValue exists for this filter
-     * @param hashValue: Long,  the hash value to check for
-     *
-     * @return true if hashed item is __probably__ in the data set represented by this filter
+     * @function check
+     * @description check if a hashValue exists for this filter
+     * @param hashValue: an unsigned Long,  the hash value to check for
+     * @return true if hashed item is found in the data set represented by this filter
      * @return false if it is __definitely not__ in the data set.
      */
     check(hashValue: Long): boolean {
+        if (!hashValue.unsigned) throw new Error("hashValue must be an unsigned Long")
+        if (!this.isInitialized()) throw new Error("filter has not been initialized")
         const i = SplitBlockBloomFilter.getBlockIndex(hashValue, this.splitBlockFilter.length)
         return SplitBlockBloomFilter.blockCheck(this.splitBlockFilter[i], hashValue.getLowBitsUnsigned());
     }
