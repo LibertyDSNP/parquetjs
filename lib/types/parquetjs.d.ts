@@ -1,6 +1,5 @@
 // <reference types = "parquetjs" />
 
-
 declare module "parquetjs" {
 
     export class ParquetEnvelopeReader {

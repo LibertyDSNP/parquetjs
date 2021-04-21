@@ -1,22 +1,23 @@
 {
   "compilerOptions": {
+    "allowJs": true,
     "allowSyntheticDefaultImports": true,
-    "baseUrl": "./lib",
+    "baseUrl": "./",
     "esModuleInterop": true,
     "module": "commonjs",
     "moduleResolution": "node",
     "noEmit": false,
     "noImplicitAny": true,
-    "outDir": "./dist",
+    "outDir": "dist",
     "resolveJsonModule": true,
     "sourceMap": true,
     "strict": true,
     "target": "es2015",
     "watch": false,
-
   },
   "files": [
     "./lib/bloom/sbbf.ts"
-  ]
+  ],
+  "include":  ["lib/**/*", "gen-nodejs/*"]
 }
 
