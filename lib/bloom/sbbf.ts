@@ -1,5 +1,5 @@
+const parquet_thrift = require("../../gen-nodejs/parquet_types")
 import Long = require('long')
-const parquet_thrift = require('../../gen-nodejs/parquet_types')
 import XxHasher from "./xxhasher"
 type Block = Uint32Array
 
@@ -66,8 +66,8 @@ class SplitBlockBloomFilter {
 
     /**
      * @function getBlockIndex: get a block index to insert a hash value for
-     * @param h: the hash from which to derive a block index (?)
-     * @param z: the number of blocks in the filter
+     * @param h the hash from which to derive a block index (?)
+     * @param z the number of blocks in the filter
      *
      * @return a number from 0 -> z-1
      */
@@ -85,8 +85,8 @@ class SplitBlockBloomFilter {
      * far too large for client applications. Sourced from:
      * https://github.com/apache/parquet-mr/blob/5608695f5777de1eb0899d9075ec9411cfdf31d3/parquet-column/src/main/java/org/apache/parquet/column/values/bloomfilter/BlockSplitBloomFilter.java#L285
      *
-     * @param numDistinct: The number of distinct values.
-     * @param falsePositiveRate: The false positive rate, a number between 0 and 1 exclusive
+     * @param numDistinct The number of distinct values.
+     * @param falsePositiveRate The false positive rate, a number between 0 and 1 exclusive
      *
      * @return number: number of bits of given n and p.
      */
