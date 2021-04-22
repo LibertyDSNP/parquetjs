@@ -50,7 +50,7 @@
     "lint": "npm-run-all -c lint:*",
     "lint:eslint": "eslint 'lib/**/*.{ts}'",
     "format": "npm run lint:eslint -- --fix && npm run lint:stylelint -- --fix ",
-    "test": "npm run build && mocha -r ts-node/register 'test/**/*.{js,ts}'"
+    "test": "mocha -r ts-node/register 'test/**/*.{js,ts}'"
   },
   "engines": {
     "node": ">=14.16.0"

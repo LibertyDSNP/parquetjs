@@ -11,14 +11,14 @@ describe("Split Block Bloom Filters", () => {
 
         // all mask values should have exactly one bit set
         const expectedVals = [
-            2 ** 29,
-            2 ** 15,
-            2 ** 12,
-            2 ** 14,
-            2 ** 13,
-            2 ** 25,
-            2 ** 24,
-            2 ** 21
+            1 << 29,
+            1 << 15,
+            1 << 12,
+            1 << 14,
+            1 << 13,
+            1 << 25,
+            1 << 24,
+            1 << 21
         ]
         for (let i = 0; i < expectedVals.length; i++) {
             expect(testMaskRes[i]).to.eq(expectedVals[i])
@@ -214,39 +214,48 @@ describe("Split Block Bloom Filters", () => {
             done()
         }).timeout(10000)
     })
+
     describe("insert, check", () => {
-        const strVal ="Hello Hello Hello"
 
-        it("works with multiple types", () => {
-            const filter = new SplitBlockBloomFilter().setOptionNumDistinct(10000).init()
-
-            const strVal ="Hello Hello Hello"
-            filter.insert(strVal)
-            expect(filter.check(strVal))
-
-            const longVal = new Long(randInt(2 ** 30), randInt(2 ** 30), true)
-            filter.insert(longVal)
-            expect(filter.check(longVal))
-
-            const aruint32 = new Uint32Array(8).fill(39383)
-            filter.insert(aruint32)
-            expect(filter.check(aruint32))
-
-            const someObj = {
-                name: "William Shakespeare",
-                preferredName: "Shakesey",
-                url: "http://placekitten.com/800/600"
-            }
-            filter.insert(someObj)
-            expect(filter.check(someObj))
-
-            const ary = [383838, 222, 5898, 1, 0]
-            filter.insert(ary)
-            expect(filter.check(ary))
-
-            const buf = Buffer.from(strVal)
-            filter.insert(ary)
-            expect(filter.check(ary))
+        type testCase = { name: string, val: any }
+        const testCases: Array<testCase> = [
+            {name: "string", val: "hello hello hello"},
+            {name: "Long", val: new Long(randInt(2 ** 30), randInt(2 ** 30), true)},
+            {name: "Uint32Array", val: new Uint32Array(8).fill(39383)},
+            {
+                name: "Float64Array",
+                val: Float64Array.from([0.0001, 2.7182818284590452353602874713527, 3487338.393939, 3.141592653589793238462643383279502884197169399375105])
+            },
+            {
+                name: "object", val: {
+                    name: "William Shakespeare",
+                    preferredName: "Shakesey",
+                    url: "http://placekitten.com/800/600"
+                }
+            },
+            {name: "array of ints", val: [383838, 222, 5898, 1, 0]},
+            {name: "Buffer", val: Buffer.from("Hello Hello Hello")},
+            {name: "BigInt", val: BigInt(1234324434440)},
+         ]
+        const filter = new SplitBlockBloomFilter().setOptionNumDistinct(1000).init()
+        testCases.forEach(tc => {
+            it(`works for a ${tc.name} type`, () => {
+                filter.insert(tc.val)
+                expect(filter.check(tc.val))
+            })
         })
+
+        const throwCases = [
+            {name: "Set", val: (new Set()).add("foo").add(5).add([1,2,3])},
+            {name: "Map", val: new Map() }
+        ]
+        throwCases.forEach((tc) => {
+            it(`throws on type ${tc.name}`, () => {
+                expect(() => {
+                    filter.insert(tc.val)
+                }).to.throw("stringify Set or Map first")
+            })
+        })
+
     })
 })
