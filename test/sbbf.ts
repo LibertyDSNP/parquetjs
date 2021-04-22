@@ -6,7 +6,7 @@ import SplitBlockBloomFilter from "../lib/bloom/sbbf";
 
 describe("Split Block Bloom Filters", () => {
     it("Mask works", () => {
-        const testMaskX = Number("0xdeadbeef");
+        const testMaskX = Long.fromString("deadbeef", true, 16);
         const testMaskRes = SplitBlockBloomFilter.mask(testMaskX)
 
         // all mask values should have exactly one bit set
@@ -26,26 +26,30 @@ describe("Split Block Bloom Filters", () => {
     })
     it("block insert + check works", () => {
         let blk = SplitBlockBloomFilter.initBlock()
-        let someX: number = Number("0xffffffff")
-        let someY: number = Number("0xdeadbeef")
-        let someV: number = Number("0x0fffffff")
+        let isInsertedX: Long = Long.fromString("6f6f6f6f6", true, 16)
+        let isInsertedY: Long = Long.fromString("deadbeef", true, 16)
+        let notInsertedZ: Long = Long.fromNumber(3)
 
-        SplitBlockBloomFilter.blockInsert(blk, someX)
+        SplitBlockBloomFilter.blockInsert(blk, isInsertedX)
 
-        expect(SplitBlockBloomFilter.blockCheck(blk, someX)).to.eq(true)
-        expect(SplitBlockBloomFilter.blockCheck(blk, someY)).to.eq(false)
-        expect(SplitBlockBloomFilter.blockCheck(blk, someV)).to.eq(false)
+        expect(SplitBlockBloomFilter.blockCheck(blk, isInsertedX)).to.eq(true)
+        expect(SplitBlockBloomFilter.blockCheck(blk, isInsertedY)).to.eq(false)
+        expect(SplitBlockBloomFilter.blockCheck(blk, notInsertedZ)).to.eq(false)
 
-        SplitBlockBloomFilter.blockInsert(blk, someY)
-        expect(SplitBlockBloomFilter.blockCheck(blk, someY)).to.eq(true)
+        SplitBlockBloomFilter.blockInsert(blk, isInsertedY)
+        expect(SplitBlockBloomFilter.blockCheck(blk, isInsertedY)).to.eq(true)
+        expect(SplitBlockBloomFilter.blockCheck(blk, notInsertedZ)).to.eq(false)
 
-        makeListN(1000, () => {
-            SplitBlockBloomFilter.blockInsert(blk, Number(generateHexString(31)))
+        makeListN(50, () => {
+            SplitBlockBloomFilter.blockInsert(
+                blk,
+                new Long(randInt(2 ** 30), randInt(2 ** 30), true)
+            )
         })
 
-        expect(SplitBlockBloomFilter.blockCheck(blk, someV)).to.eq(false)
-        expect(SplitBlockBloomFilter.blockCheck(blk, someY)).to.eq(true)
-        expect(SplitBlockBloomFilter.blockCheck(blk, someX)).to.eq(true)
+        expect(SplitBlockBloomFilter.blockCheck(blk, isInsertedX)).to.eq(true)
+        expect(SplitBlockBloomFilter.blockCheck(blk, isInsertedY)).to.eq(true)
+        expect(SplitBlockBloomFilter.blockCheck(blk, notInsertedZ)).to.eq(false)
     })
 
     const exes = [
@@ -78,7 +82,7 @@ describe("Split Block Bloom Filters", () => {
         })
         exes.forEach((x) => expect(filter.check(x)).to.eq(true))
         expect(filter.check(badVal)).to.eq(false)
-        expect(filter.optNumFilterBytes()).to.eq(16777216)
+        expect(filter.optNumFilterBytes()).to.eq(19808)
     })
 
     describe("setOptionNumBytes", () => {
@@ -97,7 +101,7 @@ describe("Split Block Bloom Filters", () => {
         })
         it("sets filter bytes to next power of 2", () => {
             let filter = new SplitBlockBloomFilter().init()
-            expect(filter.optNumFilterBytes()).to.eq(16777216)
+            expect(filter.optNumFilterBytes()).to.eq(19808)
 
             filter = new SplitBlockBloomFilter()
                 .setOptionNumFilterBytes(1024)
@@ -240,6 +244,9 @@ describe("Split Block Bloom Filters", () => {
             filter.insert(ary)
             expect(filter.check(ary))
 
+            const buf = Buffer.from(strVal)
+            filter.insert(ary)
+            expect(filter.check(ary))
         })
     })
 })

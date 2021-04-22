@@ -26,7 +26,7 @@ type Block = Uint32Array
  */
 
 class SplitBlockBloomFilter {
-    private static salt: Array<number> = [
+    private static readonly salt: Array<number> = [
         0x47b6137b,
         0x44974d91,
         0x8824ad5b,
@@ -40,26 +40,29 @@ class SplitBlockBloomFilter {
     // How many bits are in a single block:
     // - Blocks are UInt32 arrays
     // - There are 8 UInt32 words in each block.
-    private static WORDS_PER_BLOCK = 8
-    private static WORD_SIZE = 32
-
-    // How many bits are in a single block: 256
-    private static BITS_PER_BLOCK: number = SplitBlockBloomFilter.WORDS_PER_BLOCK * SplitBlockBloomFilter.WORD_SIZE
+    private static readonly WORDS_PER_BLOCK = 8
+    private static readonly WORD_SIZE = 32
+    private static readonly BITS_PER_BLOCK: number = SplitBlockBloomFilter.WORDS_PER_BLOCK * SplitBlockBloomFilter.WORD_SIZE
 
     // Default number of blocks in a Split Block Bloom filter (SBBF)
-    private static NUMBER_OF_BLOCKS: number = 32
+    private static readonly NUMBER_OF_BLOCKS: number = 32
 
     // The lower bound of SBBF size in bytes.
     // Currently this is 1024
-    private static LOWER_BOUND_BYTES = SplitBlockBloomFilter.NUMBER_OF_BLOCKS * SplitBlockBloomFilter.BITS_PER_BLOCK / 8;
+    private static readonly LOWER_BOUND_BYTES = SplitBlockBloomFilter.NUMBER_OF_BLOCKS * SplitBlockBloomFilter.BITS_PER_BLOCK / 8;
 
     // The upper bound of SBBF size, set to default row group size in bytes.
     // Note that the subsquent requirements for an effective bloom filter on a row group this size would mean this
     // is unacceptably large for a lightweight client application.
-    public static UPPER_BOUND_BYTES = 128 * 1024 * 1024;
+    public static readonly UPPER_BOUND_BYTES = 128 * 1024 * 1024;
 
-    public static DEFAULT_FALSE_POSITIVE_RATE = 0.01
+    public static readonly DEFAULT_FALSE_POSITIVE_RATE = 0.01
+    public static readonly DEFAULT_DISTINCT_VALUES = 128 * 1024
 
+    /**
+     * @function initBlock
+     * @description initializes a single block
+     */
     static initBlock = function (): Block {
         return Uint32Array.from(Array(SplitBlockBloomFilter.WORDS_PER_BLOCK).fill(0))
     }
@@ -120,10 +123,10 @@ class SplitBlockBloomFilter {
      *
      * @return mask Block
      */
-    static mask(hashValue: number): Block {
+    static mask(hashValue: Long): Block {
         let result: Block = SplitBlockBloomFilter.initBlock()
         for (let i = 0; i < result.length; i++) {
-            const y = hashValue * SplitBlockBloomFilter.salt[i]
+            const y = hashValue.getLowBitsUnsigned() * SplitBlockBloomFilter.salt[i]
             result[i] = result[i] | (1 << (y >>> 27))
         }
         return result
@@ -140,7 +143,7 @@ class SplitBlockBloomFilter {
      */
     // FIXME: hashValue should be a Long val  ?
     // TODO: Make sure the value is preserved; I think it's passed by ref
-    static blockInsert(b: Block, hashValue: number): void {
+    static blockInsert(b: Block, hashValue: Long): void {
         const masked: Block = this.mask(hashValue)
         for (let i = 0; i < masked.length; i++) {
             for (let j = 0; j < this.WORD_SIZE; j++) {
@@ -163,7 +166,7 @@ class SplitBlockBloomFilter {
      * @return false if it is __definitely not__ in the data set.
      */
     // FIXME: hashValue should be a Long val   ?
-    static blockCheck(b: Block, hashValue: number): boolean {
+    static blockCheck(b: Block, hashValue: Long): boolean {
         const masked: Block = this.mask(hashValue)
         for (let i = 0; i < masked.length; i++) {
             for (let j = 0; j < this.WORD_SIZE; j++) {
@@ -180,13 +183,23 @@ class SplitBlockBloomFilter {
     }
 
     /**
+     * @function from
+     * @description instantiate a SplitBlockBloomFilter from a Buffer.
+     * @param buf
+     */
+    // static from(buf: Buffer) {
+    //     const blkBytes = this.BITS_PER_BLOCK >>> 3
+    //     buf.forEach()
+    // }
+
+    /**
      * Instance
      */
 
     private splitBlockFilter: Array<Block> = []
     private desiredFalsePositiveRate: number = SplitBlockBloomFilter.DEFAULT_FALSE_POSITIVE_RATE
     private numBlocks: number = 0
-    private numDistinctValues: number = SplitBlockBloomFilter.UPPER_BOUND_BYTES
+    private numDistinctValues: number = SplitBlockBloomFilter.DEFAULT_DISTINCT_VALUES
     private hashStrategy = new parquet_thrift.BloomFilterHash(parquet_thrift.XxHash)
 
     private isInitialized(): boolean { return this.splitBlockFilter.length > 0 }
@@ -196,6 +209,12 @@ class SplitBlockBloomFilter {
     optNumDistinct(): number { return this.numDistinctValues }
     filter(): Array<Block> { return this.splitBlockFilter }
 
+    /**
+     * @function  optNumFilterBytes
+     * @description return the actual number of filter bytes set; if the option to numBytes
+     *     was called, this value will be returned. If the options for preferred FPR
+     *     and/or numDistinct were called, this function returns the calculated value.
+     */
     optNumFilterBytes(): number {
         return this.numBlocks * SplitBlockBloomFilter.BITS_PER_BLOCK >>> 3
     }
@@ -306,7 +325,8 @@ class SplitBlockBloomFilter {
         }
 
         if (this.numBlocks === 0) {
-            this.numBlocks = SplitBlockBloomFilter.optimalNumOfBlocks(this.numDistinctValues, this.desiredFalsePositiveRate) >>> 3
+            this.numBlocks = SplitBlockBloomFilter.optimalNumOfBlocks(
+                this.numDistinctValues, this.desiredFalsePositiveRate) >>> 3
         }
 
         this.splitBlockFilter = Array(this.numBlocks).fill(SplitBlockBloomFilter.initBlock())
@@ -328,7 +348,7 @@ class SplitBlockBloomFilter {
         if (!hashValue.unsigned) throw new Error("hashValue must be an unsigned Long")
         if (!this.isInitialized()) throw new Error("filter has not been initialized. call init() first")
         const i = SplitBlockBloomFilter.getBlockIndex(hashValue, this.splitBlockFilter.length)
-        SplitBlockBloomFilter.blockInsert(this.splitBlockFilter[i], hashValue.getLowBitsUnsigned());
+        SplitBlockBloomFilter.blockInsert(this.splitBlockFilter[i], hashValue);
     }
 
     /**
@@ -351,7 +371,7 @@ class SplitBlockBloomFilter {
         if (!hashValue.unsigned) throw new Error("hashValue must be an unsigned Long")
         if (!this.isInitialized()) throw new Error("filter has not been initialized")
         const i = SplitBlockBloomFilter.getBlockIndex(hashValue, this.splitBlockFilter.length)
-        return SplitBlockBloomFilter.blockCheck(this.splitBlockFilter[i], hashValue.getLowBitsUnsigned());
+        return SplitBlockBloomFilter.blockCheck(this.splitBlockFilter[i], hashValue);
     }
     /**
      * @function check
