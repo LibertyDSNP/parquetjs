@@ -64,6 +64,14 @@ class SplitBlockBloomFilter {
         return Uint32Array.from(Array(SplitBlockBloomFilter.WORDS_PER_BLOCK).fill(0))
     }
 
+    static from = function(blocks: Block[]) {
+        const filter = new SplitBlockBloomFilter();
+        filter.splitBlockFilter = blocks;
+        filter.numBlocks = blocks.length;
+
+        return filter;
+    }
+
     /**
      * @function getBlockIndex: get a block index to insert a hash value for
      * @param h the hash from which to derive a block index (?)
@@ -317,6 +325,7 @@ class SplitBlockBloomFilter {
         if (!this.hashStrategy.hasOwnProperty("XXHASH")) {
             throw new Error("unsupported hash strategy")
         }
+ 
         return Long.fromString(XxHasher.hash64(value), true, 16)
     }
 
