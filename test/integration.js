@@ -503,9 +503,6 @@ describe('Parquet', function() {
         () => { throw new Error('Should emit error'); },
         () => undefined
       );
-
     });
-
   });
-
 });
