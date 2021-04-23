@@ -1,3 +1,5 @@
+import TypedArray = NodeJS.TypedArray;
+
 const parquet_thrift = require("../../gen-nodejs/parquet_types")
 import Long = require('long')
 import XxHasher from "./xxhasher"
@@ -5,16 +7,18 @@ type Block = Uint32Array
 
 /**
  * @class SplitBlockBloomFilter
+ *
  * @overview  Parquet spec implementation of Split Block Bloom Filtering
- * @description Much of this code was pulled from apache/parquet Java implementation
- *     https://github.com/apache/parquet-mr
- *     See also Cache-, Hash- and Space-Efficient Bloom Filters:
- *     http://algo2.iti.kit.edu/documents/cacheefficientbloomfilters-jea.pdf
+ *
+ * @description Much of this code was pulled from the
+ *     [apache/parquet Java implementation](https://github.com/apache/parquet-mr)
+ *     See also
+ *     [Cache-, Hash- and Space-Efficient Bloom Filters](http://algo2.iti.kit.edu/documents/cacheefficientbloomfilters-jea.pdf)
  *
  *     Default filter size is ~16.8MB, using 0.001 FPR and 128M rows
  *
  * @constructor   SplitBlockBloomFilter()
- *      Once desired options are set, call init() to set up the filter array
+ *      Once desired options are set, call **`init()`** to set up the filter array
  * @example This calculates and sets the optimal filter size based on the options:
  *   const filter = new SplitBLockBloomFilter()
  *      .setOptionNumDistinct(100000)
@@ -22,9 +26,8 @@ type Block = Uint32Array
  *      .init()
  *
  * @example This uses the default values to initialize the filter:
- *  const filter = new SplitBlockBloomFilter().init()
+ *   const filter = new SplitBlockBloomFilter().init()
  */
-
 class SplitBlockBloomFilter {
     private static readonly salt: Array<number> = [
         0x47b6137b,
@@ -63,24 +66,40 @@ class SplitBlockBloomFilter {
      * @function initBlock
      * @description initializes a single block
      */
-    static initBlock = function (): Block {
+    static initBlock(): Block {
         return Uint32Array.from(Array(SplitBlockBloomFilter.WORDS_PER_BLOCK).fill(0))
     }
 
-    static from = function(blocks: Block[]) {
-        const filter = new SplitBlockBloomFilter();
-        filter.splitBlockFilter = blocks;
-        filter.numBlocks = blocks.length;
+    /**
+     * @function from
+     * @description initialize a SplitBlockBloomFilter for a single column row group
+     * from the provided Buffer
+     * @param buffer a NodeJs Buffer containing bloom filter data for a row group.
+     */
+    static from(buffer: Buffer): SplitBlockBloomFilter {
+      if (buffer.length === 0) {
+        throw new Error("buffer is empty")
+      }
+      const chunkSize = SplitBlockBloomFilter.WORDS_PER_BLOCK
+      const uint32sFromBuf = new Uint32Array(buffer.buffer)
+      let result: Array<Block> = [];
+      const length = uint32sFromBuf.length;
 
-        return filter;
-    }
+      for (let index = 0; index < length; index += chunkSize) {
+        result.push(uint32sFromBuf.subarray(index, index + chunkSize));
+      }
+      let sb = new SplitBlockBloomFilter()
+      sb.splitBlockFilter = result
+      sb.numBlocks = result.length
+      return sb;
+    };
 
     /**
      * @function getBlockIndex: get a block index to insert a hash value for
      * @param h the hash from which to derive a block index (?)
      * @param z the number of blocks in the filter
      *
-     * @return a number from 0 -> z-1
+     * @return a number from 0 to z-1, inclusive
      */
     static getBlockIndex(h: Long, z: number): number {
         const zLong = Long.fromNumber(z, true)
@@ -191,16 +210,6 @@ class SplitBlockBloomFilter {
     }
 
     /**
-     * @function from
-     * @description instantiate a SplitBlockBloomFilter from a Buffer.
-     * @param buf
-     */
-    // static from(buf: Buffer) {
-    //     const blkBytes = this.BITS_PER_BLOCK >>> 3
-    //     buf.forEach()
-    // }
-
-    /**
      * Instance
      */
 
@@ -212,10 +221,10 @@ class SplitBlockBloomFilter {
 
     private isInitialized(): boolean { return this.splitBlockFilter.length > 0 }
 
-    numFilterBlocks(): number { return this.numBlocks }
-    optFalsePositiveRate(): number { return this.desiredFalsePositiveRate }
-    optNumDistinct(): number { return this.numDistinctValues }
-    filter(): Array<Block> { return this.splitBlockFilter }
+    getFalsePositiveRate(): number { return this.desiredFalsePositiveRate }
+    getNumDistinct(): number { return this.numDistinctValues }
+    getNumFilterBlocks(): number { return this.splitBlockFilter.length }
+    getFilter(): Array<Block> { return this.splitBlockFilter }
 
     /**
      * @function  optNumFilterBytes
@@ -223,7 +232,7 @@ class SplitBlockBloomFilter {
      *     was called, this value will be returned. If the options for preferred FPR
      *     and/or numDistinct were called, this function returns the calculated value.
      */
-    optNumFilterBytes(): number {
+    getNumFilterBytes(): number {
         return this.numBlocks * SplitBlockBloomFilter.BITS_PER_BLOCK >>> 3
     }
 
@@ -310,7 +319,6 @@ class SplitBlockBloomFilter {
         return this
     }
 
-    // is numBits the correct value to use?
     /**
      * @function initFilter
      * @description initialize the Bloom filter using the options previously provided.
@@ -345,7 +353,7 @@ class SplitBlockBloomFilter {
         if (!this.hashStrategy.hasOwnProperty("XXHASH")) {
             throw new Error("unsupported hash strategy")
         }
- 
+
         return Long.fromString(XxHasher.hash64(value), true, 16)
     }
 

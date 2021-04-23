@@ -4,7 +4,7 @@ const assert = chai.assert;
 const parquet = require("../parquet.js");
 const TEST_VTIME = new Date();
 
-const SplitBlockBloomFilter = require("../dist/lib/bloom/sbbf").default;
+const SplitBlockBloomFilter = require("../lib/bloom/sbbf").default
 
 const schema = new parquet.ParquetSchema({
   name: { type: "UTF8" },
@@ -45,7 +45,7 @@ describe("bloom filter", async function () {
       options
     );
 
-    writer.appendRow({
+    await writer.appendRow({
       name: "apples",
       quantity: 10n,
       price: 2.6,
@@ -56,7 +56,7 @@ describe("bloom filter", async function () {
       colour: ["green", "red"],
     });
 
-    writer.appendRow({
+    await writer.appendRow({
       name: "oranges",
       quantity: 20n,
       price: 2.7,
@@ -67,7 +67,7 @@ describe("bloom filter", async function () {
       colour: ["orange"],
     });
 
-    writer.appendRow({
+    await writer.appendRow({
       name: "kiwi",
       price: 4.2,
       quantity: 15n,
@@ -83,7 +83,7 @@ describe("bloom filter", async function () {
       meta_json: { expected_ship_date: TEST_VTIME },
     });
 
-    writer.appendRow({
+    await writer.appendRow({
       name: "banana",
       price: 3.2,
       day: new Date("2017-11-26"),
@@ -99,11 +99,7 @@ describe("bloom filter", async function () {
     row = reader.metadata.row_groups[0];
 
     const blocks = await reader.getBloomFiltersFor(["name"]);
-    // [ { columnName: 'name', bloomFilters: [ [Object] ] } ]
-    // { name: [{bloomFiters: 0, group} ]}
-    console.log("blocks[0]", blocks[0]);
-    const columnBlocks = blocks[0].bloomFilters[0].filterBlocks;
-    splitBlockBloomFilter = SplitBlockBloomFilter.from(columnBlocks);
+    splitBlockBloomFilter = blocks[0].bloomFilters[0].filterBlocks
   });
 
   it("writes bloom filters for specified column name", async function () {
