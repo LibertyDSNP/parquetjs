@@ -1,7 +1,7 @@
 import Long = require('long')
 import {assert, expect} from "chai"
 import * as sinon from "sinon"
-import {generateHexString, makeListN, randInt, times} from "./util/general";
+import {makeListN, randInt, times} from "./util/general";
 import SplitBlockBloomFilter from "../lib/bloom/sbbf";
 
 describe("Split Block Bloom Filters", () => {
@@ -82,38 +82,38 @@ describe("Split Block Bloom Filters", () => {
         })
         exes.forEach((x) => expect(filter.check(x)).to.eq(true))
         expect(filter.check(badVal)).to.eq(false)
-        expect(filter.optNumFilterBytes()).to.eq(19808)
+        expect(filter.getNumFilterBytes()).to.eq(19808)
     })
 
     describe("setOptionNumBytes", () => {
         it("does not set invalid values", () => {
             const filter = new SplitBlockBloomFilter().init()
-            const filterBytes = filter.optNumFilterBytes()
+            const filterBytes = filter.getNumFilterBytes()
             const badZees = [-1, 512, 1023]
 
             badZees.forEach((bz) => {
                 const spy = sinon.spy(console, "error")
                 filter.setOptionNumFilterBytes(bz)
-                expect(filter.optNumFilterBytes()).to.eq(filterBytes)
+                expect(filter.getNumFilterBytes()).to.eq(filterBytes)
                 expect(spy.calledOnce)
                 spy.restore()
             })
         })
         it("sets filter bytes to next power of 2", () => {
             let filter = new SplitBlockBloomFilter().init()
-            expect(filter.optNumFilterBytes()).to.eq(19808)
+            expect(filter.getNumFilterBytes()).to.eq(19808)
 
             filter = new SplitBlockBloomFilter()
                 .setOptionNumFilterBytes(1024)
                 .init()
-            expect(filter.optNumFilterBytes()).to.eq(1024)
+            expect(filter.getNumFilterBytes()).to.eq(1024)
 
             filter = new SplitBlockBloomFilter().setOptionNumFilterBytes(1025).init()
-            expect(filter.optNumFilterBytes()).to.eq(2048)
+            expect(filter.getNumFilterBytes()).to.eq(2048)
 
             const below2 = 2 ** 12 - 1
             filter = new SplitBlockBloomFilter().setOptionNumFilterBytes(below2).init()
-            expect(filter.optNumFilterBytes()).to.eq(2 ** 12)
+            expect(filter.getNumFilterBytes()).to.eq(2 ** 12)
         })
         it("can't be set twice after initializing", () => {
             const spy = sinon.spy(console, "error")
@@ -124,7 +124,7 @@ describe("Split Block Bloom Filters", () => {
             expect(spy.notCalled)
             filter.setOptionNumFilterBytes(44444)
             expect(spy.calledOnce)
-            expect(filter.optNumFilterBytes()).to.eq(2 ** 20)
+            expect(filter.getNumFilterBytes()).to.eq(2 ** 20)
             spy.restore()
         })
     })
@@ -132,7 +132,7 @@ describe("Split Block Bloom Filters", () => {
     describe("setOptionFalsePositiveRate", () => {
         it("can be set", () => {
             const filter = new SplitBlockBloomFilter().setOptionFalsePositiveRate(.001010)
-            expect(filter.optFalsePositiveRate()).to.eq(.001010)
+            expect(filter.getFalsePositiveRate()).to.eq(.001010)
         })
         it("can't be set twice after initializing", () => {
             const spy = sinon.spy(console, "error")
@@ -143,7 +143,7 @@ describe("Split Block Bloom Filters", () => {
             expect(spy.notCalled)
             filter.setOptionFalsePositiveRate(.0099)
             expect(spy.calledOnce)
-            expect(filter.optFalsePositiveRate()).to.eq(.002)
+            expect(filter.getFalsePositiveRate()).to.eq(.002)
             spy.restore()
         })
     })
@@ -151,7 +151,7 @@ describe("Split Block Bloom Filters", () => {
     describe("setOptionNumDistinct", () => {
         it("can be set", () => {
             const filter = new SplitBlockBloomFilter().setOptionNumDistinct(10000)
-            expect(filter.optNumDistinct()).to.eq(10000)
+            expect(filter.getNumDistinct()).to.eq(10000)
         })
         it("can't be set twice after initializing", () => {
             const spy = sinon.spy(console, "error")
@@ -160,7 +160,7 @@ describe("Split Block Bloom Filters", () => {
                 .setOptionNumDistinct(9999)
             expect(spy.notCalled)
             filter.init().setOptionNumDistinct(38383)
-            expect(filter.optNumDistinct()).to.eq(9999)
+            expect(filter.getNumDistinct()).to.eq(9999)
             expect(spy.calledOnce)
             spy.restore()
         })
@@ -175,8 +175,8 @@ describe("Split Block Bloom Filters", () => {
         })
         it("allocates the filter", () => {
             const filter = new SplitBlockBloomFilter().setOptionNumFilterBytes(1024).init()
-            expect(filter.numFilterBlocks()).to.eq(32)
-            expect(filter.filter().length).to.eq(32)
+            expect(filter.getNumFilterBlocks()).to.eq(32)
+            expect(filter.getFilter().length).to.eq(32)
         })
     })
     describe("optimal number of blocks", () => {
