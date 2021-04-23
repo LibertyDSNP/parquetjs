@@ -215,27 +215,28 @@ describe("Split Block Bloom Filters", () => {
         }).timeout(10000)
     })
 
+    /**
+     * Some of these test cases may seem redundant or superfluous. They're put here to
+     * suggest how filter data might be inserted, or not.
+     */
     describe("insert, check", () => {
-
+         const pojo = {
+            name: "William Shakespeare",
+                preferredName: "Shakesey",
+                url: "http://placekitten.com/800/600"
+        }
         type testCase = { name: string, val: any }
         const testCases: Array<testCase> = [
+            { name: "boolean", val: true },
+            { name: "int number", val: 23423},
+            { name: "float number", val: 23334.23},
             {name: "string", val: "hello hello hello"},
+            {name: "UInt8Array", val: Uint8Array.from([0x1,0x4,0xa,0xb])},
             {name: "Long", val: new Long(randInt(2 ** 30), randInt(2 ** 30), true)},
-            {name: "Uint32Array", val: new Uint32Array(8).fill(39383)},
-            {
-                name: "Float64Array",
-                val: Float64Array.from([0.0001, 2.7182818284590452353602874713527, 3487338.393939, 3.141592653589793238462643383279502884197169399375105])
-            },
-            {
-                name: "object", val: {
-                    name: "William Shakespeare",
-                    preferredName: "Shakesey",
-                    url: "http://placekitten.com/800/600"
-                }
-            },
-            {name: "array of ints", val: [383838, 222, 5898, 1, 0]},
             {name: "Buffer", val: Buffer.from("Hello Hello Hello")},
             {name: "BigInt", val: BigInt(1234324434440)},
+            {name: "stringified object", val: JSON.stringify(pojo)},
+            {name: "stringified array", val: [383838, 222, 5898, 1, 0].toString()}
          ]
         const filter = new SplitBlockBloomFilter().setOptionNumDistinct(1000).init()
         testCases.forEach(tc => {
@@ -246,6 +247,9 @@ describe("Split Block Bloom Filters", () => {
         })
 
         const throwCases = [
+            {name: "POJO", val: pojo },
+            {name: "Array", val: [383838, 222, 5898, 1, 0]},
+            {name: "Uint32Array", val: new Uint32Array(8).fill(39383)},
             {name: "Set", val: (new Set()).add("foo").add(5).add([1,2,3])},
             {name: "Map", val: new Map() }
         ]
@@ -253,7 +257,7 @@ describe("Split Block Bloom Filters", () => {
             it(`throws on type ${tc.name}`, () => {
                 expect(() => {
                     filter.insert(tc.val)
-                }).to.throw("stringify Set or Map first")
+                }).to.throw(/unsupported type/)
             })
         })
 
