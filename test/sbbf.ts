@@ -6,19 +6,19 @@ import SplitBlockBloomFilter from "../lib/bloom/sbbf";
 
 describe("Split Block Bloom Filters", () => {
     it("Mask works", () => {
-        const testMaskX = Number("0xdeadbeef");
+        const testMaskX = Long.fromString("deadbeef", true, 16);
         const testMaskRes = SplitBlockBloomFilter.mask(testMaskX)
 
         // all mask values should have exactly one bit set
         const expectedVals = [
-            2 ** 29,
-            2 ** 15,
-            2 ** 12,
-            2 ** 14,
-            2 ** 13,
-            2 ** 25,
-            2 ** 24,
-            2 ** 21
+            1 << 29,
+            1 << 15,
+            1 << 12,
+            1 << 14,
+            1 << 13,
+            1 << 25,
+            1 << 24,
+            1 << 21
         ]
         for (let i = 0; i < expectedVals.length; i++) {
             expect(testMaskRes[i]).to.eq(expectedVals[i])
@@ -26,26 +26,30 @@ describe("Split Block Bloom Filters", () => {
     })
     it("block insert + check works", () => {
         let blk = SplitBlockBloomFilter.initBlock()
-        let someX: number = Number("0xffffffff")
-        let someY: number = Number("0xdeadbeef")
-        let someV: number = Number("0x0fffffff")
+        let isInsertedX: Long = Long.fromString("6f6f6f6f6", true, 16)
+        let isInsertedY: Long = Long.fromString("deadbeef", true, 16)
+        let notInsertedZ: Long = Long.fromNumber(3)
 
-        SplitBlockBloomFilter.blockInsert(blk, someX)
+        SplitBlockBloomFilter.blockInsert(blk, isInsertedX)
 
-        expect(SplitBlockBloomFilter.blockCheck(blk, someX)).to.eq(true)
-        expect(SplitBlockBloomFilter.blockCheck(blk, someY)).to.eq(false)
-        expect(SplitBlockBloomFilter.blockCheck(blk, someV)).to.eq(false)
+        expect(SplitBlockBloomFilter.blockCheck(blk, isInsertedX)).to.eq(true)
+        expect(SplitBlockBloomFilter.blockCheck(blk, isInsertedY)).to.eq(false)
+        expect(SplitBlockBloomFilter.blockCheck(blk, notInsertedZ)).to.eq(false)
 
-        SplitBlockBloomFilter.blockInsert(blk, someY)
-        expect(SplitBlockBloomFilter.blockCheck(blk, someY)).to.eq(true)
+        SplitBlockBloomFilter.blockInsert(blk, isInsertedY)
+        expect(SplitBlockBloomFilter.blockCheck(blk, isInsertedY)).to.eq(true)
+        expect(SplitBlockBloomFilter.blockCheck(blk, notInsertedZ)).to.eq(false)
 
-        makeListN(1000, () => {
-            SplitBlockBloomFilter.blockInsert(blk, Number(generateHexString(31)))
+        makeListN(50, () => {
+            SplitBlockBloomFilter.blockInsert(
+                blk,
+                new Long(randInt(2 ** 30), randInt(2 ** 30), true)
+            )
         })
 
-        expect(SplitBlockBloomFilter.blockCheck(blk, someV)).to.eq(false)
-        expect(SplitBlockBloomFilter.blockCheck(blk, someY)).to.eq(true)
-        expect(SplitBlockBloomFilter.blockCheck(blk, someX)).to.eq(true)
+        expect(SplitBlockBloomFilter.blockCheck(blk, isInsertedX)).to.eq(true)
+        expect(SplitBlockBloomFilter.blockCheck(blk, isInsertedY)).to.eq(true)
+        expect(SplitBlockBloomFilter.blockCheck(blk, notInsertedZ)).to.eq(false)
     })
 
     const exes = [
@@ -78,7 +82,7 @@ describe("Split Block Bloom Filters", () => {
         })
         exes.forEach((x) => expect(filter.check(x)).to.eq(true))
         expect(filter.check(badVal)).to.eq(false)
-        expect(filter.optNumFilterBytes()).to.eq(16777216)
+        expect(filter.optNumFilterBytes()).to.eq(19808)
     })
 
     describe("setOptionNumBytes", () => {
@@ -97,7 +101,7 @@ describe("Split Block Bloom Filters", () => {
         })
         it("sets filter bytes to next power of 2", () => {
             let filter = new SplitBlockBloomFilter().init()
-            expect(filter.optNumFilterBytes()).to.eq(16777216)
+            expect(filter.optNumFilterBytes()).to.eq(19808)
 
             filter = new SplitBlockBloomFilter()
                 .setOptionNumFilterBytes(1024)
@@ -210,36 +214,52 @@ describe("Split Block Bloom Filters", () => {
             done()
         }).timeout(10000)
     })
+
+    /**
+     * Some of these test cases may seem redundant or superfluous. They're put here to
+     * suggest how filter data might be inserted, or not.
+     */
     describe("insert, check", () => {
-        const strVal ="Hello Hello Hello"
-
-        it("works with multiple types", () => {
-            const filter = new SplitBlockBloomFilter().setOptionNumDistinct(10000).init()
-
-            const strVal ="Hello Hello Hello"
-            filter.insert(strVal)
-            expect(filter.check(strVal))
-
-            const longVal = new Long(randInt(2 ** 30), randInt(2 ** 30), true)
-            filter.insert(longVal)
-            expect(filter.check(longVal))
-
-            const aruint32 = new Uint32Array(8).fill(39383)
-            filter.insert(aruint32)
-            expect(filter.check(aruint32))
-
-            const someObj = {
-                name: "William Shakespeare",
+         const pojo = {
+            name: "William Shakespeare",
                 preferredName: "Shakesey",
                 url: "http://placekitten.com/800/600"
-            }
-            filter.insert(someObj)
-            expect(filter.check(someObj))
-
-            const ary = [383838, 222, 5898, 1, 0]
-            filter.insert(ary)
-            expect(filter.check(ary))
-
+        }
+        type testCase = { name: string, val: any }
+        const testCases: Array<testCase> = [
+            { name: "boolean", val: true },
+            { name: "int number", val: 23423},
+            { name: "float number", val: 23334.23},
+            {name: "string", val: "hello hello hello"},
+            {name: "UInt8Array", val: Uint8Array.from([0x1,0x4,0xa,0xb])},
+            {name: "Long", val: new Long(randInt(2 ** 30), randInt(2 ** 30), true)},
+            {name: "Buffer", val: Buffer.from("Hello Hello Hello")},
+            {name: "BigInt", val: BigInt(1234324434440)},
+            {name: "stringified object", val: JSON.stringify(pojo)},
+            {name: "stringified array", val: [383838, 222, 5898, 1, 0].toString()}
+         ]
+        const filter = new SplitBlockBloomFilter().setOptionNumDistinct(1000).init()
+        testCases.forEach(tc => {
+            it(`works for a ${tc.name} type`, () => {
+                filter.insert(tc.val)
+                expect(filter.check(tc.val))
+            })
         })
+
+        const throwCases = [
+            {name: "POJO", val: pojo },
+            {name: "Array", val: [383838, 222, 5898, 1, 0]},
+            {name: "Uint32Array", val: new Uint32Array(8).fill(39383)},
+            {name: "Set", val: (new Set()).add("foo").add(5).add([1,2,3])},
+            {name: "Map", val: new Map() }
+        ]
+        throwCases.forEach((tc) => {
+            it(`throws on type ${tc.name}`, () => {
+                expect(() => {
+                    filter.insert(tc.val)
+                }).to.throw(/unsupported type/)
+            })
+        })
+
     })
 })
