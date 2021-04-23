@@ -160,6 +160,13 @@ async function sampleColumnHeaders() {
   return {column, pages};
 }
 
+async function verifyBloomFilterOffset() {
+  const headers = await sampleColumnHeaders();
+  const { column: { meta_data: { bloom_filter_offset } } } = headers;
+
+  assert.equal(parseInt(bloom_filter_offset), 4106725);
+}
+
 async function verifyPages() {
   let rowCount = 0;
   const column = await sampleColumnHeaders();
@@ -400,6 +407,29 @@ describe('Parquet', function() {
     });
   });
 
+  describe('with BloomFilterHeader', function() {
+    const bloomFilters = [
+      {
+        column: 'name',
+        numFilterBytes: 1024,
+      }
+    ];
+
+    it('write a test file', function() {
+      const opts = { useDataPageV2: true, compression: 'UNCOMPRESSED', bloomFilters };
+      return writeTestFile(opts);
+    });
+
+    it('write a test file and then read it back', function() {
+      const opts = { useDataPageV2: true, pageSize: 2000, compression: 'UNCOMPRESSED', bloomFilters };
+      return writeTestFile(opts).then(readTestFile);
+    });
+
+    it('verify that bloom filter offset is set', function() {
+      return verifyBloomFilterOffset();
+    });
+  });
+
   describe('with DataPageHeaderV2', function() {
     it('write a test file', function() {
       const opts = { useDataPageV2: true, compression: 'UNCOMPRESSED' };
@@ -503,9 +533,6 @@ describe('Parquet', function() {
         () => { throw new Error('Should emit error'); },
         () => undefined
       );
-
     });
-
   });
-
 });
