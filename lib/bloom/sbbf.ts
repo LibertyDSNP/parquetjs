@@ -59,7 +59,7 @@ class SplitBlockBloomFilter {
     // is unacceptably large for a lightweight client application.
     public static readonly UPPER_BOUND_BYTES = 128 * 1024 * 1024;
 
-    public static readonly DEFAULT_FALSE_POSITIVE_RATE = 0.01
+    public static readonly DEFAULT_FALSE_POSITIVE_RATE = 0.001
     public static readonly DEFAULT_DISTINCT_VALUES = 128 * 1024
 
     /**
