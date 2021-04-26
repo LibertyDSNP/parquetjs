@@ -5,6 +5,8 @@ import {makeListN, randInt, times} from "./util/general";
 import SplitBlockBloomFilter from "../lib/bloom/sbbf";
 
 describe("Split Block Bloom Filters", () => {
+    const expectedDefaultBytes = 29920
+
     it("Mask works", () => {
         const testMaskX = Long.fromString("deadbeef", true, 16);
         const testMaskRes = SplitBlockBloomFilter.mask(testMaskX)
@@ -82,7 +84,7 @@ describe("Split Block Bloom Filters", () => {
         })
         exes.forEach((x) => expect(filter.check(x)).to.eq(true))
         expect(filter.check(badVal)).to.eq(false)
-        expect(filter.getNumFilterBytes()).to.eq(19808)
+        expect(filter.getNumFilterBytes()).to.eq(expectedDefaultBytes)
     })
 
     describe("setOptionNumBytes", () => {
@@ -101,7 +103,7 @@ describe("Split Block Bloom Filters", () => {
         })
         it("sets filter bytes to next power of 2", () => {
             let filter = new SplitBlockBloomFilter().init()
-            expect(filter.getNumFilterBytes()).to.eq(19808)
+            expect(filter.getNumFilterBytes()).to.eq(expectedDefaultBytes)
 
             filter = new SplitBlockBloomFilter()
                 .setOptionNumFilterBytes(1024)
