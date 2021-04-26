@@ -59,16 +59,9 @@ declare module "parquetjs" {
         filter(): Array<Block>
         numDistinctExpected(): number
         falsePositiveRate(): number
-        numFilterBlocks(): number
-        numFilterBytes(): number
+        getNumFilterBlocks(): number
+        getNumFilterBytes(): number
         insert(hashValue: Long): void
         check(hashValue: Long): boolean
     }
 }
-
-
-
-
-
-
-

@@ -27,7 +27,6 @@ export const randInt = (max: number): number => {
     return Math.floor(Math.random() * Math.floor(max));
 };
 
-
 /**
  * Returns a list of N <Type> things, using the provided function.
  * @param n - how many times to do it.

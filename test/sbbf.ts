@@ -1,5 +1,5 @@
 import Long = require('long')
-import {assert, expect} from "chai"
+import {expect} from "chai"
 import * as sinon from "sinon"
 import {makeListN, randInt, times} from "./util/general";
 import SplitBlockBloomFilter from "../lib/bloom/sbbf";
