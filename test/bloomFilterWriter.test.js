@@ -1,14 +1,12 @@
-"use strict";
-const chai = require("chai");
-const { expect } = chai;
-const sinon = require("sinon");
+import sinon from "sinon"
 
 const bloomFilterWriter = require("../lib/bloomFilterWriter.js");
 const SplitBlockBloomFilter = require("../lib/bloom/sbbf").default;
 
 describe("buildFilterBlocks", () => {
   describe("when no options are present", () => {
-    let sbbfMock;
+    let sbbfMock:sinon.SinonMock;
+
     beforeEach(() => {
       sbbfMock = sinon.mock(SplitBlockBloomFilter.prototype);
     });
@@ -34,7 +32,8 @@ describe("buildFilterBlocks", () => {
   });
 
   describe("when numFilterBytes is present", () => {
-    let sbbfMock;
+    let sbbfMock:sinon.SinonMock;
+
     beforeEach(() => {
       sbbfMock = sinon.mock(SplitBlockBloomFilter.prototype);
     });
@@ -60,7 +59,7 @@ describe("buildFilterBlocks", () => {
   });
 
   describe("when numFilterBytes is NOT present", () => {
-    let sbbfMock;
+    let sbbfMock:sinon.SinonMock;
     beforeEach(() => {
       sbbfMock = sinon.mock(SplitBlockBloomFilter.prototype);
     });

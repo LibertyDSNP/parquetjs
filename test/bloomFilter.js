@@ -133,7 +133,7 @@ describe("bloom filter", async function () {
       "taco is NOT included in name filter"
     );
   });
-  
+
   it("writes bloom filters for column: quantity", async function () {
     const splitBlockBloomFilter = bloomFilters.quantity[0].sbbf;
     assert.isTrue(

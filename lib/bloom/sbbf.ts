@@ -8,9 +8,8 @@ type Block = Uint32Array
 /**
  * @class SplitBlockBloomFilter
  *
- * @overview  Parquet spec implementation of Split Block Bloom Filtering
- *
- * @description Much of this code was pulled from the
+ * @description Parquet spec implementation of Split Block Bloom Filtering.
+ *      Much of this code was pulled from the
  *     [apache/parquet Java implementation](https://github.com/apache/parquet-mr)
  *     See also
  *     [Cache-, Hash- and Space-Efficient Bloom Filters](http://algo2.iti.kit.edu/documents/cacheefficientbloomfilters-jea.pdf)
@@ -76,7 +75,7 @@ class SplitBlockBloomFilter {
      * from the provided Buffer
      * @param buffer a NodeJs Buffer containing bloom filter data for a row group.
      */
-    static from(buffer: Buffer): SplitBlockBloomFilter {
+    static from(buffer: Buffer, rowCount?: number): SplitBlockBloomFilter {
       if (buffer.length === 0) {
         throw new Error("buffer is empty")
       }
@@ -91,6 +90,9 @@ class SplitBlockBloomFilter {
       let sb = new SplitBlockBloomFilter()
       sb.splitBlockFilter = result
       sb.numBlocks = result.length
+      // these will not be knowable when reading
+      sb.numDistinctValues = 0
+      sb.desiredFalsePositiveRate = 0.0
       return sb;
     };
 
