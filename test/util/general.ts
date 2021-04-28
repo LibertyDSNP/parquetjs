@@ -15,7 +15,7 @@ export const generateHexString = (length: number): string => {
  * @param data - the array of things to sample from
  */
 export const sample = <Type>(data: Type[]): Type => {
-    const sampleIdx = randInt(data.length - 1)
+    const sampleIdx = randInt(data.length)
     return data[sampleIdx]
 }
 
