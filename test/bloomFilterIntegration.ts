@@ -1,10 +1,12 @@
-"use strict";
-const chai = require("chai");
-const assert = chai.assert;
+import { assert }from "chai";
+import SplitBlockBloomFilter from "../lib/bloom/sbbf";
 const parquet = require("../parquet.js");
 const TEST_VTIME = new Date();
 
-const SplitBlockBloomFilter = require("../lib/bloom/sbbf").default
+type BloomFilters = {
+  name: Array<any>
+  quantity: Array<any>
+};
 
 const schema = new parquet.ParquetSchema({
   name: { type: "UTF8" },
@@ -26,7 +28,9 @@ const schema = new parquet.ParquetSchema({
 });
 
 describe("bloom filter", async function () {
-  let row, reader, bloomFilters;
+  let row: any;
+  let reader: any;
+  let bloomFilters: BloomFilters;
 
   before(async function () {
     const options = {
@@ -51,10 +55,10 @@ describe("bloom filter", async function () {
 
     await writer.appendRow({
       name: "apples",
-      quantity: 10n,
+      quantity: BigInt(10),
       price: 2.6,
       day: new Date("2017-11-26"),
-      date: new Date(TEST_VTIME + 1000),
+      date: new Date(TEST_VTIME.valueOf() + 1000),
       finger: "FNORD",
       inter: { months: 10, days: 5, milliseconds: 777 },
       colour: ["green", "red"],
@@ -62,10 +66,10 @@ describe("bloom filter", async function () {
 
     await writer.appendRow({
       name: "oranges",
-      quantity: 20n,
+      quantity: BigInt(20),
       price: 2.7,
       day: new Date("2018-03-03"),
-      date: new Date(TEST_VTIME + 2000),
+      date: new Date(TEST_VTIME.valueOf() + 2000),
       finger: "ABCDE",
       inter: { months: 42, days: 23, milliseconds: 777 },
       colour: ["orange"],
@@ -74,24 +78,24 @@ describe("bloom filter", async function () {
     await writer.appendRow({
       name: "kiwi",
       price: 4.2,
-      quantity: 15n,
+      quantity: BigInt(15),
       day: new Date("2008-11-26"),
-      date: new Date(TEST_VTIME + 8000),
+      date: new Date(TEST_VTIME.valueOf() + 8000),
       finger: "XCVBN",
       inter: { months: 60, days: 1, milliseconds: 99 },
       stock: [
-        { quantity: 42n, warehouse: "f" },
-        { quantity: 21n, warehouse: "x" },
+        { quantity: BigInt(42), warehouse: "f" },
+        { quantity: BigInt(21), warehouse: "x" },
       ],
       colour: ["green", "brown", "yellow"],
-      meta_json: { expected_ship_date: TEST_VTIME },
+      meta_json: { expected_ship_date: TEST_VTIME.valueOf() },
     });
 
     await writer.appendRow({
       name: "banana",
       price: 3.2,
       day: new Date("2017-11-26"),
-      date: new Date(TEST_VTIME + 6000),
+      date: new Date(TEST_VTIME.valueOf() + 6000),
       finger: "FNORD",
       inter: { months: 1, days: 15, milliseconds: 888 },
       colour: ["yellow"],
@@ -107,7 +111,7 @@ describe("bloom filter", async function () {
 
   it('contains name and quantity filter', () => {
     const columnsFilterNames = Object.keys(bloomFilters);
-    assert(columnsFilterNames, ['name', 'quantity']);
+    assert.deepEqual(columnsFilterNames, ['name', 'quantity']);
   });
 
   it("writes bloom filters for column: name", async function () {
@@ -137,15 +141,15 @@ describe("bloom filter", async function () {
   it("writes bloom filters for column: quantity", async function () {
     const splitBlockBloomFilter = bloomFilters.quantity[0].sbbf;
     assert.isTrue(
-      splitBlockBloomFilter.check(10n),
+      splitBlockBloomFilter.check(BigInt(10)),
       "10n is included in quantity filter"
     );
     assert.isTrue(
-      splitBlockBloomFilter.check(15n),
+      splitBlockBloomFilter.check(BigInt(15)),
       "15n is included in quantity filter"
     );
     assert.isFalse(
-      splitBlockBloomFilter.check(100n),
+      splitBlockBloomFilter.check(BigInt(100)),
       "100n is NOT included in quantity filter"
     );
   });
