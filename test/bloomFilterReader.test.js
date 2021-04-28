@@ -35,14 +35,13 @@ describe("parseBloomFilterOffsets", () => {
 
   it("returns bloom filter offsets", () => {
     const result = bloomFilterReader.parseBloomFilterOffsets(columnChunkMeta);
-    const expected = {
-      name: [
-        {
-          offset: 2164,
-          rowGroup: 0,
-        },
-      ],
-    };
+    const expected = [
+      {
+        columnName: "name",
+        offset: 2164,
+        rowGroup: 0,
+      },
+    ];
 
     expect(result).to.deep.equal(expected);
   });

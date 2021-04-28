@@ -26,7 +26,7 @@ const schema = new parquet.ParquetSchema({
 });
 
 describe("bloom filter", async function () {
-  let row, reader, splitBlockBloomFilter;
+  let row, reader, bloomFilters;
 
   before(async function () {
     const options = {
@@ -34,6 +34,10 @@ describe("bloom filter", async function () {
       bloomFilters: [
         {
           column: "name",
+          numFilterBytes: 1024,
+        },
+        {
+          column: "quantity",
           numFilterBytes: 1024,
         },
       ],
@@ -98,18 +102,23 @@ describe("bloom filter", async function () {
     reader = await parquet.ParquetReader.openFile("fruits-bloomfilter.parquet");
     row = reader.metadata.row_groups[0];
 
-    const blocks = await reader.getBloomFiltersFor(["name"]);
-    splitBlockBloomFilter = blocks[0].bloomFilters[0].filterBlocks
+    bloomFilters = await reader.getBloomFiltersFor(["name", "quantity"]);
   });
 
-  it("writes bloom filters for specified column name", async function () {
+  it('contains name and quantity filter', () => {
+    const columnsFilterNames = Object.keys(bloomFilters);
+    assert(columnsFilterNames, ['name', 'quantity']);
+  });
+
+  it("writes bloom filters for column: name", async function () {
+    const splitBlockBloomFilter = bloomFilters.name[0].sbbf;
     assert.isTrue(
       splitBlockBloomFilter.check(Buffer.from("apples")),
-      "apples is included"
+      "apples is included in name filter"
     );
     assert.isTrue(
       splitBlockBloomFilter.check(Buffer.from("oranges")),
-      "oranges is included bloomfilter"
+      "oranges is included in name filter"
     );
     assert.isTrue(
       splitBlockBloomFilter.check(Buffer.from("kiwi")),
@@ -117,7 +126,27 @@ describe("bloom filter", async function () {
     );
     assert.isTrue(
       splitBlockBloomFilter.check(Buffer.from("banana")),
-      "banana is included"
+      "banana is included in name filter"
+    );
+    assert.isFalse(
+      splitBlockBloomFilter.check(Buffer.from("taco")),
+      "taco is NOT included in name filter"
+    );
+  });
+  
+  it("writes bloom filters for column: quantity", async function () {
+    const splitBlockBloomFilter = bloomFilters.quantity[0].sbbf;
+    assert.isTrue(
+      splitBlockBloomFilter.check(10n),
+      "10n is included in quantity filter"
+    );
+    assert.isTrue(
+      splitBlockBloomFilter.check(15n),
+      "15n is included in quantity filter"
+    );
+    assert.isFalse(
+      splitBlockBloomFilter.check(100n),
+      "100n is NOT included in quantity filter"
     );
   });
 });
