@@ -1,5 +1,4 @@
 import { assert }from "chai";
-import SplitBlockBloomFilter from "../lib/bloom/sbbf";
 const parquet = require("../parquet.js");
 const TEST_VTIME = new Date();
 

@@ -170,8 +170,6 @@ class SplitBlockBloomFilter {
      *
      * @return void
      */
-    // FIXME: hashValue should be a Long val  ?
-    // TODO: Make sure the value is preserved; I think it's passed by ref
     static blockInsert(b: Block, hashValue: Long): void {
         const masked: Block = this.mask(hashValue)
         for (let i = 0; i < masked.length; i++) {
@@ -194,7 +192,6 @@ class SplitBlockBloomFilter {
      * @return true if hashed item is __probably__ in the data set represented by this filter
      * @return false if it is __definitely not__ in the data set.
      */
-    // FIXME: hashValue should be a Long val   ?
     static blockCheck(b: Block, hashValue: Long): boolean {
         const masked: Block = this.mask(hashValue)
         for (let i = 0; i < masked.length; i++) {
@@ -359,10 +356,6 @@ class SplitBlockBloomFilter {
         return Long.fromString(XxHasher.hash64(value), true, 16)
     }
 
-    /**
-     *
-     * @param hashValue: an unsigned Long, the hash value to add
-     */
     private insertHash(hashValue: Long): void {
         if (!hashValue.unsigned) throw new Error("hashValue must be an unsigned Long")
         if (!this.isInitialized()) throw new Error("filter has not been initialized. call init() first")
@@ -381,11 +374,6 @@ class SplitBlockBloomFilter {
         this.insertHash(this.hash(value))
     }
 
-    /**
-     *
-     * @param hashValue: an unsigned Long,  the hash value to check for
-     * @private
-     */
     private checkHash(hashValue: Long): boolean {
         if (!hashValue.unsigned) throw new Error("hashValue must be an unsigned Long")
         if (!this.isInitialized()) throw new Error("filter has not been initialized")

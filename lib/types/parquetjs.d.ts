@@ -1,8 +1,8 @@
-// <reference types = "parquetjs" />
+/// <reference path = "../../parquet.js" />
 
-declare module "parquetjs" {
-
+declare module "parquet" {
     export class ParquetEnvelopeReader {
+        read(offset: number, length: number): Promise<any>
         getCursor(columnList?: any): any
     }
     export class ParquetReader {
@@ -64,4 +64,5 @@ declare module "parquetjs" {
         insert(hashValue: Long): void
         check(hashValue: Long): boolean
     }
+
 }
