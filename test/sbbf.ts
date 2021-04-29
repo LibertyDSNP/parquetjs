@@ -183,9 +183,14 @@ describe("Split Block Bloom Filters", () => {
     })
     describe("optimal number of blocks", () => {
         // Some general ideas of what size filters are needed for different parameters
+        // Note there is a small but non-negligible difference between this and what
+        // is stated in https://github.com/apache/parquet-format/blob/master/BloomFilter.md
         it("can be called", () => {
-            expect(SplitBlockBloomFilter.optimalNumOfBlocks(20000, 0.001)).to.eq(1143)
-            expect(SplitBlockBloomFilter.optimalNumOfBlocks(20000, 0.0001)).to.eq(1645)
+            expect(SplitBlockBloomFilter.optimalNumOfBlocks(13107, 0.0004)).to.eq(869)
+            expect(SplitBlockBloomFilter.optimalNumOfBlocks(26214, 0.0126)).to.eq(949)
+            expect(SplitBlockBloomFilter.optimalNumOfBlocks(52428, 0.18)).to.eq(997)
+
+            expect(SplitBlockBloomFilter.optimalNumOfBlocks(25000, 0.001)).to.eq(1427)
             expect(SplitBlockBloomFilter.optimalNumOfBlocks(50000, 0.0001)).to.eq(4111)
             expect(SplitBlockBloomFilter.optimalNumOfBlocks(50000, 0.00001)).to.eq(5773)
             expect(SplitBlockBloomFilter.optimalNumOfBlocks(100000, 0.000001)).to.eq(15961)

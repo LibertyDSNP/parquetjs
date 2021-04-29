@@ -26,6 +26,11 @@ type Block = Uint32Array
  *
  * @example This uses the default values to initialize the filter:
  *   const filter = new SplitBlockBloomFilter().init()
+ *
+ * @example If you know what size bloom filter you want, do:
+ *   const filter = new SplitBLockBloomFilter()
+ *      .setOptionNumFilterBytes(128000)
+ *      .init()
  */
 class SplitBlockBloomFilter {
     private static readonly salt: Array<number> = [
@@ -170,6 +175,7 @@ class SplitBlockBloomFilter {
      *
      * @return void
      */
+    // TODO: Make sure the value is preserved; I think it's passed by ref
     static blockInsert(b: Block, hashValue: Long): void {
         const masked: Block = this.mask(hashValue)
         for (let i = 0; i < masked.length; i++) {
@@ -283,8 +289,6 @@ class SplitBlockBloomFilter {
      *     see  https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
      *     NOTE: cannot use values > 2**31. We are not expecting these values internally,
      *     so this works as intended.
-     * @param v: the number to increase
-     * @returns the new number
      */
     private static nextPwr2(v:number): number {
         v--;
@@ -298,7 +302,7 @@ class SplitBlockBloomFilter {
     }
 
     /**
-     * @function setOptionNumBytes
+     * @function setOptionNumFilterBytes
      * @description set the bytes for this Bloom filter. Set this if you don't want an
      *     optimal value calculated for you.  Rounds up to nearest power of 2
      *     This function does nothing if the filter has already been allocated.
