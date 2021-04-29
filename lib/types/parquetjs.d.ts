@@ -1,4 +1,5 @@
 /// <reference path = "../../parquet.js" />
+import {Block} from "./types";
 
 declare module "parquet" {
     export class ParquetEnvelopeReader {
@@ -45,7 +46,6 @@ declare module "parquet" {
         setRowGroupSize(cnt:number): void
         setPageSize(cnt:number): void
     }
-    export type Block = Uint32Array;
 
     export class SplitBlockBloomFilter {
         static getBlockIndex(h: Long, z: number): number

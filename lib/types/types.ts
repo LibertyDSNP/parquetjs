@@ -88,64 +88,37 @@ export interface ParquetRecord {
     [key: string]: any;
 }
 
-// export interface BloomFilterOffset {
-//     buffer: Buffer
-// }
-
-//
-// export interface ColumnMetaData {
-//     bloom_filter_offset: BloomFilterOffset
-//     path_in_schema: Array<string>
-//     read(input: any):void
-// }
-//
-// export interface ColumnChunk {
-//     type: any
-//     encodings: any
-//     path_in_schema: Array<string>
-//     code: any
-//     num_value: number
-//     total_uncompressed_size: number
-//     total_compressed_size: number
-//     key_value_metadata: any
-//     data_page_offset: number
-//     index_page_offset: number
-//     dictionary_page_offset: number
-//     statistics: any
-//     encoding_stats: any
-//     bloom_filter_offset: any
-//     column: {
-//         meta_data: ColumnMetaData,
-//     }
-//     rowGroup: any
-// }
 export interface Offset {
     buffer: Buffer
     offset: number
 }
 
+export interface ColumnMetaData {
+    type: number,
+    encodings: Array<any>,
+    path_in_schema: Array<string>,
+    codec: number,
+    num_values: any,
+    total_uncompressed_size: any,
+    total_compressed_size: any,
+    key_value_metadata: any,
+    data_page_offset: Offset,
+    index_page_offset: Offset,
+    dictionary_page_offset: Offset,
+    statistics: any,
+    encoding_stats: any,
+    bloom_filter_offset: Offset
+}
+
 export interface ColumnData {
     file_path: string,
     file_offset: Offset,
-    meta_data: {
-        type: number,
-        encodings: Array<any>,
-        path_in_schema: Array<string>,
-        codec: number,
-        num_values: any,
-        total_uncompressed_size: any,
-        total_compressed_size: any,
-        key_value_metadata: any,
-        data_page_offset: Offset,
-        index_page_offset: Offset,
-        dictionary_page_offset: Offset,
-        statistics: any,
-        encoding_stats: any,
-        bloom_filter_offset: Offset
-    }
+    meta_data: ColumnMetaData
 }
 
 export interface ColumnChunkData {
     rowGroupIndex: number,
     column: ColumnData
 }
+
+export type Block = Uint32Array

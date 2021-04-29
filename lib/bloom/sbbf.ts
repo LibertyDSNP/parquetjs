@@ -3,7 +3,7 @@ import TypedArray = NodeJS.TypedArray;
 const parquet_thrift = require("../../gen-nodejs/parquet_types")
 import Long = require('long')
 import XxHasher from "./xxhasher"
-type Block = Uint32Array
+import {Block} from "../types/types";
 
 /**
  * @class SplitBlockBloomFilter

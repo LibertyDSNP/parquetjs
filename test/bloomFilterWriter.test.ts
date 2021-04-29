@@ -1,6 +1,6 @@
 import sinon from "sinon"
 
-const bloomFilterWriter = require("../lib/bloomFilterWriter.js");
+import { createSBBF } from "../lib/bloomFilterWriter"
 const SplitBlockBloomFilter = require("../lib/bloom/sbbf").default;
 
 describe("buildFilterBlocks", () => {
@@ -17,17 +17,17 @@ describe("buildFilterBlocks", () => {
 
     it("calls .init once", () => {
       sbbfMock.expects("init").once();
-      bloomFilterWriter.createSBBF({});
+      createSBBF({});
     });
 
     it("does not set false positive rate", () => {
       sbbfMock.expects("setOptionNumFilterBytes").never();
-      bloomFilterWriter.createSBBF({});
+      createSBBF({});
     });
 
     it("does not set number of distinct", () => {
       sbbfMock.expects("setOptionNumDistinct").never();
-      bloomFilterWriter.createSBBF({});
+      createSBBF({});
     });
   });
 
@@ -44,17 +44,17 @@ describe("buildFilterBlocks", () => {
 
     it("calls setOptionNumberFilterBytes once", () => {
       sbbfMock.expects("setOptionNumFilterBytes").once().returnsThis();
-      bloomFilterWriter.createSBBF({ numFilterBytes: 1024 });
+      createSBBF({ numFilterBytes: 1024 });
     });
 
     it("does not set number of distinct", () => {
       sbbfMock.expects("setOptionNumDistinct").never();
-      bloomFilterWriter.createSBBF({});
+      createSBBF({});
     });
 
     it("calls .init once", () => {
       sbbfMock.expects("init").once();
-      bloomFilterWriter.createSBBF({});
+      createSBBF({});
     });
   });
 
@@ -71,14 +71,14 @@ describe("buildFilterBlocks", () => {
     describe("and falsePositiveRate is present", () => {
       it("calls ssbf.setOptionFalsePositiveRate", () => {
         sbbfMock.expects("setOptionFalsePositiveRate").once();
-        bloomFilterWriter.createSBBF({ falsePositiveRate: 0.1 });
+        createSBBF({ falsePositiveRate: 0.1 });
       });
     });
 
     describe("and numDistinct is present", () => {
       it("calls ssbf.setOptionNumDistinct", () => {
         sbbfMock.expects("setOptionNumDistinct").once();
-        bloomFilterWriter.createSBBF({
+        createSBBF({
           falsePositiveRate: 0.1,
           numDistinct: 1,
         });
