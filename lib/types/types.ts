@@ -145,18 +145,7 @@ export interface ColumnData {
     }
 }
 
-export interface ColumnChunk {
-    rowGroupIndex: number,
-    column: ColumnData,
-    offset_index_offset: Offset,
-    offset_index_length: number,
-    column_index_offset: Offset,
-    column_index_length: number,
-    crypto_metadata: any,
-    encrypted_column_metadata: any
-}
-
 export interface ColumnChunkData {
-    rowGroup: number,
-    column: ColumnChunk
+    rowGroupIndex: number,
+    column: ColumnData
 }

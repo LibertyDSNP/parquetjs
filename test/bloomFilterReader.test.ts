@@ -1,11 +1,11 @@
 import {expect} from "chai"
 import { parseBloomFilterOffsets } from '../lib/bloomFilterReader';
-import { ColumnChunk, ColumnChunkData, ColumnData } from "../lib/types/types.js";
+import { ColumnChunkData, ColumnData } from "../lib/types/types.js";
 // const bloomFilterReader = require("../lib/bloomFilterReader.js");
 
 describe("bloomFilterReader", () => {
   describe("offsets", () => {
-    let columnChunkMeta: Array<any>;
+    let columnChunkDataCollection: Array<Partial<ColumnChunkData>>;
 
 
     beforeEach(() => {
@@ -20,13 +20,16 @@ describe("bloomFilterReader", () => {
         },
       };
 
-      columnChunkMeta = [
+      const columnData: Partial<ColumnData> = {
+        meta_data: metaData,
+        file_offset: {buffer: null, offset: 0},
+        file_path: ''
+      }
+
+      columnChunkDataCollection = [
         {
           rowGroupIndex: 0,
-          column: {
-            meta_data: metaData,
-            encrypted_column_metadata: null,
-          },
+          column: columnData,
         },
       ];
     });
