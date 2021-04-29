@@ -27,10 +27,10 @@ const toInteger = (buffer: Buffer) => {
 type bloomFilterOffsetData = {
   columnName: string,
   offsetBytes: number,
-  rowGroup: number
+  rowGroupIndex: number
 }
 
-const parseBloomFilterOffsets = (columnChunks: Array<ColumnChunk>): Array<bloomFilterOffsetData> => {
+export const parseBloomFilterOffsets = (columnChunks: Array<ColumnChunk>): Array<bloomFilterOffsetData> => {
   return columnChunks.map((columnChunk) => {
     const {
       column: {
@@ -39,18 +39,18 @@ const parseBloomFilterOffsets = (columnChunks: Array<ColumnChunk>): Array<bloomF
           path_in_schema: pathInSchema,
         },
       },
-      rowGroup,
+      rowGroupIndex,
     } = columnChunk;
 
     return {
       offsetBytes: toInteger(bloomFilterOffsetBuffer),
       columnName: pathInSchema.join(""),
-      rowGroup: rowGroup
+      rowGroupIndex
     };
   });
 };
 
-const getBloomFilterHeader = async (offsetBytes: number, envelopeReader: ParquetEnvelopeReader) => {
+const getBloomFilterHeader = async (offsetBytes: number, envelopeReader: InstanceType<typeof ParquetEnvelopeReader>) => {
   const headerByteSizeEstimate = 200;
   const bloomFilterHeaderData = await envelopeReader.read(
     offsetBytes,
@@ -69,7 +69,7 @@ const getBloomFilterHeader = async (offsetBytes: number, envelopeReader: Parquet
 };
 
 const readFilterData = async (offsetBytes: number,
-                              envelopeReader: ParquetEnvelopeReader): Promise<Buffer> => {
+                              envelopeReader: InstanceType<typeof ParquetEnvelopeReader>): Promise<Buffer> => {
 
   const {
     bloomFilterHeader,
@@ -91,17 +91,17 @@ const readFilterData = async (offsetBytes: number,
   }
 };
 
-const readFilterDataFrom = (offsets: Array<number>, envelopeReader: ParquetEnvelopeReader): Promise<Array<Buffer>> => {
+const readFilterDataFrom = (offsets: Array<number>, envelopeReader: InstanceType<typeof ParquetEnvelopeReader>): Promise<Array<Buffer>> => {
   return Promise.all(
-    offsets.map(async (offset) => await readFilterData(offset, envelopeReader))
+    offsets.map((offset) => readFilterData(offset, envelopeReader))
   );
 };
 
-const siftAllOffsets = (columnChunks: Array<ColumnChunk>): Array<bloomFilterOffsetData> => {
+export const siftAllOffsets = (columnChunks: Array<ColumnChunk>): Array<bloomFilterOffsetData> => {
   return parseBloomFilterOffsets(filterColumnChunksWithBloomFilters(columnChunks));
 };
 
-const readFilterBlocksFrom = async (offsets: Array<bloomFilterOffsetData>, envelopeReader: ParquetEnvelopeReader) => {
+export const readFilterBlocksFrom = async (offsets: Array<bloomFilterOffsetData>, envelopeReader: InstanceType<typeof ParquetEnvelopeReader>) => {
   const offsetByteValues = offsets.map(({ offsetBytes }) => offsetBytes);
 
   const filterBlocksBuffers: Array<Buffer> = await readFilterDataFrom(
@@ -110,7 +110,7 @@ const readFilterBlocksFrom = async (offsets: Array<bloomFilterOffsetData>, envel
   );
 
   return filterBlocksBuffers.reduce((accumulator: Record<string, any>, buffer: Buffer, index: number) => {
-    const { columnName, rowGroup } = offsets[index];
+    const { columnName, rowGroupIndex } = offsets[index];
 
     if (!(columnName in accumulator)) {
       accumulator[columnName] = [];
@@ -119,14 +119,8 @@ const readFilterBlocksFrom = async (offsets: Array<bloomFilterOffsetData>, envel
     accumulator[columnName].push({
       sbbf: sbbf.from(buffer),
       columnName,
-      rowGroup,
+      rowGroupIndex,
     });
     return accumulator;
   }, {});
-};
-
-module.exports = {
-  siftAllOffsets,
-  readFilterBlocksFrom,
-  parseBloomFilterOffsets,
 };

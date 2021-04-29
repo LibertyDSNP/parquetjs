@@ -146,7 +146,7 @@ export interface ColumnData {
 }
 
 export interface ColumnChunk {
-    rowGroup: number,
+    rowGroupIndex: number,
     column: ColumnData,
     offset_index_offset: Offset,
     offset_index_length: number,
