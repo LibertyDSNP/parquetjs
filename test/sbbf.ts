@@ -42,40 +42,7 @@ describe("Split Block Bloom Filters", () => {
         expect(SplitBlockBloomFilter.blockCheck(blk, isInsertedY)).to.eq(true)
         expect(SplitBlockBloomFilter.blockCheck(blk, notInsertedZ)).to.eq(false)
 
-        makeListN(50, () => {// declare module "parquet" {
-//     interface ParquetEnvelopeReader {
-//         read(offset: number, length: number): Promise<any>
-//         getCursor(columnList?: any): any
-//     }
-//     interface ParquetReader {
-//         openFile(filePath: string, options?: any): any
-//
-//         openUrl(request: any, params: any, options?: any): any
-//     }
-//     type schemaPath = string|Array<string>
-//     interface ParquetSchema {
-//         findField(path:schemaPath):any
-//         findFieldBranch(path:any):any
-//         buildFields(schema:ParquetSchema,
-//                     rLevelParentMax:number,
-//                     dLevelParentMax:number,
-//                     path:schemaPath):any
-//         listFields(fields: Array<string>):any
-//     }
-//
-//
-//     interface ParquetWriter{
-//         openFile(schema:ParquetSchema, path:schemaPath, opts?:any):ParquetWriter
-//         openStream(schema:ParquetSchema, outputStream: Buffer, opts?:any): ParquetWriter
-//
-//         appendRow(row: any): void
-//         close(callback?: Function):void
-//         setMetadata(key:any, value:any):void
-//         setRowGroupSize(cnt:number): void
-//         setPageSize(cnt:number): void
-//     }
-// }
-
+        makeListN(50, () => {
             SplitBlockBloomFilter.blockInsert(
                 blk,
                 new Long(randInt(2 ** 30), randInt(2 ** 30), true)
