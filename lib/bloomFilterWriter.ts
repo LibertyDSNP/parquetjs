@@ -43,7 +43,7 @@ const buildFilterHeader = (numBytes: number) => {
   return bloomFilterHeader;
 };
 
-const serializeFilterHeaders = (numberOfBytes: number) => {
+export const serializeFilterHeaders = (numberOfBytes: number) => {
   const bloomFilterHeader = buildFilterHeader(numberOfBytes);
 
   return parquet_util.serializeThrift(bloomFilterHeader);
@@ -54,13 +54,13 @@ type serializeFilterDataParams = {
   filterByteSize: number
 }
 
-const serializeFilterData = (params: serializeFilterDataParams) => {
+export const serializeFilterData = (params: serializeFilterDataParams) => {
   const serializedFilterBlocks = serializeFilterBlocks(params.filterBlocks);
   const serializedFilterHeaders = serializeFilterHeaders(params.filterByteSize);
 
   return Buffer.concat([serializedFilterHeaders, serializedFilterBlocks]);
 };
 
-const setFilterOffset = (column: ColumnData, offset: Offset) => {
+export const setFilterOffset = (column: ColumnData, offset: Offset) => {
   column.meta_data.bloom_filter_offset = offset;
 };
