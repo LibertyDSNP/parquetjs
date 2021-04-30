@@ -113,7 +113,7 @@ describe("bloom filter", async function () {
     assert.deepEqual(columnsFilterNames, ['name', 'quantity']);
   });
 
-  it("writes bloom filters for column: name", async function () {
+  it("writes bloom filters for column: name", function () {
     const splitBlockBloomFilter = bloomFilters.name[0].sbbf;
     assert.isTrue(
       splitBlockBloomFilter.check(Buffer.from("apples")),

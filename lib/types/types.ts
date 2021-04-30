@@ -1,5 +1,8 @@
 // Lifted from https://github.com/kbajalc/parquets
 
+import { RowGroup } from "gen-nodejs/parquet_types";
+import SplitBlockBloomFilter from "lib/bloom/sbbf";
+
 export type ParquetCodec = 'PLAIN' | 'RLE';
 export type ParquetCompression = 'UNCOMPRESSED' | 'GZIP' | 'SNAPPY' | 'LZO' | 'BROTLI' | 'LZ4';
 export type RepetitionType = 'REQUIRED' | 'OPTIONAL' | 'REPEATED';
@@ -122,3 +125,9 @@ export interface ColumnChunkData {
 }
 
 export type Block = Uint32Array
+
+export interface BloomFilterData {
+    sbbf: SplitBlockBloomFilter,
+    columnName: string,
+    RowGroupIndex: number,
+};

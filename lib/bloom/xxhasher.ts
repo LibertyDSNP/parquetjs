@@ -1,4 +1,4 @@
-const xxhash = require("xxhash")
+const xxhash = require("xxhash");
 import Long from "long"
 
 const HASH_SEED = 0x0

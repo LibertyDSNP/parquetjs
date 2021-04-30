@@ -1,6 +1,6 @@
 import TypedArray = NodeJS.TypedArray;
 
-const parquet_thrift = require("../../gen-nodejs/parquet_types")
+import parquet_thrift from "../../gen-nodejs/parquet_types";
 import Long = require('long')
 import XxHasher from "./xxhasher"
 import {Block} from "../types/types";

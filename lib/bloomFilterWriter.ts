@@ -1,18 +1,19 @@
+import parquet_util from "./util";
+import parquet_thrift from "../gen-nodejs/parquet_types";
 import SplitBlockBloomFilter from "./bloom/sbbf";
-import {ColumnData, Offset, Block} from "./types/types";
 
-const parquet_thrift = require("../gen-nodejs/parquet_types");
-const parquet_util = require("./util");
+import { ColumnData, Offset, Block } from "./types/types";
 
 type createSBBFParams = {
-  numFilterBytes?: number
-  falsePositiveRate?: number
-  numDistinct?: number }
+  numFilterBytes?: number;
+  falsePositiveRate?: number;
+  numDistinct?: number;
+};
 
 export const createSBBF = (params: createSBBFParams): SplitBlockBloomFilter => {
-  const {numFilterBytes, falsePositiveRate, numDistinct} = params
+  const { numFilterBytes, falsePositiveRate, numDistinct } = params;
 
-  const bloomFilter = new SplitBlockBloomFilter()
+  const bloomFilter = new SplitBlockBloomFilter();
 
   const hasOptions = numFilterBytes || falsePositiveRate || numDistinct;
 
@@ -22,7 +23,7 @@ export const createSBBF = (params: createSBBFParams): SplitBlockBloomFilter => {
     return bloomFilter.setOptionNumFilterBytes(numFilterBytes).init();
 
   if (falsePositiveRate)
-  bloomFilter.setOptionFalsePositiveRate(falsePositiveRate);
+    bloomFilter.setOptionFalsePositiveRate(falsePositiveRate);
 
   if (numDistinct) bloomFilter.setOptionNumDistinct(numDistinct);
 
@@ -36,7 +37,6 @@ const buildFilterHeader = (numBytes: number) => {
   const bloomFilterHeader = new parquet_thrift.BloomFilterHeader();
   bloomFilterHeader.numBytes = numBytes;
   bloomFilterHeader.algorithm = new parquet_thrift.BloomFilterAlgorithm();
-  bloomFilterHeader.algorithm.BLOCK = new parquet_thrift.SplitBlockAlgorithm();
   bloomFilterHeader.hash = new parquet_thrift.BloomFilterHash();
   bloomFilterHeader.compression = new parquet_thrift.BloomFilterCompression();
 
@@ -50,9 +50,9 @@ export const serializeFilterHeaders = (numberOfBytes: number) => {
 };
 
 type serializeFilterDataParams = {
-  filterBlocks: Array<Block>
-  filterByteSize: number
-}
+  filterBlocks: Array<Block>;
+  filterByteSize: number;
+};
 
 export const serializeFilterData = (params: serializeFilterDataParams) => {
   const serializedFilterBlocks = serializeFilterBlocks(params.filterBlocks);
@@ -63,4 +63,13 @@ export const serializeFilterData = (params: serializeFilterDataParams) => {
 
 export const setFilterOffset = (column: ColumnData, offset: Offset) => {
   column.meta_data.bloom_filter_offset = offset;
+};
+
+export const getSerializedBloomFilterData = (
+  splitBlockBloomFilter: InstanceType<typeof SplitBlockBloomFilter>
+): Buffer => {
+  const filterBlocks = splitBlockBloomFilter.getFilter();
+  const filterByteSize = splitBlockBloomFilter.getNumFilterBytes();
+
+  return serializeFilterData({ filterBlocks, filterByteSize });
 };
