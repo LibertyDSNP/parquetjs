@@ -53,15 +53,15 @@ const getBloomFilterHeader = async (
   envelopeReader: InstanceType<typeof ParquetEnvelopeReader>
 ) => {
   const headerByteSizeEstimate = 200;
+
   let bloomFilterHeaderData;
-  
   try {
     bloomFilterHeaderData = await envelopeReader.read(
       offsetBytes,
       headerByteSizeEstimate
     );
   } catch(e) {
-    new Error(e);
+    throw new Error(e);
   }
 
   const bloomFilterHeader = new parquet_thrift.BloomFilterHeader();
@@ -129,22 +129,23 @@ export const getBloomFiltersFor = async (
     ({ offsetBytes }) => offsetBytes
   );
 
+  let filterBlocksBuffers: Array<Buffer>;
   try {
-    const filterBlocksBuffers: Array<Buffer> = await readFilterDataFrom(
+    filterBlocksBuffers = await readFilterDataFrom(
       offsetByteValues,
       envelopeReader
     );
-
-    return filterBlocksBuffers.map((buffer, index) => {
-      const { columnName, rowGroupIndex } = bloomFilterOffsetData[index];
-
-      return {
-        sbbf: sbbf.from(buffer),
-        columnName,
-        rowGroupIndex,
-      };
-    });
   } catch (e) {
     throw new Error(e);
   }
+
+  return filterBlocksBuffers.map((buffer, index) => {
+    const { columnName, rowGroupIndex } = bloomFilterOffsetData[index];
+
+    return {
+      sbbf: sbbf.from(buffer),
+      columnName,
+      rowGroupIndex,
+    };
+  });
 };
