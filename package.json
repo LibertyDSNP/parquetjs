@@ -29,7 +29,6 @@
     "long": "^4.0.0",
     "lzo": "^0.4.0",
     "object-stream": "0.0.1",
-    "sinon": "^10.0.0",
     "snappyjs": "^0.6.0",
     "thrift": "^0.14.1",
     "ts-node": "^9.1.1",
@@ -43,6 +42,7 @@
     "@babel/preset-typescript": "7.13.0",
     "@types/chai": "^4.2.16",
     "@types/mocha": "^8.2.2",
+    "sinon": "^10.0.0",
     "chai": "4.3.4",
     "mocha": "8.3.2"
   },
