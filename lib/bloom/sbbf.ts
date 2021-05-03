@@ -175,7 +175,6 @@ class SplitBlockBloomFilter {
      *
      * @return void
      */
-    // TODO: Make sure the value is preserved; I think it's passed by ref
     static blockInsert(b: Block, hashValue: Long): void {
         const masked: Block = this.mask(hashValue)
         for (let i = 0; i < masked.length; i++) {
