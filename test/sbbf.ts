@@ -1,7 +1,9 @@
 import Long = require('long')
 import {expect} from "chai"
 import * as sinon from "sinon"
-import {makeListN, randInt, times} from "./util/general";
+const times = require("lodash/times");
+const random = require("lodash/random");
+
 import SplitBlockBloomFilter from "../lib/bloom/sbbf";
 
 describe("Split Block Bloom Filters", () => {
@@ -42,10 +44,10 @@ describe("Split Block Bloom Filters", () => {
         expect(SplitBlockBloomFilter.blockCheck(blk, isInsertedY)).to.eq(true)
         expect(SplitBlockBloomFilter.blockCheck(blk, notInsertedZ)).to.eq(false)
 
-        makeListN(50, () => {
+        times(50, () => {
             SplitBlockBloomFilter.blockInsert(
                 blk,
-                new Long(randInt(2 ** 30), randInt(2 ** 30), true)
+                new Long(random(0, 2 ** 30), random(0, 2 ** 30), true)
             )
         })
 
@@ -205,14 +207,14 @@ describe("Split Block Bloom Filters", () => {
                 .init()
 
             times(numDistinct, () => {
-                const hashValue = new Long(randInt(2 ** 30), randInt(2 ** 30), true)
+                const hashValue = new Long(random(0, 2 ** 30), random(0, 2 ** 30), true)
                 filter.insert(hashValue)
                 expect(filter.check(hashValue))
             })
 
             let falsePositive = 0
             times(numDistinct, () => {
-                const notInFilter = new Long(randInt(2 ** 30), randInt(2 ** 30), true)
+                const notInFilter = new Long(random(2 ** 30), random(0, 2 ** 30), true)
                 if (!filter.check(notInFilter)) falsePositive++
             })
 
@@ -239,7 +241,7 @@ describe("Split Block Bloom Filters", () => {
             { name: "float number", val: 23334.23},
             {name: "string", val: "hello hello hello"},
             {name: "UInt8Array", val: Uint8Array.from([0x1,0x4,0xa,0xb])},
-            {name: "Long", val: new Long(randInt(2 ** 30), randInt(2 ** 30), true)},
+            {name: "Long", val: new Long(random(2 ** 30), random(2 ** 30), true)},
             {name: "Buffer", val: Buffer.from("Hello Hello Hello")},
             {name: "BigInt", val: BigInt(1234324434440)},
             {name: "stringified object", val: JSON.stringify(pojo)},

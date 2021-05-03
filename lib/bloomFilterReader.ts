@@ -3,7 +3,7 @@ import parquet_thrift from "../gen-nodejs/parquet_types";
 import sbbf from "./bloom/sbbf";
 import { ParquetEnvelopeReader } from "parquet";
 
-import { ColumnChunkData, BloomFilterData } from "./types/types";
+import { ColumnChunkData } from "./types/types";
 
 const filterColumnChunksWithBloomFilters = (
   columnChunkDataCollection: Array<ColumnChunkData>
@@ -140,20 +140,4 @@ export const getBloomFiltersFor = async (
   } catch (e) {
     throw new Error(e);
   }
-};
-
-export const groupByColumnName = (bloomFilterData: Array<BloomFilterData>) => {
-  return bloomFilterData.reduce(
-    (accumulator: Record<string, any>, bloomFilterData: BloomFilterData) => {
-      const { columnName } = bloomFilterData;
-
-      if (!(columnName in accumulator)) {
-        accumulator[columnName] = [];
-      }
-
-      accumulator[columnName].push(bloomFilterData);
-      return accumulator;
-    },
-    {}
-  );
 };
