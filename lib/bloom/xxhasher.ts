@@ -54,4 +54,4 @@ class XxHasher {
   }
 }
 
-export default XxHasher
+export = XxHasher;
