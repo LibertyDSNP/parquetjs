@@ -110,8 +110,8 @@ class SplitBlockBloomFilter {
      */
     static getBlockIndex(h: Long, z: number): number {
         const zLong = Long.fromNumber(z, true)
-        const h_top_bits = Long.fromNumber(h.getHighBitsUnsigned(), true);
-        return h_top_bits.mul(zLong).shiftRightUnsigned(32).getLowBitsUnsigned();
+        const hTopBits = Long.fromNumber(h.getHighBitsUnsigned(), true);
+        return hTopBits.mul(zLong).shiftRightUnsigned(32).getLowBitsUnsigned();
     }
 
     /**
