@@ -26,6 +26,16 @@ type bloomFilterOffsetData = {
   rowGroupIndex: number;
 };
 
+const toInteger = (buffer: Buffer) => {
+  const integer = parseInt(buffer.toString("hex"), 16)
+
+  if (integer > Number.MAX_VALUE) {
+    throw Error("Number exceeds Number.MAX_VALUE: Godspeed");
+  }
+
+  return integer;
+}
+
 export const parseBloomFilterOffsets = (
   ColumnChunkDataCollection: Array<ColumnChunkData>
 ): Array<bloomFilterOffsetData> => {
@@ -41,7 +51,7 @@ export const parseBloomFilterOffsets = (
     } = columnChunkData;
 
     return {
-      offsetBytes: parseInt(bloomFilterOffsetBuffer.toString("hex"), 16),
+      offsetBytes: toInteger(bloomFilterOffsetBuffer),
       columnName: pathInSchema.join(","),
       rowGroupIndex,
     };
