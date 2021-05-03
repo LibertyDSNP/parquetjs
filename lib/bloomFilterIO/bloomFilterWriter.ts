@@ -1,8 +1,8 @@
-import parquet_util from "./util";
-import parquet_thrift from "../gen-nodejs/parquet_types";
-import SplitBlockBloomFilter from "./bloom/sbbf";
+import parquet_util from "../util";
+import parquet_thrift from "../../gen-nodejs/parquet_types";
+import SplitBlockBloomFilter from "../bloom/sbbf";
 
-import { ColumnData, Offset, Block } from "./types/types";
+import { ColumnData, Offset, Block } from "../types/types";
 
 type createSBBFParams = {
   numFilterBytes?: number;

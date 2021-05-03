@@ -1,6 +1,6 @@
 import sinon from "sinon"
 
-import { createSBBF } from "../lib/bloomFilterWriter"
+import { createSBBF } from "../lib/bloomFilterIO/bloomFilterWriter"
 const SplitBlockBloomFilter = require("../lib/bloom/sbbf").default;
 
 describe("buildFilterBlocks", () => {

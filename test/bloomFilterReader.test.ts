@@ -1,5 +1,5 @@
 import {expect} from "chai"
-import { parseBloomFilterOffsets } from '../lib/bloomFilterReader';
+import { parseBloomFilterOffsets } from '../lib/bloomFilterIO/bloomFilterReader';
 import {ColumnChunkData, ColumnData, ColumnMetaData, Offset} from "../lib/types/types.js";
 
 const emptyOffset= ():Offset => {
