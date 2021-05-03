@@ -53,10 +53,17 @@ const getBloomFilterHeader = async (
   envelopeReader: InstanceType<typeof ParquetEnvelopeReader>
 ) => {
   const headerByteSizeEstimate = 200;
-  const bloomFilterHeaderData = await envelopeReader.read(
-    offsetBytes,
-    headerByteSizeEstimate
-  );
+  let bloomFilterHeaderData;
+  
+  try {
+    bloomFilterHeaderData = await envelopeReader.read(
+      offsetBytes,
+      headerByteSizeEstimate
+    );
+  } catch(e) {
+    new Error(e);
+  }
+
   const bloomFilterHeader = new parquet_thrift.BloomFilterHeader();
   const sizeOfBloomFilterHeader = parquet_util.decodeThrift(
     bloomFilterHeader,
