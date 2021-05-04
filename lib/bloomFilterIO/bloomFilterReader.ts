@@ -27,14 +27,14 @@ type bloomFilterOffsetData = {
 };
 
 const toInteger = (buffer: Buffer) => {
-  const integer = parseInt(buffer.toString("hex"), 16)
+  const integer = parseInt(buffer.toString("hex"), 16);
 
   if (integer >= Number.MAX_VALUE) {
     throw Error("Number exceeds Number.MAX_VALUE: Godspeed");
   }
 
   return integer;
-}
+};
 
 export const parseBloomFilterOffsets = (
   ColumnChunkDataCollection: Array<ColumnChunkData>
@@ -70,7 +70,7 @@ const getBloomFilterHeader = async (
       offsetBytes,
       headerByteSizeEstimate
     );
-  } catch(e) {
+  } catch (e) {
     throw new Error(e);
   }
 
@@ -139,15 +139,10 @@ export const getBloomFiltersFor = async (
     ({ offsetBytes }) => offsetBytes
   );
 
-  let filterBlocksBuffers: Array<Buffer>;
-  try {
-    filterBlocksBuffers = await readFilterDataFrom(
-      offsetByteValues,
-      envelopeReader
-    );
-  } catch (e) {
-    throw new Error(e);
-  }
+  const filterBlocksBuffers: Array<Buffer> = await readFilterDataFrom(
+    offsetByteValues,
+    envelopeReader
+  );
 
   return filterBlocksBuffers.map((buffer, index) => {
     const { columnName, rowGroupIndex } = bloomFilterOffsetData[index];
