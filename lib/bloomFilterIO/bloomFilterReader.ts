@@ -29,7 +29,7 @@ type bloomFilterOffsetData = {
 const toInteger = (buffer: Buffer) => {
   const integer = parseInt(buffer.toString("hex"), 16)
 
-  if (integer > Number.MAX_VALUE) {
+  if (integer >= Number.MAX_VALUE) {
     throw Error("Number exceeds Number.MAX_VALUE: Godspeed");
   }
 
