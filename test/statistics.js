@@ -94,10 +94,8 @@ describe('statistics', async function() {
   });
 
   it('column statistics should match input', async function() {
-    const rowStats = (path) =>
-            row.columns.find(
-              d => d.meta_data.path_in_schema.join(',') == path
-            ).meta_data.statistics;
+    
+    const rowStats = (path) => row.columns.find(d => d.meta_data.path_in_schema.join(',') == path).meta_data.statistics;
 
     assert.equal(rowStats('name').min_value,'apples');
     assert.equal(rowStats('name').max_value,'oranges');
@@ -119,8 +117,8 @@ describe('statistics', async function() {
     assert.equal(+rowStats('day').distinct_count, 4);
     assert.equal(+rowStats('day').null_count, 0);
 
-    assert.deepEqual(rowStats('finger').min_value, Buffer.from('ABCDE'));
-    assert.deepEqual(rowStats('finger').max_value, Buffer.from('XCVBN'));
+    assert.deepEqual(rowStats('finger').min_value, 'ABCDE');
+    assert.deepEqual(rowStats('finger').max_value, 'XCVBN');
     assert.equal(+rowStats('finger').distinct_count, 3);
     assert.equal(+rowStats('finger').null_count, 0);
 
@@ -164,8 +162,8 @@ describe('statistics', async function() {
     assert.deepEqual(day.max_values, [ new Date('2018-03-03'), new Date('2017-11-26') ]);
 
     const finger = await reader.envelopeReader.readColumnIndex('finger', row);
-    assert.deepEqual(finger.min_values, [ Buffer.from('ABCDE'), Buffer.from('FNORD') ]);
-    assert.deepEqual(finger.max_values, [ Buffer.from('XCVBN'), Buffer.from('FNORD')]);
+    assert.deepEqual(finger.min_values, [ 'ABCDE', 'FNORD' ]);
+    assert.deepEqual(finger.max_values, [ 'XCVBN', 'FNORD' ]);
 
     const stockQuantity = await reader.envelopeReader.readColumnIndex('stock,quantity', row);
     assert.deepEqual(stockQuantity.min_values, [ 10n, undefined ]);
