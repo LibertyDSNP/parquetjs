@@ -48,9 +48,7 @@
   "scripts": {
     "build": "tsc -b",
     "type": "tsc --noEmit",
-    "lint": "npm-run-all -c lint:*",
-    "lint:eslint": "eslint 'lib/**/*.{ts}'",
-    "format": "npm run lint:eslint -- --fix && npm run lint:stylelint -- --fix ",
+    "lint": "echo 'Linting, it is on the TODO list...'",
     "test": "mocha -r ts-node/register 'test/**/*.{js,ts}'"
   },
   "engines": {
