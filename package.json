@@ -40,9 +40,9 @@
     "@babel/preset-typescript": "7.13.0",
     "@types/chai": "^4.2.16",
     "@types/mocha": "^8.2.2",
-    "sinon": "^10.0.0",
     "chai": "4.3.4",
     "mocha": "8.3.2",
+    "sinon": "^10.0.0",
     "ts-node": "^9.1.1"
   },
   "scripts": {

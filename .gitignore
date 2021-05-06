@@ -1,7 +1,6 @@
 node_modules
 *.parquet
 npm-debug.log
-package-lock.json
 .nyc_output
 dist
 !test/test-files/*.parquet
