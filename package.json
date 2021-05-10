@@ -49,7 +49,9 @@
     "build": "tsc -b",
     "type": "tsc --noEmit",
     "lint": "echo 'Linting, it is on the TODO list...'",
-    "test": "mocha -r ts-node/register 'test/**/*.{js,ts}'"
+    "test": "mocha -r ts-node/register 'test/**/*.{js,ts}'",
+    "clean": "rm -Rf ./dist",
+    "prepare": "npm run build"
   },
   "engines": {
     "node": ">=14.16.0"
