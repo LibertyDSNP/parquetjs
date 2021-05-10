@@ -1,7 +1,7 @@
 {
   "name": "@unfinishedlabs/parquetjs",
   "description": "fully asynchronous, pure JavaScript implementation of the Parquet file format",
-  "main": "parquet.js",
+  "main": "dist/parquet.js",
   "version": "0.0.0",
   "homepage": "https://github.com/LibertyDSNP/parquetjs",
   "license": "MIT",
@@ -53,5 +53,11 @@
   },
   "engines": {
     "node": ">=14.16.0"
-  }
+  },
+  "files": [
+    "dist/**/*",
+    "parquet.thrift",
+    "*.md",
+    "docs/**/*"
+  ]
 }
