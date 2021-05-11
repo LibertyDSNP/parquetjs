@@ -249,9 +249,10 @@ describe("Split Block Bloom Filters", () => {
          ]
         const filter = new SplitBlockBloomFilter().setOptionNumDistinct(1000).init()
         testCases.forEach(tc => {
-            it(`works for a ${tc.name} type`, () => {
-                filter.insert(tc.val)
-                expect(filter.check(tc.val))
+            it(`works for a ${tc.name} type`, async () => {
+                await filter.insert(tc.val)
+                const isPresent = filter.check(tc.val)
+                expect(isPresent)
             })
         })
 
@@ -263,10 +264,15 @@ describe("Split Block Bloom Filters", () => {
             {name: "Map", val: new Map() }
         ]
         throwCases.forEach((tc) => {
-            it(`throws on type ${tc.name}`, () => {
-                expect(() => {
-                    filter.insert(tc.val)
-                }).to.throw(/unsupported type/)
+            it(`throws on type ${tc.name}`, async () => {
+                let gotError = false
+                try {
+                    await filter.insert(tc.val)
+                } catch (e) {
+                    gotError = true
+                    expect(e.message).to.match(/unsupported type:/)
+                }
+                expect(gotError).to.eq(true)
             })
         })
 

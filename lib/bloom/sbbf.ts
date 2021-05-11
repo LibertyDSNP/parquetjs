@@ -222,6 +222,7 @@ class SplitBlockBloomFilter {
     private numBlocks: number = 0
     private numDistinctValues: number = SplitBlockBloomFilter.DEFAULT_DISTINCT_VALUES
     private hashStrategy = new parquet_thrift.BloomFilterHash(parquet_thrift.XxHash)
+    private hasher = new XxHasher()
 
     private isInitialized(): boolean { return this.splitBlockFilter.length > 0 }
 
@@ -351,12 +352,12 @@ class SplitBlockBloomFilter {
         return this
     }
 
-    hash(value: any): Long {
+    async hash(value: any): Promise<Long> {
         if (!this.hashStrategy.hasOwnProperty("XXHASH")) {
             throw new Error("unsupported hash strategy")
         }
-
-        return Long.fromString(XxHasher.hash64(value), true, 16)
+        const hashed = await this.hasher.hash64(value)
+        return Long.fromString(hashed, true, 16)
     }
 
     private insertHash(hashValue: Long): void {
@@ -372,9 +373,9 @@ class SplitBlockBloomFilter {
      * @param value: an unsigned Long, the value to add. If not a string, will be JSON.stringified
      * @return void
      */
-    insert(value: any): void {
+    async insert(value: any): Promise<void> {
         if (!this.isInitialized()) throw new Error("filter has not been initialized. call init() first")
-        this.insertHash(this.hash(value))
+        this.insertHash(await this.hash(value))
     }
 
     private checkHash(hashValue: Long): boolean {
@@ -390,9 +391,9 @@ class SplitBlockBloomFilter {
      * @return true if hashed item is found in the data set represented by this filter
      * @return false if it is __definitely not__ in the data set.
      */
-    check(value: any): boolean {
+    async check(value: any): Promise<boolean> {
         if (!this.isInitialized()) throw new Error("filter has not been initialized")
-        return this.checkHash(this.hash(value))
+        return this.checkHash(await this.hash(value))
     }
 }
 
