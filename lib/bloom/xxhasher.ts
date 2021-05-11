@@ -6,7 +6,7 @@ type HasherFunc = (input: string, seedHigh?: number, seedLow?: number) => string
 /**
  * @class XxHasher
  *
- * @description  Simple wrapper for xxhash package that makes educated guesses to convert
+ * @description  Simple wrapper for xxhash package that converts
  * Parquet Type analogs in JavaScript to strings for creating 64 bit hashes.  Hash seed = 0 per
  * [Parquet specification](https://github.com/apache/parquet-format/blob/master/BloomFilter.md).
  *
@@ -17,6 +17,7 @@ class XxHasher {
     hasher: HasherFunc | undefined
 
     private async hashit(value: string): Promise<string> {
+        // initialized here because constructors can't be async
         if (this.hasher === undefined) {
             const {h64} = await xxhash()
             this.hasher = h64
@@ -27,7 +28,7 @@ class XxHasher {
 
     /**
      * @function hash64
-     * @description attempts to create a hash for certain data types.
+     * @description creates a hash for certain data types.
      * @return the 64 big XXHash as a string
      * @param value one of n, throw an error.
      */
