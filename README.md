@@ -172,7 +172,7 @@ const bloomFilters = reader.getBloomFiltersFor(['name']);
 }
 
 ```
-Calling `getBloomFiltersFor` on reader returns an object with the keys being a column name and value being an array which length is the number of row groups that the column spans.
+Calling `getBloomFiltersFor` on the reader returns an object with the keys being a column name and value being an array of length equal to the number of row groups that the column spans.
 
 Given the SplitBlockBloomFilter<instance> inclusion of a value in the filter can be checked as follows:
 
