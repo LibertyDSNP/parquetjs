@@ -98,7 +98,7 @@ Bloom filters can be added to multiple columns as demonstrated below:
 var writer = await parquet.ParquetWriter.openFile(schema, 'fruits.parquet', options);
 ```
 
-By default, not passing any additonal options calculates the optimal number of blocks according to the number of distinct values and false positive probability.
+By default, not passing any additional options calculates the optimal number of blocks according to the default number of distinct values (128*1024) and default false positive probability (0.001), which gives a filter byte size of 29,920.
 
 The following options are provided to have the ability to adjust the split-block bloom filter settings.
 
