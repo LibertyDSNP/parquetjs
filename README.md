@@ -77,6 +77,38 @@ await writer.appendRow({name: 'oranges', quantity: 10, price: 2.5, date: new Dat
 Once we are finished adding rows to the file, we have to tell the writer object
 to flush the metadata to disk and close the file by calling the `close()` method:
 
+### Adding bloom filters 
+
+Bloom filters can be added to multiple columns as demonstrated below:
+
+``` js
+  const options = {
+    bloomFilters: [
+      {
+        column: "name",
+        numFilterBytes: 1024,
+      },
+      {
+        column: "quantity",
+        numFilterBytes: 1024,
+      },
+    ]
+  };
+
+var writer = await parquet.ParquetWriter.openFile(schema, 'fruits.parquet', options);
+```
+
+By default, not passing any additonal options calculates the optimal number of blocks according to the number of distinct values and false positive probability.
+
+The following options are provided to have the ability to adjust the split-block bloom filter settings.
+
+`numFilterBytes` - sets the desire size of bloom filter in bytes. Defaults to 128 * 1024 * 1024 bits.
+
+`falsePositiveRate` - set the desired false positive percentage for bloom filter. Defaults to 0.001.
+
+`numDistinct` - sets the number of distinct values. Defaults to 128 * 1024 bits.
+
+Note that if numFilterBytes is provided then falsePositiveRate and numDistinct options are ignored.
 
 Usage: Reading files
 --------------------
@@ -117,6 +149,39 @@ avoid leaking file descriptors.
 ``` js
 await reader.close();
 ```
+
+### Reading bloom filter
+
+Bloom filters can be fetched from a parquet file by creating a reader
+and calling `getBloomFiltersFor`.
+``` js
+// create new ParquetReader that reads from 'fruits.parquet`
+let reader = await parquet.ParquetReader.openFile('fruits.parquet');
+
+// fetches bloom filter for the columns provided.
+const bloomFilters = reader.getBloomFiltersFor(['name']);
+
+=> {
+  name: [
+    {
+      rowGroupIndex: 0
+      columnName: 'name',
+      sbbf: SplitBlockBloomFilter<instance>
+    }
+  ]
+}
+
+```
+Calling `getBloomFiltersFor` on reader returns an object with the keys being a column name and value being an array which length is the number of row groups that the column spans.
+
+Given the SplitBlockBloomFilter<instance> inclusion of a value in the filter can be checked as follows:
+
+``` js
+const sbbf = bloomFilters.name[0].ssbf;
+
+sbbf.check('apples') ===> true
+```
+
 
 ### Reading data from a url
 
