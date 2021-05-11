@@ -150,7 +150,7 @@ avoid leaking file descriptors.
 await reader.close();
 ```
 
-### Reading bloom filter
+### Reading a bloom filter
 
 Bloom filters can be fetched from a parquet file by creating a reader
 and calling `getBloomFiltersFor`.
