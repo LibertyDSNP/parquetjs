@@ -113,26 +113,26 @@ describe("bloom filter", async function () {
     assert.deepEqual(columnsFilterNames, ['name', 'quantity']);
   });
 
-  it("writes bloom filters for column: name", function () {
+  it("writes bloom filters for column: name", async function () {
     const splitBlockBloomFilter = bloomFilters.name[0].sbbf;
     assert.isTrue(
-      splitBlockBloomFilter.check(Buffer.from("apples")),
+      await splitBlockBloomFilter.check(Buffer.from("apples")),
       "apples is included in name filter"
     );
     assert.isTrue(
-      splitBlockBloomFilter.check(Buffer.from("oranges")),
+      await splitBlockBloomFilter.check(Buffer.from("oranges")),
       "oranges is included in name filter"
     );
     assert.isTrue(
-      splitBlockBloomFilter.check(Buffer.from("kiwi")),
+      await splitBlockBloomFilter.check(Buffer.from("kiwi")),
       "kiwi is included"
     );
     assert.isTrue(
-      splitBlockBloomFilter.check(Buffer.from("banana")),
+      await splitBlockBloomFilter.check(Buffer.from("banana")),
       "banana is included in name filter"
     );
     assert.isFalse(
-      splitBlockBloomFilter.check(Buffer.from("taco")),
+      await splitBlockBloomFilter.check(Buffer.from("taco")),
       "taco is NOT included in name filter"
     );
   });
@@ -140,15 +140,15 @@ describe("bloom filter", async function () {
   it("writes bloom filters for column: quantity", async function () {
     const splitBlockBloomFilter = bloomFilters.quantity[0].sbbf;
     assert.isTrue(
-      splitBlockBloomFilter.check(BigInt(10)),
+      await splitBlockBloomFilter.check(BigInt(10)),
       "10n is included in quantity filter"
     );
     assert.isTrue(
-      splitBlockBloomFilter.check(BigInt(15)),
+      await splitBlockBloomFilter.check(BigInt(15)),
       "15n is included in quantity filter"
     );
     assert.isFalse(
-      splitBlockBloomFilter.check(BigInt(100)),
+      await splitBlockBloomFilter.check(BigInt(100)),
       "100n is NOT included in quantity filter"
     );
   });

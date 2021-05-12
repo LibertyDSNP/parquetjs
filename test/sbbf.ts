@@ -1,6 +1,8 @@
 import Long = require('long')
 import {expect} from "chai"
 import * as sinon from "sinon"
+import {Done} from "mocha"
+
 const times = require("lodash/times");
 const random = require("lodash/random");
 
@@ -9,7 +11,7 @@ import SplitBlockBloomFilter from "../lib/bloom/sbbf";
 describe("Split Block Bloom Filters", () => {
     const expectedDefaultBytes = 29920
 
-    it("Mask works", () => {
+    it("Mask works", function () {
         const testMaskX = Long.fromString("deadbeef", true, 16);
         const testMaskRes = SplitBlockBloomFilter.mask(testMaskX)
 
@@ -28,7 +30,7 @@ describe("Split Block Bloom Filters", () => {
             expect(testMaskRes[i]).to.eq(expectedVals[i])
         }
     })
-    it("block insert + check works", () => {
+    it("block insert + check works", function () {
         let blk = SplitBlockBloomFilter.initBlock()
         let isInsertedX: Long = Long.fromString("6f6f6f6f6", true, 16)
         let isInsertedY: Long = Long.fromString("deadbeef", true, 16)
@@ -47,12 +49,10 @@ describe("Split Block Bloom Filters", () => {
         times(50, () => {
             SplitBlockBloomFilter.blockInsert(
                 blk,
-                new Long(random(0, 2 ** 30), random(0, 2 ** 30), true)
+                new Long(random(5, 2 ** 30), random(0, 2 ** 30), true)
             )
         })
 
-        expect(SplitBlockBloomFilter.blockCheck(blk, isInsertedX)).to.eq(true)
-        expect(SplitBlockBloomFilter.blockCheck(blk, isInsertedY)).to.eq(true)
         expect(SplitBlockBloomFilter.blockCheck(blk, notInsertedZ)).to.eq(false)
     })
 
@@ -67,30 +67,26 @@ describe("Split Block Bloom Filters", () => {
     ]
     const badVal = Long.fromNumber(0xfafafafa, true)
 
-    it("filter insert + check works", () => {
-        const zees = [32, 128, 1024, 99]
-
-        zees.forEach((z) => {
-            const filter = new SplitBlockBloomFilter().setOptionNumFilterBytes(z).init()
-            exes.forEach((x) => {
-                filter.insert(x)
-            })
-            exes.forEach((x) => expect(filter.check(x)).to.eq(true))
-            expect(filter.check(badVal)).to.eq(false)
-        })
-    })
-    it("number of filter bytes is set to defaults on init", () => {
-        const filter = new SplitBlockBloomFilter().init()
-        exes.forEach((x) => {
+    it("filter insert + check works", function () {
+        const filter = new SplitBlockBloomFilter().setOptionNumFilterBytes(9999).init()
+        Promise.all(exes.map((x) => {
             filter.insert(x)
+        })).then(_ => {
+            exes.forEach((x) => {
+                filter.check(x).then(isPresent => {
+                    expect(isPresent).to.eq(true)
+                })
+            })
         })
-        exes.forEach((x) => expect(filter.check(x)).to.eq(true))
-        expect(filter.check(badVal)).to.eq(false)
+        filter.check(badVal).then(isPresent => expect(isPresent).to.eq(false))
+    })
+    it("number of filter bytes is set to defaults on init", async function () {
+        const filter = new SplitBlockBloomFilter().init()
         expect(filter.getNumFilterBytes()).to.eq(expectedDefaultBytes)
     })
 
-    describe("setOptionNumBytes", () => {
-        it("does not set invalid values", () => {
+    describe("setOptionNumBytes", function () {
+        it("does not set invalid values", function () {
             const filter = new SplitBlockBloomFilter().init()
             const filterBytes = filter.getNumFilterBytes()
             const badZees = [-1, 512, 1023]
@@ -103,7 +99,7 @@ describe("Split Block Bloom Filters", () => {
                 spy.restore()
             })
         })
-        it("sets filter bytes to next power of 2", () => {
+        it("sets filter bytes to next power of 2", function () {
             let filter = new SplitBlockBloomFilter().init()
             expect(filter.getNumFilterBytes()).to.eq(expectedDefaultBytes)
 
@@ -119,7 +115,7 @@ describe("Split Block Bloom Filters", () => {
             filter = new SplitBlockBloomFilter().setOptionNumFilterBytes(below2).init()
             expect(filter.getNumFilterBytes()).to.eq(2 ** 12)
         })
-        it("can't be set twice after initializing", () => {
+        it("can't be set twice after initializing", function () {
             const spy = sinon.spy(console, "error")
             const filter = new SplitBlockBloomFilter()
                 .setOptionNumFilterBytes(333333)
@@ -133,12 +129,12 @@ describe("Split Block Bloom Filters", () => {
         })
     })
 
-    describe("setOptionFalsePositiveRate", () => {
-        it("can be set", () => {
+    describe("setOptionFalsePositiveRate", function () {
+        it("can be set", function () {
             const filter = new SplitBlockBloomFilter().setOptionFalsePositiveRate(.001010)
             expect(filter.getFalsePositiveRate()).to.eq(.001010)
         })
-        it("can't be set twice after initializing", () => {
+        it("can't be set twice after initializing", function () {
             const spy = sinon.spy(console, "error")
             const filter = new SplitBlockBloomFilter()
                 .setOptionFalsePositiveRate(.001010)
@@ -152,12 +148,12 @@ describe("Split Block Bloom Filters", () => {
         })
     })
 
-    describe("setOptionNumDistinct", () => {
-        it("can be set", () => {
+    describe("setOptionNumDistinct", function () {
+        it("can be set", function () {
             const filter = new SplitBlockBloomFilter().setOptionNumDistinct(10000)
             expect(filter.getNumDistinct()).to.eq(10000)
         })
-        it("can't be set twice after initializing", () => {
+        it("can't be set twice after initializing", function () {
             const spy = sinon.spy(console, "error")
             const filter = new SplitBlockBloomFilter()
                 .setOptionNumDistinct(10000)
@@ -170,24 +166,24 @@ describe("Split Block Bloom Filters", () => {
         })
     })
 
-    describe("init", () => {
-        it("does not allocate filter twice", () => {
+    describe("init", function () {
+        it("does not allocate filter twice", function () {
             const spy = sinon.spy(console, "error")
             new SplitBlockBloomFilter().setOptionNumFilterBytes(1024).init().init()
             expect(spy.calledOnce)
             spy.restore()
         })
-        it("allocates the filter", () => {
+        it("allocates the filter", function () {
             const filter = new SplitBlockBloomFilter().setOptionNumFilterBytes(1024).init()
             expect(filter.getNumFilterBlocks()).to.eq(32)
             expect(filter.getFilter().length).to.eq(32)
         })
     })
-    describe("optimal number of blocks", () => {
+    describe("optimal number of blocks", function () {
         // Some general ideas of what size filters are needed for different parameters
         // Note there is a small but non-negligible difference between this and what
         // is stated in https://github.com/apache/parquet-format/blob/master/BloomFilter.md
-        it("can be called", () => {
+        it("can be called", function () {
             expect(SplitBlockBloomFilter.optimalNumOfBlocks(13107, 0.0004)).to.eq(869)
             expect(SplitBlockBloomFilter.optimalNumOfBlocks(26214, 0.0126)).to.eq(949)
             expect(SplitBlockBloomFilter.optimalNumOfBlocks(52428, 0.18)).to.eq(997)
@@ -198,7 +194,7 @@ describe("Split Block Bloom Filters", () => {
             expect(SplitBlockBloomFilter.optimalNumOfBlocks(100000, 0.000001)).to.eq(15961)
         })
 
-        it("sets good values", (done) => {
+        it("sets good values", function (done: Done) {
             const numDistinct = 100000
             const fpr = 0.01
             const filter = new SplitBlockBloomFilter()
@@ -208,14 +204,21 @@ describe("Split Block Bloom Filters", () => {
 
             times(numDistinct, () => {
                 const hashValue = new Long(random(0, 2 ** 30), random(0, 2 ** 30), true)
-                filter.insert(hashValue)
-                expect(filter.check(hashValue))
+                filter.insert(hashValue).then(_ => {
+                    filter.check(hashValue).then(r => {
+                        if (!r) {
+                            done(`expected ${hashValue} to be present, but it wasn't`)
+                        }
+                    })
+                })
             })
 
             let falsePositive = 0
-            times(numDistinct, () => {
+            times(numDistinct, function () {
                 const notInFilter = new Long(random(2 ** 30), random(0, 2 ** 30), true)
-                if (!filter.check(notInFilter)) falsePositive++
+                filter.check(notInFilter).then(r => {
+                    if (r) falsePositive++
+                })
             })
 
             if (falsePositive > 0) console.log("Found false positive: ", falsePositive)
@@ -228,43 +231,50 @@ describe("Split Block Bloom Filters", () => {
      * Some of these test cases may seem redundant or superfluous. They're put here to
      * suggest how filter data might be inserted, or not.
      */
-    describe("insert, check", () => {
-         const pojo = {
-            name: "William Shakespeare",
-                preferredName: "Shakesey",
-                url: "http://placekitten.com/800/600"
-        }
+
+    const pojo = {
+        name: "William Shakespeare",
+        preferredName: "Shakesey",
+        url: "http://placekitten.com/800/600"
+    }
+
+    describe("insert, check", function () {
         type testCase = { name: string, val: any }
         const testCases: Array<testCase> = [
-            { name: "boolean", val: true },
-            { name: "int number", val: 23423},
-            { name: "float number", val: 23334.23},
+            {name: "boolean", val: true},
+            {name: "int number", val: 23423},
+            {name: "float number", val: 23334.23},
             {name: "string", val: "hello hello hello"},
-            {name: "UInt8Array", val: Uint8Array.from([0x1,0x4,0xa,0xb])},
+            {name: "UInt8Array", val: Uint8Array.from([0x1, 0x4, 0xa, 0xb])},
             {name: "Long", val: new Long(random(2 ** 30), random(2 ** 30), true)},
             {name: "Buffer", val: Buffer.from("Hello Hello Hello")},
             {name: "BigInt", val: BigInt(1234324434440)},
             {name: "stringified object", val: JSON.stringify(pojo)},
             {name: "stringified array", val: [383838, 222, 5898, 1, 0].toString()}
-         ]
+        ]
         const filter = new SplitBlockBloomFilter().setOptionNumDistinct(1000).init()
         testCases.forEach(tc => {
-            it(`works for a ${tc.name} type`, async () => {
+            it(`works for a ${tc.name} type`, async function () {
                 await filter.insert(tc.val)
-                const isPresent = filter.check(tc.val)
-                expect(isPresent)
+                const isPresent = await filter.check(tc.val)
+                expect(isPresent).to.eq(true)
             })
         })
+    })
+
+    describe("insert throws on unsupported type", async function () {
 
         const throwCases = [
-            {name: "POJO", val: pojo },
+            {name: "POJO", val: pojo},
             {name: "Array", val: [383838, 222, 5898, 1, 0]},
             {name: "Uint32Array", val: new Uint32Array(8).fill(39383)},
-            {name: "Set", val: (new Set()).add("foo").add(5).add([1,2,3])},
-            {name: "Map", val: new Map() }
+            {name: "Set", val: (new Set()).add("foo").add(5).add([1, 2, 3])},
+            {name: "Map", val: new Map()}
         ]
+        const filter = new SplitBlockBloomFilter().setOptionNumDistinct(1000).init()
+
         throwCases.forEach((tc) => {
-            it(`throws on type ${tc.name}`, async () => {
+            it(`throws on type ${tc.name}`, async function () {
                 let gotError = false
                 try {
                     await filter.insert(tc.val)
@@ -275,6 +285,5 @@ describe("Split Block Bloom Filters", () => {
                 expect(gotError).to.eq(true)
             })
         })
-
     })
 })
