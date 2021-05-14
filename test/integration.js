@@ -377,7 +377,7 @@ async function readTestFile() {
   reader.close();
 }
 
-describe('Parquet', function() {
+describe('Parquet integration', function() {
   this.timeout(60000);
 
 
