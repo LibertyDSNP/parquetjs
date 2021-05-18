@@ -1,5 +1,5 @@
 {
-  "name": "@unfinishedlabs/parquetjs",
+  "name": "@dsnp/parquetjs",
   "description": "fully asynchronous, pure JavaScript implementation of the Parquet file format",
   "main": "dist/parquet.js",
   "version": "0.0.0",

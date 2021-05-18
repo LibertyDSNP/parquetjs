@@ -26,7 +26,7 @@ Installation
 To use parquet.js with node.js, install it using npm:
 
 ```
-  $ npm install @unfinishedlabs/parquetjs
+  $ npm install @dsnp/parquetjs
 ```
 
 _parquet.js requires node.js >= 7.6.0_

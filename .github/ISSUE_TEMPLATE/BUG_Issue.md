@@ -1,6 +1,6 @@
 ---
     name: Bug Report
-    about: Report an issue found in @unfinishedlabs/parquetjs
+    about: Report an issue found in @dsnp/parquetjs
     title: ""
     labels: ""
     assignees: ""
