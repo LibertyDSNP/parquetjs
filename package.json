@@ -2,6 +2,7 @@
   "name": "@dsnp/parquetjs",
   "description": "fully asynchronous, pure JavaScript implementation of the Parquet file format",
   "main": "dist/parquet.js",
+  "types": "dist/parquet.d.ts",
   "version": "0.0.0",
   "homepage": "https://github.com/LibertyDSNP/parquetjs",
   "license": "MIT",
@@ -45,12 +46,13 @@
     "ts-node": "^9.1.1"
   },
   "scripts": {
-    "build": "tsc -b",
+    "build": "tsc -b && tsc -p tsconfig.types.json && cp gen-nodejs/*.d.ts dist/gen-nodejs/",
     "type": "tsc --noEmit",
     "lint": "echo 'Linting, it is on the TODO list...'",
     "test": "mocha -r ts-node/register 'test/**/*.{js,ts}'",
     "clean": "rm -Rf ./dist",
-    "prepare": "npm run build"
+    "prepublishOnly": "npm run clean && npm run build",
+    "thrift": "thrift -out gen-nodejs --gen js:ts parquet.thrift && thrift -out gen-nodejs --gen js:node parquet.thrift"
   },
   "engines": {
     "node": ">=14.16.0"
