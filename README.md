@@ -3,7 +3,7 @@
 fully asynchronous, pure node.js implementation of the Parquet file format
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![npm version](https://badge.fury.io/js/%40unfinishedlabs%2Fparquet-js.svg)](https://badge.fury.io/js/%40unfinishedlabs%2Fparquet-js)
+[![npm version](https://badge.fury.io/js/%40unfinishedlabs%2Fparquet-js.svg)](https://badge.fury.io/js/%40dsnp%2Fparquetjs)
 
 This package contains a fully asynchronous, pure JavaScript implementation of
 the [Parquet](https://parquet.apache.org/) file format. The implementation conforms with the
@@ -29,7 +29,7 @@ To use parquet.js with node.js, install it using npm:
   $ npm install @dsnp/parquetjs
 ```
 
-_parquet.js requires node.js >= 7.6.0_
+_parquet.js requires node.js >= 14.16.0_
 
 
 Usage: Writing files
@@ -39,7 +39,7 @@ Once you have installed the parquet.js library, you can import it as a single
 module:
 
 ``` js
-var parquet = require('parquetjs-lite');
+var parquet = require('@dsnp/parquetjs');
 ```
 
 Parquet files have a strict schema, similar to tables in a SQL database. So,
