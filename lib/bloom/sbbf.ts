@@ -221,7 +221,7 @@ class SplitBlockBloomFilter {
     private desiredFalsePositiveRate: number = SplitBlockBloomFilter.DEFAULT_FALSE_POSITIVE_RATE
     private numBlocks: number = 0
     private numDistinctValues: number = SplitBlockBloomFilter.DEFAULT_DISTINCT_VALUES
-    private hashStrategy = new parquet_thrift.BloomFilterHash(parquet_thrift.XxHash)
+    private hashStrategy = new parquet_thrift.BloomFilterHash(new parquet_thrift.XxHash())
     private hasher = new XxHasher()
 
     private isInitialized(): boolean { return this.splitBlockFilter.length > 0 }
