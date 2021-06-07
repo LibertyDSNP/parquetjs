@@ -41,9 +41,10 @@ enum Type {
 }
 
 /**
- * Common types used by frameworks(e.g. hive, pig) using parquet.  This helps map
- * between types in those frameworks to the base types in parquet.  This is only
- * metadata and not needed to read or write the data.
+ * DEPRECATED: Common types used by frameworks(e.g. hive, pig) using parquet.
+ * ConvertedType is superseded by LogicalType.  This enum should not be extended.
+ *
+ * See LogicalTypes.md for conversion between ConvertedType and LogicalType.
  */
 enum ConvertedType {
   /** a BYTE_ARRAY actually contains UTF8 encoded chars */
@@ -316,15 +317,15 @@ struct BsonType {
  * LogicalType annotations to replace ConvertedType.
  *
  * To maintain compatibility, implementations using LogicalType for a
- * SchemaElement must also set the corresponding ConvertedType from the
- * following table.
+ * SchemaElement must also set the corresponding ConvertedType (if any)
+ * from the following table.
  */
 union LogicalType {
   1:  StringType STRING       // use ConvertedType UTF8
   2:  MapType MAP             // use ConvertedType MAP
   3:  ListType LIST           // use ConvertedType LIST
   4:  EnumType ENUM           // use ConvertedType ENUM
-  5:  DecimalType DECIMAL     // use ConvertedType DECIMAL
+  5:  DecimalType DECIMAL     // use ConvertedType DECIMAL + SchemaElement.{scale, precision}
   6:  DateType DATE           // use ConvertedType DATE
 
   // use ConvertedType TIME_MICROS for TIME(isAdjustedToUTC = *, unit = MICROS)
@@ -340,7 +341,7 @@ union LogicalType {
   11: NullType UNKNOWN        // no compatible ConvertedType
   12: JsonType JSON           // use ConvertedType JSON
   13: BsonType BSON           // use ConvertedType BSON
-  14: UUIDType UUID
+  14: UUIDType UUID           // no compatible ConvertedType
 }
 
 /**
@@ -374,13 +375,19 @@ struct SchemaElement {
    */
   5: optional i32 num_children;
 
-  /** When the schema is the result of a conversion from another model
+  /**
+   * DEPRECATED: When the schema is the result of a conversion from another model.
    * Used to record the original type to help with cross conversion.
+   *
+   * This is superseded by logicalType.
    */
   6: optional ConvertedType converted_type;
 
-  /** Used when this column contains decimal data.
+  /**
+   * DEPRECATED: Used when this column contains decimal data.
    * See the DECIMAL converted type for more details.
+   *
+   * This is superseded by using the DecimalType annotation in logicalType.
    */
   7: optional i32 scale
   8: optional i32 precision
@@ -934,13 +941,14 @@ struct ColumnIndex {
   1: required list<bool> null_pages
 
   /**
-   * Two lists containing lower and upper bounds for the values of each page.
-   * These may be the actual minimum and maximum values found on a page, but
-   * can also be (more compact) values that do not exist on a page. For
-   * example, instead of storing ""Blart Versenwald III", a writer may set
-   * min_values[i]="B", max_values[i]="C". Such more compact values must still
-   * be valid values within the column's logical type. Readers must make sure
-   * that list entries are populated before using them by inspecting null_pages.
+   * Two lists containing lower and upper bounds for the values of each page
+   * determined by the ColumnOrder of the column. These may be the actual
+   * minimum and maximum values found on a page, but can also be (more compact)
+   * values that do not exist on a page. For example, instead of storing ""Blart
+   * Versenwald III", a writer may set min_values[i]="B", max_values[i]="C".
+   * Such more compact values must still be valid values within the column's
+   * logical type. Readers must make sure that list entries are populated before
+   * using them by inspecting null_pages.
    */
   2: required list<binary> min_values
   3: required list<binary> max_values
@@ -1017,17 +1025,20 @@ struct FileMetaData {
   6: optional string created_by
 
   /**
-   * Sort order used for the min_value and max_value fields of each column in
-   * this file. Sort orders are listed in the order matching the columns in the
-   * schema. The indexes are not necessary the same though, because only leaf
-   * nodes of the schema are represented in the list of sort orders.
+   * Sort order used for the min_value and max_value fields in the Statistics
+   * objects and the min_values and max_values fields in the ColumnIndex
+   * objects of each column in this file. Sort orders are listed in the order
+   * matching the columns in the schema. The indexes are not necessary the same
+   * though, because only leaf nodes of the schema are represented in the list
+   * of sort orders.
    *
-   * Without column_orders, the meaning of the min_value and max_value fields is
-   * undefined. To ensure well-defined behaviour, if min_value and max_value are
-   * written to a Parquet file, column_orders must be written as well.
+   * Without column_orders, the meaning of the min_value and max_value fields
+   * in the Statistics object and the ColumnIndex object is undefined. To ensure
+   * well-defined behaviour, if these fields are written to a Parquet file,
+   * column_orders must be written as well.
    *
-   * The obsolete min and max fields are always sorted by signed comparison
-   * regardless of column_orders.
+   * The obsolete min and max fields in the Statistics object are always sorted
+   * by signed comparison regardless of column_orders.
    */
   7: optional list<ColumnOrder> column_orders;
 
