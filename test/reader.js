@@ -1,0 +1,95 @@
+"use strict";
+const chai = require("chai");
+const assert = chai.assert;
+const parquet = require("../parquet.js");
+const server = require("./mocks/server");
+
+describe("ParquetReader", () => {
+  describe("#openUrl", () => {
+    before(() => {
+      server.listen();
+    });
+
+    afterEach(() => {
+      server.resetHandlers();
+    });
+
+    after(() => {
+      server.close();
+    });
+
+    it("reads parquet files via http", async () => {
+      const reader = await parquet.ParquetReader.openUrl(
+        "http://fruits-bloomfilter.parquet"
+      );
+
+      const cursor = await reader.getCursor();
+
+      assert.deepOwnInclude(
+        await cursor.next(),
+        {
+          name: "apples",
+          quantity: 10n,
+          price: 2.6,
+          day: new Date("2017-11-26"),
+          finger: Buffer.from("FNORD"),
+          inter: { months: 10, days: 5, milliseconds: 777 },
+          colour: ["green", "red"],
+        }
+      );
+
+      assert.deepOwnInclude(
+        await cursor.next(),
+        {
+          name: "oranges",
+          quantity: 20n,
+          price: 2.7,
+          day: new Date("2018-03-03"),
+          finger: Buffer.from("ABCDE"),
+          inter: { months: 42, days: 23, milliseconds: 777 },
+          colour: ["orange"],
+        }
+      );
+
+      assert.deepOwnInclude(
+        await cursor.next(),
+        {
+          name: "kiwi",
+          quantity: 15n,
+          price: 4.2,
+          day: new Date("2008-11-26"),
+          finger: Buffer.from("XCVBN"),
+          inter: { months: 60, days: 1, milliseconds: 99 },
+          colour: ["green", "brown", "yellow"],
+          stock: [
+            {
+              quantity: [42n],
+              warehouse: "f",
+            },
+            {
+              quantity: [21n],
+              warehouse: "x",
+            },
+          ]
+        }
+      );
+
+      assert.deepOwnInclude(
+        await cursor.next(),
+        {
+          name: "banana",
+          price: 3.2,
+          day: new Date("2017-11-26"),
+          finger: Buffer.from("FNORD"),
+          inter: { months: 1, days: 15, milliseconds: 888 },
+          colour: ["yellow"],
+          meta_json: {
+            shape: "curved",
+          },
+        }
+      );
+
+      assert.deepEqual(null, await cursor.next());
+    });
+  });
+});
