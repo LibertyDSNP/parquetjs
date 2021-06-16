@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script src="js/parquet.js"></script>
+    <script>
+
+        xyz.ParquetReader
+       .openUrl('http://localhost:3000/files/fruits.parquet')
+       .then(async (reader) => {
+           console.log("reader", reader)
+           let cursor = await reader.getCursor();
+
+           let record = null;
+           while (record = await cursor.next()) {
+              console.log("record", record);
+           }
+           return reader;
+       })
+       .then((reader) => reader.close())
+       .then((res) => {console.log("res", res)})
+       .catch((e) => {
+           console.log("error", e);
+       })
+
+    </script>
+    
+</body>
+</html>
