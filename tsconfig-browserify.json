@@ -8,19 +8,15 @@
     "moduleResolution": "node",
     "noEmit": false,
     "noImplicitAny": true,
-    "outDir": "dist",
     "resolveJsonModule": true,
     "sourceMap": true,
     "strict": true,
-    "target": "ESNext",
+    "target": "es2020",
     "watch": false,
     "typeRoots": [
       "node_modules/@types",
       "gen-nodejs"
     ]
   },
-  "files": [
-    "./lib/bloom/sbbf.ts"
-  ],
   "include":  ["lib/**/*", "gen-nodejs/*"]
 }
