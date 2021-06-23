@@ -15,7 +15,6 @@ const TEST_VTIME =  new Date();
 function mkTestSchema(opts) {
   return new parquet.ParquetSchema({
     name:       { type: 'UTF8', compression: opts.compression },
-    //quantity:   { type: 'INT64', encoding: 'RLE', typeLength: 6, optional: true, compression: opts.compression }, // parquet-mr actually doesnt support this
     quantity:   { type: 'INT64', optional: true, compression: opts.compression },
     price:      { type: 'DOUBLE', compression: opts.compression },
     date:       { type: 'TIMESTAMP_MICROS', compression: opts.compression },
@@ -358,7 +357,6 @@ async function readTestFile() {
       assert.deepEqual(await cursor.next(), { name: 'kiwi' });
       assert.deepEqual(await cursor.next(), { name: 'banana' });
     }
-
     assert.equal(await cursor.next(), null);
   }
 
@@ -436,7 +434,7 @@ describe('Parquet', function() {
       return writeTestFile(opts);
     });
 
-    it('write a test file and then read it back', function() {
+    it('write a test file and then read it back', async function() {
       const opts = { useDataPageV2: true, pageSize: 2000, compression: 'UNCOMPRESSED' };
       return writeTestFile(opts).then(readTestFile);
     });
@@ -484,14 +482,14 @@ describe('Parquet', function() {
     //   return writeTestFile(opts).then(readTestFile);
     // });
 
-    it('write a test file with BROTLI compression', function() {
+    it('write a test file with BROTLI compression', async function() {
       const opts = { useDataPageV2: true, compression: 'BROTLI' };
-      return writeTestFile(opts);
+      return await writeTestFile(opts);
     });
 
-    it('write a test file with BROTLI compression and then read it back', function() {
+    it('write a test file with BROTLI compression and then read it back', async function() {
       const opts = { useDataPageV2: true, compression: 'BROTLI' };
-      return writeTestFile(opts).then(readTestFile);
+      return await writeTestFile(opts).then(readTestFile);
     });
 
   });
