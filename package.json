@@ -21,7 +21,7 @@
     "assert": "^2.0.0",
     "brotli": "^1.3.0",
     "browserify-zlib": "^0.2.0",
-    "bson": "^2.0.8",
+    "bson": "4.4.0",
     "buffer": "^6.0.3",
     "cross-fetch": "^3.1.4",
     "events": "^3.3.0",
@@ -34,7 +34,6 @@
     "readable-stream": "^3.6.0",
     "snappyjs": "^0.6.0",
     "thrift": "0.14.1",
-    "typescript": "^4.3.2",
     "util": "^0.12.4",
     "varint": "^5.0.0",
     "wasm-brotli": "^2.0.2",
@@ -42,22 +41,26 @@
   },
   "devDependencies": {
     "@babel/core": "^7.13.10",
-    "@babel/preset-env": "7.13.12",
-    "@babel/preset-typescript": "7.13.0",
-    "@types/browserify": "^12.0.36",
+    "@babel/preset-env": "^7.14.7",
+    "@babel/preset-typescript": "^7.14.5",
     "@types/chai": "^4.2.16",
     "@types/mocha": "^8.2.2",
     "@types/sinon": "^10.0.0",
-    "babelify": "^10.0.0",
+    "@webpack-cli/generators": "^2.2.0",
     "browserfs": "^1.4.3",
+    "buffer-browserify": "^0.2.5",
     "chai": "4.3.4",
-    "esbuild": "^0.12.9",
     "mocha": "8.3.2",
     "msw": "^0.29.0",
+    "process": "^0.11.10",
     "sinon": "^10.0.0",
-    "testling": "^1.7.3",
+    "stream-browserify": "^3.0.0",
+    "ts-loader": "^9.2.3",
     "ts-node": "^9.1.1",
-    "tsify": "^5.0.4"
+    "typescript": "^4.3.4",
+    "webpack": "^5.40.0",
+    "webpack-cli": "^4.7.2",
+    "webpack-dev-server": "^3.11.2"
   },
   "browser": {
     "thrift": "./node_modules/thrift/lib/nodejs/lib/thrift/browser.js",
@@ -70,13 +73,19 @@
     "fs": "browserfs"
   },
   "scripts": {
-    "build": "tsc -b",
+    "build": "npm run build:node",
+    "build:node": "tsc -b",
+    "build:browser": "webpack --mode=production --node-env=production",
+    "build:dev": "webpack --mode=development",
+    "build:prod": "webpack --mode=production --node-env=production",
     "type": "tsc --noEmit",
     "lint": "echo 'Linting, it is on the TODO list...'",
     "test": "mocha -r ts-node/register 'test/**/*.{js,ts}'",
     "clean": "rm -Rf ./dist",
     "prepublishOnly": "npm run clean && npm run build",
-    "thrift": "thrift -out gen-nodejs --gen js:ts parquet.thrift && thrift -out gen-nodejs --gen js:node parquet.thrift"
+    "thrift": "thrift -out gen-nodejs --gen js:ts parquet.thrift && thrift -out gen-nodejs --gen js:node parquet.thrift",
+    "watch": "webpack --watch",
+    "serve": "webpack serve"
   },
   "engines": {
     "node": ">=14.16.0"
