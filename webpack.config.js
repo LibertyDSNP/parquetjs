@@ -1,13 +1,6 @@
 // Generated using webpack-cli https://github.com/webpack/webpack-cli
 const path = require('path');
 const webpack = require("webpack")
-const isProduction = process.env.NODE_ENV == 'production';
-
-// Learn more about plugins from https://webpack.js.org/configuration/plugins/
-const envPlugin = new webpack.EnvironmentPlugin({
-    NODE_ENV: 'development', // use 'development' unless process.env.NODE_ENV is defined
-    DEBUG: false,
-});
 
 const BufferPlugin = new webpack.ProvidePlugin({
     process: 'process/browser',
@@ -16,28 +9,38 @@ const BufferPlugin = new webpack.ProvidePlugin({
 
 const processPlugin = new webpack.ProvidePlugin({ process: 'process/browser', })
 
-const config = {
+let config = {
     entry: './bootstrap.js',
     output: {
-        filename: 'bundle.js',
         path: path.resolve(__dirname),
+        filename: "bundle.js",
+        library: 'parquetjs',
     },
     devServer: {
         open: true,
         host: 'localhost',
         port: 8000,
+        injectClient: false   // This is what allows the module to be available to browser scripts.
     },
+    devtool: "source-map",
     experiments: {
         asyncWebAssembly: true,
         topLevelAwait: true
     },
-    plugins: [ BufferPlugin, envPlugin, processPlugin ],
+    plugins: [
+        BufferPlugin,
+        processPlugin ],
     module: {
         rules: [
             {
                 test: /\.(ts|tsx)$/i,
                 loader: 'ts-loader',
                 exclude: ['/node_modules/'],
+            },
+            {
+                test: /\.js$/,
+                enforce: "pre",
+                use: ["source-map-loader"],
             },
             // Add your rules for custom modules here
             // Learn more about loaders from https://webpack.js.org/loaders/
@@ -57,7 +60,7 @@ const config = {
     },
 };
 
-module.exports = () => {
+module.exports = (isProduction) => {
     if (isProduction) {
         config.mode = 'production';
     } else {

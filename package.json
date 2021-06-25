@@ -54,6 +54,7 @@
     "msw": "^0.29.0",
     "process": "^0.11.10",
     "sinon": "^10.0.0",
+    "source-map-loader": "^3.0.0",
     "stream-browserify": "^3.0.0",
     "ts-loader": "^9.2.3",
     "ts-node": "^9.1.1",
@@ -84,8 +85,7 @@
     "clean": "rm -Rf ./dist",
     "prepublishOnly": "npm run clean && npm run build",
     "thrift": "thrift -out gen-nodejs --gen js:ts parquet.thrift && thrift -out gen-nodejs --gen js:node parquet.thrift",
-    "watch": "webpack --watch",
-    "serve": "webpack serve"
+    "serve": "node wpserver.js"
   },
   "engines": {
     "node": ">=14.16.0"
