@@ -18,6 +18,7 @@ let config = {
     },
     devServer: {
         open: true,
+        headers: {"Access-Control-Allow-Origin": "*"},
         host: 'localhost',
         port: 8000,
         injectClient: false   // This is what allows the module to be available to browser scripts.
@@ -33,8 +34,11 @@ let config = {
     module: {
         rules: [
             {
-                test: /\.(ts|tsx)$/i,
+                test: /\.(js|ts|tsx)$/i,
                 loader: 'ts-loader',
+                options: {
+                    logLevel: "warn",
+                },
                 exclude: ['/node_modules/'],
             },
             {
@@ -53,8 +57,26 @@ let config = {
     },
     resolve: {
         extensions: ['.tsx', '.ts', '.js', '.wasm'],
+        //  "browser": {
+        //     "assert": "assert",
+        //     "events": "events",
+        //     "fs": "browserfs"
+        //     "path": "path-browserify",
+        //     "stream": "readable-stream",
+        //     "thrift": "./node_modules/thrift/lib/nodejs/lib/thrift/browser.js",
+        //     "util": "util",
+        //     "zlib": "browserify-zlib",
+        //   },
         fallback: {
-            "stream": require.resolve("stream-browserify"),
+            "assert": require.resolve("assert"),
+            "events": require.resolve("events"),
+            "fs": require.resolve("browserfs"),
+            "path": require.resolve("path-browserify"),
+            "stream": require.resolve("readable-stream"),
+            "thrift": "./node_modules/thrift/lib/nodejs/lib/thrift/browser.js",
+            "util": require.resolve("util"),
+            "zlib": require.resolve("browserify-zlib"),
+
         } ,
 
     },

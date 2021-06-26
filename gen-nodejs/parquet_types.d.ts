@@ -26,7 +26,7 @@ export declare enum Type {
 /**
  * DEPRECATED: Common types used by frameworks(e.g. hive, pig) using parquet.
  * ConvertedType is superseded by LogicalType.  This enum should not be extended.
- * 
+ *
  * See LogicalTypes.md for conversion between ConvertedType and LogicalType.
  */
 export declare enum ConvertedType {
@@ -82,11 +82,11 @@ export declare enum Encoding {
 
 /**
  * Supported compression algorithms.
- * 
+ *
  * Codecs added in format version X.Y can be read by readers based on X.Y and later.
  * Codec support may vary between readers based on the format version and
  * libraries available at runtime.
- * 
+ *
  * See Compression.md for a detailed specification of these algorithms.
  */
 export declare enum CompressionCodec {
@@ -155,7 +155,7 @@ export declare class DateType {
 
 /**
  * Logical type to annotate a column that is always null.
- * 
+ *
  * Sometimes when discovering the schema of existing data, values are always
  * null and the physical type can't be determined. This annotation signals
  * the case where the physical type was guessed from all null values.
@@ -165,10 +165,10 @@ export declare class NullType {
 
 /**
  * Decimal logical type annotation
- * 
+ *
  * To maintain forward-compatibility in v1, implementations using this logical
  * type must also set scale and precision on the annotated SchemaElement.
- * 
+ *
  * Allowed for physical types: INT32, INT64, FIXED, and BINARY
  */
 export declare class DecimalType {
@@ -200,7 +200,7 @@ export declare class TimeUnit {
 
 /**
  * Timestamp logical type annotation
- * 
+ *
  * Allowed for physical types: INT64
  */
 export declare class TimestampType {
@@ -212,7 +212,7 @@ export declare class TimestampType {
 
 /**
  * Time logical type annotation
- * 
+ *
  * Allowed for physical types: INT32 (millis), INT64 (micros, nanos)
  */
 export declare class TimeType {
@@ -224,9 +224,9 @@ export declare class TimeType {
 
 /**
  * Integer logical type annotation
- * 
+ *
  * bitWidth must be 8, 16, 32, or 64.
- * 
+ *
  * Allowed for physical types: INT32, INT64
  */
 export declare class IntType {
@@ -238,7 +238,7 @@ export declare class IntType {
 
 /**
  * Embedded JSON logical type annotation
- * 
+ *
  * Allowed for physical types: BINARY
  */
 export declare class JsonType {
@@ -246,7 +246,7 @@ export declare class JsonType {
 
 /**
  * Embedded BSON logical type annotation
- * 
+ *
  * Allowed for physical types: BINARY
  */
 export declare class BsonType {
@@ -254,7 +254,7 @@ export declare class BsonType {
 
 /**
  * LogicalType annotations to replace ConvertedType.
- * 
+ *
  * To maintain compatibility, implementations using LogicalType for a
  * SchemaElement must also set the corresponding ConvertedType (if any)
  * from the following table.
@@ -326,7 +326,7 @@ export declare class DictionaryPageHeader {
  * New page format allowing reading levels without decompressing the data
  * Repetition and definition levels are uncompressed
  * The remaining section containing the data is compressed if is_compressed is true
- * 
+ *
  */
 export declare class DataPageHeaderV2 {
   num_values: number;
@@ -359,7 +359,7 @@ export declare class BloomFilterAlgorithm {
 /**
  * Hash strategy type annotation. xxHash is an extremely fast non-cryptographic hash
  * algorithm. It uses 64 bits version of xxHash.
- * 
+ *
  */
 export declare class XxHash {
 }
@@ -367,7 +367,7 @@ export declare class XxHash {
 /**
  * The hash function used in Bloom filter. This function takes the hash of a column value
  * using plain encoding.
- * 
+ *
  */
 export declare class BloomFilterHash {
   XXHASH: XxHash;
@@ -377,7 +377,7 @@ export declare class BloomFilterHash {
 
 /**
  * The compression used in the Bloom filter.
- * 
+ *
  */
 export declare class Uncompressed {
 }
@@ -391,7 +391,7 @@ export declare class BloomFilterCompression {
 /**
  * Bloom filter header is stored at beginning of Bloom filter data of each column
  * and followed by its bitset.
- * 
+ *
  */
 export declare class BloomFilterHeader {
   numBytes: number;
@@ -522,11 +522,11 @@ export declare class TypeDefinedOrder {
  * Union to specify the order used for the min_value and max_value fields for a
  * column. This union takes the role of an enhanced enum that allows rich
  * elements (which will be needed for a collation-based ordering in the future).
- * 
+ *
  * Possible values are:
  * * TypeDefinedOrder - the column uses the order defined by its logical or
  *                      physical type (if there is no logical type).
- * 
+ *
  * If the reader does not support the value of this union, min and max stats
  * for this column should be ignored.
  */

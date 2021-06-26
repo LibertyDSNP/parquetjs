@@ -1,5 +1,3 @@
-import TypedArray = NodeJS.TypedArray;
-
 import parquet_thrift from "../../gen-nodejs/parquet_types";
 import Long = require('long')
 import XxHasher from "./xxhasher"

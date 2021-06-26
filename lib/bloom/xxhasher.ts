@@ -13,7 +13,7 @@ type HasherFunc = (input: string, seedHigh?: number, seedLow?: number) => string
  * See also:
  * [xxHash spec](https://github.com/Cyan4973/xxHash/blob/v0.7.0/doc/xxhash_spec.md)
  */
-class XxHasher {
+export default class XxHasher {
     private static h64 = xxhash().then(x => x.h64)
 
     private async hashit(value: string): Promise<string> {
@@ -39,5 +39,3 @@ class XxHasher {
         throw new Error("unsupported type: " + value)
     }
 }
-
-export = XxHasher;
