@@ -10,11 +10,13 @@ const BufferPlugin = new webpack.ProvidePlugin({
 const processPlugin = new webpack.ProvidePlugin({ process: 'process/browser', })
 
 let config = {
+    target: 'web',   // should be default
     entry: './bootstrap.js',
     output: {
         path: path.resolve(__dirname),
         filename: "bundle.js",
         library: 'parquetjs',
+        wasmLoading: 'fetch', // should be default when target is 'web'
     },
     devServer: {
         open: true,
@@ -26,7 +28,7 @@ let config = {
     devtool: "source-map",
     experiments: {
         asyncWebAssembly: true,
-        topLevelAwait: true
+        // topLevelAwait: true
     },
     plugins: [
         BufferPlugin,
@@ -46,6 +48,10 @@ let config = {
                 enforce: "pre",
                 use: ["source-map-loader"],
             },
+            // {
+            //     test: /\.wasm$/,
+            //     type: 'webassembly/sync',
+            // }
             // Add your rules for custom modules here
             // Learn more about loaders from https://webpack.js.org/loaders/
         ],
@@ -56,7 +62,7 @@ let config = {
         __dirname: false,
     },
     resolve: {
-        extensions: ['.tsx', '.ts', '.js', '.wasm'],
+        extensions: ['.ts', '.js', '.wasm'],
         //  "browser": {
         //     "assert": "assert",
         //     "events": "events",
@@ -67,6 +73,9 @@ let config = {
         //     "util": "util",
         //     "zlib": "browserify-zlib",
         //   },
+        alias: {
+            "./compression": "./browser/compression"
+        },
         fallback: {
             "assert": require.resolve("assert"),
             "events": require.resolve("events"),
