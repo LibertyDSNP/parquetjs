@@ -6,7 +6,7 @@ const path = require('path');
 const parquet = require('../parquet.js');
 const {promisify} = require('util');
 
-describe('test-files', function() {  
+describe('test-files', function() {
   let csv;
 
   async function readData(file, count) {
@@ -37,7 +37,7 @@ describe('test-files', function() {
     if (typeof records === 'string') {
       records = await readData(records);
     }
-    
+
     records = bufferToString(records);
 
     assert.deepEqual(records, csv.map(d => d.reduce( (p,d,i) => {
@@ -52,24 +52,23 @@ describe('test-files', function() {
   });
 
   it('customer.impala.parquet loads', async function() {
-    this.timeout(5000);
+    this.timeout(50000);
     let data = await readData('customer.impala.parquet',100);
+    console.log("data first: ", data[0])
     bufferToString(data);
     const expected = require(path.join(__dirname,'test-files','customer.impala.json')).map(el => { return { ...el, c_custkey: BigInt(el.c_custkey)}});
-
-    
     assert.deepEqual(data,expected);
   });
 
-  it('gzip-nation.impala.parquet loads', async function() {    
+  it('gzip-nation.impala.parquet loads', async function() {
     await check('gzip-nation.impala.parquet',['n_nationkey','n_name','n_regionkey','n_comment']);
   });
 
   // repeated values
   // it('nation.dict.parquet loads', async function() {
-  //   await check('nation.dict.parquet',['nation_key','name','region_key','comment_col']);  
+  //   await check('nation.dict.parquet',['nation_key','name','region_key','comment_col']);
   // });
-  
+
   it('nation.impala.parquet loads', async function() {
     await check('nation.impala.parquet', ['n_nationkey','n_name','n_regionkey','n_comment']);
   });
