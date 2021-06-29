@@ -8,14 +8,10 @@ const filterColumnChunksWithBloomFilters = (
   columnChunkDataCollection: Array<ColumnChunkData>
 ) => {
   return columnChunkDataCollection.filter((columnChunk) => {
-    const {
-      column: {
-        meta_data: {
-          bloom_filter_offset: { buffer: bloomFilterOffsetBuffer },
-        },
-      },
-    } = columnChunk;
-    return bloomFilterOffsetBuffer;
+    if (!columnChunk.column.meta_data.bloom_filter_offset) {
+      return null
+    }
+    return columnChunk?.column?.meta_data?.bloom_filter_offset?.buffer
   });
 };
 

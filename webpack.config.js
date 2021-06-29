@@ -1,4 +1,10 @@
-// Generated using webpack-cli https://github.com/webpack/webpack-cli
+/**
+ * Left here in case esbuild stops working for us when we try to re-enable
+ * LZO and Brotli, since it took a lot of time to get the right configuration
+ * Warning: this is much slower than esbuild.
+ * To use, you will need to re-install webpack, webpack-cli, source-map-loader.
+ * @type {path.PlatformPath | path}
+ */
 const path = require('path');
 const webpack = require("webpack")
 
@@ -10,13 +16,13 @@ const BufferPlugin = new webpack.ProvidePlugin({
 const processPlugin = new webpack.ProvidePlugin({ process: 'process/browser', })
 
 let config = {
-    target: 'web',   // should be default
+    target: 'web',   // should be the default
     entry: './bootstrap.js',
     output: {
         path: path.resolve(__dirname),
         filename: "bundle.js",
         library: 'parquetjs',
-        wasmLoading: 'fetch', // should be default when target is 'web'
+        wasmLoading: 'fetch', // should be the default when target is 'web'
     },
     devServer: {
         open: true,
@@ -28,7 +34,7 @@ let config = {
     devtool: "source-map",
     experiments: {
         asyncWebAssembly: true,
-        // topLevelAwait: true
+        // topLevelAwait: true  // maybe not needed?
     },
     plugins: [
         BufferPlugin,
@@ -63,16 +69,8 @@ let config = {
     },
     resolve: {
         extensions: ['.ts', '.js', '.wasm'],
-        //  "browser": {
-        //     "assert": "assert",
-        //     "events": "events",
-        //     "fs": "browserfs"
-        //     "path": "path-browserify",
-        //     "stream": "readable-stream",
-        //     "thrift": "./node_modules/thrift/lib/nodejs/lib/thrift/browser.js",
-        //     "util": "util",
-        //     "zlib": "browserify-zlib",
-        //   },
+        // this uses a browser version of compression.js that
+        //  currently does not include LZO or Brötli comprssion
         alias: {
             "./compression": "./browser/compression"
         },

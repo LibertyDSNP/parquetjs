@@ -22,6 +22,7 @@
     "browserify-zlib": "^0.2.0",
     "bson": "4.4.0",
     "cross-fetch": "^3.1.4",
+    "esbuild": "^0.12.11",
     "events": "^3.3.0",
     "int53": "^0.2.4",
     "lodash": "^4.17.21",
@@ -44,7 +45,6 @@
     "@types/chai": "^4.2.16",
     "@types/mocha": "^8.2.2",
     "@types/sinon": "^10.0.0",
-    "@webpack-cli/generators": "^2.2.0",
     "babel-loader": "^8.2.2",
     "babel-plugin-add-module-exports": "^1.0.4",
     "browserfs": "^1.4.3",
@@ -60,16 +60,12 @@
     "stream-browserify": "^3.0.0",
     "ts-loader": "^9.2.3",
     "ts-node": "^9.1.1",
-    "typescript": "^4.3.4",
-    "webpack": "~5.41.0",
-    "webpack-cli": "^4.7.2",
-    "webpack-dev-server": "^3.11.2"
+    "typescript": "^4.3.4"
   },
   "scripts": {
     "build": "npm run build:node",
     "build:node": "tsc -b",
-    "build:browser": "webpack --mode=production --node-env=production",
-    "build:dev": "webpack --mode=development",
+    "build:browser": "node esbuild.js",
     "build:prod": "webpack --mode=production --node-env=production",
     "type": "tsc --noEmit",
     "lint": "echo 'Linting, it is on the TODO list...'",
@@ -77,7 +73,17 @@
     "clean": "rm -Rf ./dist",
     "prepublishOnly": "npm run clean && npm run build",
     "thrift": "thrift -out gen-nodejs --gen js:ts parquet.thrift && thrift -out gen-nodejs --gen js:node parquet.thrift",
-    "serve": "node wpserver.js"
+    "serve": "node esbuild-serve.js"
+  },
+  "browser": {
+    "assert": "assert",
+    "events": "events",
+    "fs": "browserfs",
+    "path": "path-browserify",
+    "stream": "readable-stream",
+    "thrift": "./node_modules/thrift/lib/nodejs/lib/thrift/browser.js",
+    "util": "util",
+    "zlib": "browserify-zlib"
   },
   "engines": {
     "node": ">=14.16.0"

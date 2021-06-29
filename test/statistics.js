@@ -30,8 +30,8 @@ describe('statistics', async function() {
 
   before(async function(){
     let writer = await parquet.ParquetWriter.openFile(schema, 'fruits-statistics.parquet', {pageSize: 3});
-    
-    writer.appendRow({
+
+    await writer.appendRow({
       name: 'apples',
       quantity: 10n,
       price: 2.6,
@@ -46,7 +46,7 @@ describe('statistics', async function() {
       colour: [ 'green', 'red' ]
     });
 
-    writer.appendRow({
+    await writer.appendRow({
       name: 'oranges',
       quantity: 20n,
       price: 2.7,
@@ -61,7 +61,7 @@ describe('statistics', async function() {
       colour: [ 'orange' ]
     });
 
-    writer.appendRow({
+    await writer.appendRow({
       name: 'kiwi',
       price: 4.2,
       quantity: 15n,
@@ -77,7 +77,7 @@ describe('statistics', async function() {
       meta_json: { expected_ship_date: TEST_VTIME }
     });
 
-    writer.appendRow({
+    await writer.appendRow({
       name: 'banana',
       price: 3.2,
       day: new Date('2017-11-26'),
@@ -113,7 +113,7 @@ describe('statistics', async function() {
     assert.equal(rowStats('price').max_value, 4.2);
     assert.equal(+rowStats('price').distinct_count, 4);
     assert.equal(+rowStats('price').null_count, 0);
-    
+
     assert.deepEqual(rowStats('day').min_value, new Date('2008-11-26'));
     assert.deepEqual(rowStats('day').max_value, new Date('2018-03-03'));
     assert.equal(+rowStats('day').distinct_count, 4);
@@ -178,7 +178,7 @@ describe('statistics', async function() {
     const colour = await reader.envelopeReader.readColumnIndex('colour', row);
     assert.deepEqual(colour.min_values, [ 'brown', 'yellow' ]);
     assert.deepEqual(colour.max_values, [ 'yellow', 'yellow' ]);
-    
+
     const inter = await reader.envelopeReader.readColumnIndex('inter', row).catch(e => e);
     assert.equal(inter.message,'Column Index Missing');
 
@@ -188,7 +188,7 @@ describe('statistics', async function() {
 
   it('Setting pageIndex: false results in no column_index and no offset_index', async function() {
     let writer = await parquet.ParquetWriter.openFile(schema, 'fruits-no-index.parquet', {pageSize: 3, pageIndex: false});
-    writer.appendRow({
+    await writer.appendRow({
       name: 'apples',
       quantity: 10n,
       price: 2.6,

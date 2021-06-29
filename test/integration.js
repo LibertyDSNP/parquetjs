@@ -476,7 +476,7 @@ describe('Parquet', function() {
     //   const opts = { useDataPageV2: true, compression: 'LZO' };
     //   return writeTestFile(opts);
     // });
-
+    //
     // it('write a test file with LZO compression and then read it back', function() {
     //   const opts = { useDataPageV2: true, compression: 'LZO' };
     //   return writeTestFile(opts).then(readTestFile);

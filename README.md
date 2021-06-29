@@ -14,26 +14,37 @@ for compatibility with Apache's Java [reference implementation](https://github.c
 write a large amount of structured data to a file, compress it and then read parts
 of it back out efficiently. The Parquet format is based on [Google's Dremel paper](https://www.google.co.nz/url?sa=t&rct=j&q=&esrc=s&source=web&cd=2&cad=rja&uact=8&ved=0ahUKEwj_tJelpv3UAhUCm5QKHfJODhUQFggsMAE&url=http%3A%2F%2Fwww.vldb.org%2Fpvldb%2Fvldb2010%2Fpapers%2FR29.pdf&usg=AFQjCNGyMk3_JltVZjMahP6LPmqMzYdCkw).
 
-Forked Notice
--------------
+## Forked Notice
+
 This is a forked repository with code from various sources:
 - Primary source [ironSource](https://github.com/ironSource/parquetjs) [npm: parquetjs](https://www.npmjs.com/package/parquetjs)
 - Secondary source [ZJONSSON](https://github.com/ZJONSSON/parquetjs) [npm: parquetjs-lite](https://www.npmjs.com/package/parquetjs-lite)
 
-Installation
-------------
-
-To use parquet.js with node.js, install it using npm:
+## Installation
+_parquet.js requires node.js >= 14.16.0_
 
 ```
   $ npm install @dsnp/parquetjs
 ```
 
-_parquet.js requires node.js >= 14.16.0_
+### NodeJS 
+To use with nodejs: 
+```javascript
+import parquetjs from "@dsnp/parquetjs"
+```
 
+### Browser
+To use in a browser, in your bundler, write the appropriate plugin or resolver to point to:
+```javascript
+"node_modules/@dsnp/parquetjs/browser/parquetjs"
+```
+or:
 
-Usage: Writing files
---------------------
+```javascript
+import parquetjs from "@dsnp/parquetjs/browser/parquetjs"
+```
+
+## Usage: Writing files
 
 Once you have installed the parquet.js library, you can import it as a single
 module:
@@ -110,8 +121,7 @@ The following options are provided to have the ability to adjust the split-block
 
 Note that if numFilterBytes is provided then falsePositiveRate and numDistinct options are ignored.
 
-Usage: Reading files
---------------------
+## Usage: Reading files
 
 A parquet reader allows retrieving the rows from a parquet file in order.
 The basic usage is to create a reader and then retrieve a cursor/iterator
@@ -224,8 +234,7 @@ const file = fs.readFileSync('fruits.parquet');
 let reader = await parquet.ParquetReader.openBuffer(file);
 ```
 
-Encodings
----------
+## Encodings
 
 Internally, the Parquet format will store values from each field as consecutive
 arrays which can be compressed/encoded using a number of schemes.
@@ -257,8 +266,7 @@ var schema = new parquet.ParquetSchema({
 ```
 
 
-Optional Fields
----------------
+### Optional Fields
 
 By default, all fields are required to be present in each row. You can also mark
 a field as 'optional' which will let you store rows with that field missing:
@@ -275,8 +283,7 @@ await writer.appendRow({name: 'banana' }); // not in stock
 ```
 
 
-Nested Rows & Arrays
---------------------
+### Nested Rows & Arrays
 
 Parquet supports nested schemas that allow you to store rows that have a more
 complex structure than a simple tuple of scalar values. To declare a schema
@@ -346,14 +353,12 @@ of that, knowing about the type of a field allows us to compress the remaining
 data more efficiently.
 
 
-Nested Lists for Hive / Athena
------------------------
+### Nested Lists for Hive / Athena
 
 Lists have to be annotated to be queriable with AWS Athena.   See [parquet-format](https://github.com/apache/parquet-format/blob/master/LogicalTypes.md#lists) for more detail and a full working example with comments in the test directory ([`test/list.js`](test/list.js))
 
 
-List of Supported Types & Encodings
------------------------------------
+### List of Supported Types & Encodings
 
 We aim to be feature-complete and add new features as they are added to the
 Parquet specification; this is the list of currently implemented data types and
@@ -386,8 +391,7 @@ encodings:
 </table>
 
 
-Buffering & Row Group Size
---------------------------
+## Buffering & Row Group Size
 
 When writing a Parquet file, the `ParquetWriter` will buffer rows in memory
 until a row group is complete (or `close()` is called) and then write out the row
@@ -403,14 +407,13 @@ writer.setRowGroupSize(8192);
 ```
 
 
-Dependencies
--------------
+## Dependencies
 
 Parquet uses [thrift](https://thrift.apache.org/) to encode the schema and other
 metadata, but the actual data does not use thrift.
 
-Notes
------
+
+## Notes
 
 Currently parquet-cpp doesn't fully support DATA_PAGE_V2. You can work around this
 by setting the useDataPageV2 option to false.
