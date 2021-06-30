@@ -1,5 +1,13 @@
-
-<%- include("./header.ejs", {title: "Parquet files" }) %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title><%= title %></title>
+    <script src="http://localhost:8000/main.js"></script>
+    <link rel="icon" href="data:,">
+</head>
+<body>
 <script>
     const readit = function(filename) {
             parquetjs.ParquetReader
@@ -41,4 +49,5 @@
 <h3>Search fruits-bloomfilter.parquet "name" column for</h3>
 <button onclick="search('fruits-bloomfilter.parquet', 'name', 'kiwi')">Search fruits-bloomfilter.parquet for "kiwi"</button>
 
-<%- include("./footer.ejs") %>
+</body>
+</html>

@@ -52,9 +52,8 @@ describe('test-files', function() {
   });
 
   it('customer.impala.parquet loads', async function() {
-    this.timeout(50000);
+    this.timeout(5000);
     let data = await readData('customer.impala.parquet',100);
-    console.log("data first: ", data[0])
     bufferToString(data);
     const expected = require(path.join(__dirname,'test-files','customer.impala.json')).map(el => { return { ...el, c_custkey: BigInt(el.c_custkey)}});
     assert.deepEqual(data,expected);
