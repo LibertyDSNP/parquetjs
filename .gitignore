@@ -4,3 +4,4 @@ npm-debug.log
 .nyc_output
 dist
 !test/test-files/*.parquet
+examples/server/package-lock.json

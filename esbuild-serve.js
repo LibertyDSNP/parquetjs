@@ -1,5 +1,10 @@
+/**
+ * Use this to serve the parquetjs bundle at http://localhost:8000/main.js
+ * It attaches the parquet.js exports to a "parquetjs" global variable.
+ * See the example server for how to use it.
+ */
 const {compressionBrowserPlugin, wasmPlugin} = require("./esbuild-plugins");
-// esbuild has TypeScript support by default
+// esbuild has TypeScript support by default. It will use .tsconfig
 require('esbuild')
       .serve({
         servedir: __dirname,
@@ -15,6 +20,4 @@ require('esbuild')
         inject: ['./esbuild-shims.js']
       }).then(server => {
           console.log("serving parquetjs", server)
-        // Call "stop" on the web server when you're done
-        // server.stop()
       })

@@ -9,45 +9,52 @@
 </head>
 <body>
 <script>
-    const readit = function(filename) {
-            parquetjs.ParquetReader
-                .openUrl(`http://localhost:3000/files/${filename}`)
-                .then(async (reader) => {
-                    let cursor = await reader.getCursor();
+    const port = "<%= port %>"
+    const readit = function (filename) {
+        parquetjs.ParquetReader
+            .openUrl(`http://localhost:${port}/files/${filename}`)
+            .then(async (reader) => {
+                let cursor = await reader.getCursor();
 
-                    let record = null;
-                    while (record = await cursor.next()) {
-                        console.log("record", record);
-                    }
-                    return reader;
-                })
-                .then((reader) => reader.close())
-                .catch((e) => {
-                    console.log("error", e);
-                })
+                let record = null;
+                while (record = await cursor.next()) {
+                    console.log("record", record);
+                }
+                return reader;
+            })
+            .then((reader) => reader.close())
+            .catch((e) => {
+                console.log("error", e);
+            })
 
-        }
+    }
 
-    const search = async function(filename, columnName, searchTerm ) {
-        const rdr = await parquetjs.ParquetReader.openUrl(`http://localhost:3000/files/${filename}`)
+    const search = async function (filename, columnName, searchTerm) {
+        const rdr = await parquetjs.ParquetReader.openUrl(`http://localhost:${port}/files/${filename}`)
         const bfs = await rdr.getBloomFiltersFor([columnName])
         if (!bfs[columnName]) return false
-        const all = Promise.all(bfs[columnName].map( async item => item.sbbf.check(searchTerm)))
-                    .then( values => values.some((el) => (el === true)))
+        Promise.all(bfs[columnName].map(async item => item.sbbf.check(searchTerm)))
+            .then(values => {
+                const res = values.some((el) => (el === true));
+                console.log("res: ", res)
+                return res
+            })
+            .then(res => {
+                alert(`found: ${res.toString()}`)
+            })
         rdr.close()
-        return all
-   }
+    }
 </script>
 
 <ul>
-<li><button onclick="readit('fruits-no-index.parquet')" >No index</button></li>
-<li><button onclick="readit('fruits-statistics.parquet')" >with statistics</button></li>
-<li><button onclick="readit('fruits-bloomfilter.parquet')" >with Bloom filter</button></li>
-<li><button onclick="readit('alltypes_dictionary.parquet')" >all types w/ dictionary</button></li>
-<li><button onclick="readit('fruits.parquet')" >With (unsupported) Brötli compression</button></li>
+    <li><button onclick="readit('fruits-no-index.parquet')" >No index</button></li>
+    <li><button onclick="readit('fruits-statistics.parquet')" >with statistics</button></li>
+    <li><button onclick="readit('fruits-bloomfilter.parquet')" >with Bloom filter</button></li>
+    <li><button onclick="readit('alltypes_dictionary.parquet')" >all types w/ dictionary</button></li>
+    <li><button onclick="readit('fruits.parquet')" >With (unsupported) Brötli compression</button></li>
 </ul>
 <h3>Search fruits-bloomfilter.parquet "name" column for</h3>
 <button onclick="search('fruits-bloomfilter.parquet', 'name', 'kiwi')">Search fruits-bloomfilter.parquet for "kiwi"</button>
-
+<button onclick="search('fruits-bloomfilter.parquet', 'name', 'xxx')">Search fruits-bloomfilter.parquet for "xxx"</button>
 </body>
 </html>

@@ -12,6 +12,7 @@ app.get('/', (req, res) => {
     res.render('parquetFiles', {
         // files: "fruits, fruits-no-index".split(','),
         title: "Parquet Files",
+        port: port
     })
 })
 
