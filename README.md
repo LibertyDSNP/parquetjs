@@ -34,7 +34,7 @@ import parquetjs from "@dsnp/parquetjs"
 ```
 
 ### Browser
-To use in a browser, in your bundler, write the appropriate plugin or resolver to point to:
+To use in a browser, in your bundler, depending on your needs, write the appropriate plugin or resolver to point to:
 ```javascript
 "node_modules/@dsnp/parquetjs/browser/parquetjs"
 ```
