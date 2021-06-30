@@ -6,5 +6,8 @@
   "dependencies": {
     "@dsnp/parquetjs": "../parquetjs",
     "ejs": "^3.1.6"
+  },
+  "devDependencies": {
+    "express": "^4.17.1"
   }
 }

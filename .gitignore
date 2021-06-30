@@ -1,5 +1,4 @@
 node_modules
-*.parquet
 npm-debug.log
 .nyc_output
 dist
