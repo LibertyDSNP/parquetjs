@@ -19,8 +19,5 @@
       "gen-nodejs"
     ]
   },
-  "files": [
-    "./lib/bloom/sbbf.ts"
-  ],
-  "include":  ["lib/**/*", "gen-nodejs/*"]
+  "include":  ["parquet.js","lib/**/*", "gen-nodejs/*"]
 }
