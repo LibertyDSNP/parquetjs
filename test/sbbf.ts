@@ -3,10 +3,16 @@ import {expect} from "chai"
 import * as sinon from "sinon"
 import {Done} from "mocha"
 
-const times = require("lodash/times");
-const random = require("lodash/random");
-
 import SplitBlockBloomFilter from "../lib/bloom/sbbf";
+
+const times = (n: number, fn: Function) => {
+    return Array(n).map(() => fn());
+}
+const random = (min: number, max: number) => {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1) + min);
+}
 
 describe("Split Block Bloom Filters", () => {
     const expectedDefaultBytes = 29920
@@ -215,7 +221,7 @@ describe("Split Block Bloom Filters", () => {
 
             let falsePositive = 0
             times(numDistinct, function () {
-                const notInFilter = new Long(random(2 ** 30), random(0, 2 ** 30), true)
+                const notInFilter = new Long(random(0, 2 ** 30), random(0, 2 ** 30), true)
                 filter.check(notInFilter).then(r => {
                     if (r) falsePositive++
                 })
@@ -246,7 +252,7 @@ describe("Split Block Bloom Filters", () => {
             {name: "float number", val: 23334.23},
             {name: "string", val: "hello hello hello"},
             {name: "UInt8Array", val: Uint8Array.from([0x1, 0x4, 0xa, 0xb])},
-            {name: "Long", val: new Long(random(2 ** 30), random(2 ** 30), true)},
+            {name: "Long", val: new Long(random(0, 2 ** 30), random(0, 2 ** 30), true)},
             {name: "Buffer", val: Buffer.from("Hello Hello Hello")},
             {name: "BigInt", val: BigInt(1234324434440)},
             {name: "stringified object", val: JSON.stringify(pojo)},
