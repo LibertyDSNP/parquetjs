@@ -62,3 +62,5 @@ describe("toPrimitive INT* should give the correct values back with string value
         assert.equal(toPrimitive('INT96',"9223372036854775807"), 9223372036854775807n)
     })
 })
+
+
