@@ -64,3 +64,65 @@ describe("toPrimitive INT* should give the correct values back with string value
 })
 
 
+describe("toPrimitive INT* should throw when given invalid value", () => {
+    it('toPrimitive(INT_8, 128) is too large', () => {
+        assert.throws(() => toPrimitive('INT_8',128))
+    }),
+    it('toPrimitive(INT_8, -256) is too small', () => {
+        assert.throws(() => toPrimitive('INT_8',-256))
+    }),
+    it('toPrimitive(INT_8, "asd12@!$1") is given gibberish and should throw', () => {
+        assert.throws(() => toPrimitive('INT_8', "asd12@!$1"))
+    }),
+    it('toPrimitive(UINT_8, 128) is too large', () => {
+        assert.throws(() => toPrimitive('UINT_8',256))
+    }),
+    it('toPrimitive(UINT_8, -256) is too small', () => {
+        assert.throws(() => toPrimitive('UINT_8',-1))
+    }),
+    it('toPrimitive(UINT_8, "asd12@!$1") is given gibberish and should throw', () => {
+        assert.throws(() => toPrimitive('UINT_8', "asd12@!$1"))
+    }),
+    it('toPrimitive(INT_16, 9999999) is too large', () => {
+        assert.throws(() => toPrimitive('INT_16',9999999))
+    }),
+    it('toPrimitive(INT_16, -9999999) is too small', () => {
+        assert.throws(() => toPrimitive('INT_16',-9999999))
+    }),
+    it('toPrimitive(INT_16, "asd12@!$1") is given gibberish and should throw', () => {
+        assert.throws(() => toPrimitive('INT_16', "asd12@!$1"))
+    }),
+    it('toPrimitive(UINT_16, 9999999999999) is too large', () => {
+        assert.throws(() => toPrimitive('UINT_16',9999999999999))
+    }),
+    it('toPrimitive(UINT_16, -999999999999) is too small', () => {
+        assert.throws(() => toPrimitive('UINT_16',-9999999999999))
+    }),
+    it('toPrimitive(UINT_16, "asd12@!$1") is given gibberish and should throw', () => {
+        assert.throws(() => toPrimitive('UINT_16', "asd12@!$1"))
+    }),
+    it('toPrimitive(INT_32, 999999999999) is too large', () => {
+        assert.throws(() => toPrimitive('INT_32',999999999999))
+    }),
+    it('toPrimitive(INT_32, -999999999999) is too small', () => {
+        assert.throws(() => toPrimitive('INT_32',-999999999999))
+    }),
+    it('toPrimitive(INT_32, "asd12@!$1") is given gibberish and should throw', () => {
+        assert.throws(() => toPrimitive('INT_32', "asd12@!$1"))
+    }),
+    it('toPrimitive(UINT_32, 999999999999999) is too large', () => {
+        assert.throws(() => toPrimitive('UINT_32',999999999999999))
+    }),
+    it('toPrimitive(UINT_32, -999999999999) is too small', () => {
+        assert.throws(() => toPrimitive('UINT_32',-999999999999))
+    }),
+    it('toPrimitive(INT_64, "asd12@!$1") is given gibberish and should throw', () => {
+        assert.throws(() => toPrimitive('INT_64', "asd12@!$1"))
+    }),
+    it('toPrimitive(UINT_64, "asd12@!$1") is given gibberish and should throw', () => {
+        assert.throws(() => toPrimitive('UINT_64', "asd12@!$1"))
+    }),
+    it('toPrimitive(UINT_96, "asd12@!$1") is given gibberish and should throw', () => {
+        assert.throws(() => toPrimitive('UINT_96', "asd12@!$1"))
+    })
+})
