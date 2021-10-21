@@ -154,10 +154,10 @@ describe("toPrimitive INT* should throw when given invalid value", () => {
         })
     }),
     describe("Testing toPrimitive_INT96 values", () => {
-        it('toPrimitive(UINT_64, 9999999999999999999999) is too large', () => {
+        it('toPrimitive(UINT_96, 9999999999999999999999) is too large', () => {
             assert.throws(() => toPrimitive('INT_96',9999999999999999999999))
         }),
-        it('toPrimitive(UINT_64, -9999999999999999999999) is too small', () => {
+        it('toPrimitive(UINT_96, -9999999999999999999999) is too small', () => {
             assert.throws(() => toPrimitive('INT_96',-9999999999999999999999))
         }),
         it('toPrimitive(UINT_96, "asd12@!$1") is given gibberish and should throw', () => {
