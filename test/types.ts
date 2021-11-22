@@ -1,5 +1,6 @@
 'use strict';
-const  { toPrimitive, fromPrimitive } = require("../lib/types.js") 
+export {}
+const  { toPrimitive, fromPrimitive } = require("../lib/types.ts") 
 const chai = require('chai');
 const assert = chai.assert;
 

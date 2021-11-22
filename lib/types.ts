@@ -1,7 +1,24 @@
 'use strict';
+export {}
 const BSON = require('bson');
 
-const PARQUET_LOGICAL_TYPES = {
+interface PARQUET_LOGICAL_TYPES {
+    [key:string]: {
+        primitiveType: string,
+        toPrimitive: Function,
+        fromPrimitive?: Function,
+        originalType?: string,
+        typeLength?: number
+    }
+}
+
+interface INTERVAL {
+  months: number,
+  days: number,
+  milliseconds: number
+}
+
+const PARQUET_LOGICAL_TYPES: PARQUET_LOGICAL_TYPES = {
   'BOOLEAN': {
     primitiveType: 'BOOLEAN',
     toPrimitive: toPrimitive_BOOLEAN,
@@ -140,7 +157,7 @@ const PARQUET_LOGICAL_TYPES = {
  * Convert a value from it's native representation to the internal/underlying
  * primitive type
  */
-function toPrimitive(type, value) {
+function toPrimitive(type: string, value: number | bigint | string | boolean | object) {
   if (!(type in PARQUET_LOGICAL_TYPES)) {
     throw 'invalid type: ' + type;
   }
@@ -152,228 +169,199 @@ function toPrimitive(type, value) {
  * Convert a value from it's internal/underlying primitive representation to
  * the native representation
  */
-function fromPrimitive(type, value) {
+function fromPrimitive(type: string, value: number | bigint | string) {
   if (!(type in PARQUET_LOGICAL_TYPES)) {
     throw 'invalid type: ' + type;
   }
-
-  if ("fromPrimitive" in PARQUET_LOGICAL_TYPES[type]) {
-    return PARQUET_LOGICAL_TYPES[type].fromPrimitive(value);
+  
+  const typeFromPrimitive = PARQUET_LOGICAL_TYPES[type].fromPrimitive
+  if (typeFromPrimitive !== undefined) {
+    return typeFromPrimitive(value)
   } else {
     return value;
   }
 }
 
-function toPrimitive_BOOLEAN(value) {
+function toPrimitive_BOOLEAN(value: boolean) {
   return !!value;
 }
 
-function fromPrimitive_BOOLEAN(value) {
+function fromPrimitive_BOOLEAN(value: boolean) {
   return !!value;
 }
 
-function toPrimitive_FLOAT(value) {
-  const v = parseFloat(value);
-  if (isNaN(v)) {
-    throw 'invalid value for FLOAT: ' + value;
+function toPrimitive_FLOAT(value: number | string) {
+  if (typeof value === 'string') {
+    const v = parseFloat(value);
+    return v;
+  } else if (typeof value === 'number') {
+    return value;
   }
-
-  return v;
+  throw 'invalid value for FLOAT: ' + value;
 }
 
-function toPrimitive_DOUBLE(value) {
-  const v = parseFloat(value);
-  if (isNaN(v)) {
-    throw 'invalid value for DOUBLE: ' + value;
+function toPrimitive_DOUBLE(value: number | string) {
+  if (typeof value === 'string') {
+    const v = parseFloat(value);
+    return v;
+  } else if (typeof value === 'number') {
+    return value;
   }
-
-  return v;
+  throw 'invalid value for DOUBLE: ' + value;
 }
 
-function toPrimitive_INT8(value) {
+function toPrimitive_INT8(value: number | bigint | string) {
   try {
-    const v = parseInt(value, 10);
-    const bigV = BigInt(value);
-    checkValidValue(-0x80, 0x7f, v, bigV);
-    if (typeof value === 'bigint' || typeof value === 'string') {
-      return bigV;
-    }
+    let v = value;
+    if (typeof v === 'string') v = BigInt(value);
+    checkValidValue(-0x80, 0x7f, v);
 
     return v;
   } catch {
       throw 'invalid value for INT8: ' + value;
   }
-
 }
 
-function toPrimitive_UINT8(value) {
+function toPrimitive_UINT8(value: number | bigint | string) {
   try {
-    const v = parseInt(value, 10);
-    const bigV = BigInt(value);
-    checkValidValue(0, 0xff, v, bigV);
-    if (typeof value === 'bigint' || typeof value === 'string') {
-      return bigV;
-    }
-  
+    let v = value;
+    if (typeof v === 'string') v = BigInt(value);
+    checkValidValue(0, 0xff, v);
+
     return v;
   } catch {
       throw 'invalid value for UINT8: ' + value;
   }
-
 }
 
-function toPrimitive_INT16(value) {
+function toPrimitive_INT16(value: number | bigint | string) {
   try {
-    const v = parseInt(value, 10);
-    const bigV = BigInt(value);
-    checkValidValue(-0x8000, 0x7fff, v, bigV);
-    if (typeof value === 'bigint' || typeof value === 'string') {
-      return bigV;
-    }
-  
+    let v = value;
+    if (typeof v === 'string') v = BigInt(value);
+    checkValidValue(-0x8000, 0x7fff, v);
+
     return v;
   } catch {
       throw 'invalid value for INT16: ' + value;
   }
-
 }
 
-function toPrimitive_UINT16(value) {
+function toPrimitive_UINT16(value: number | bigint | string) {
   try {
-    const v = parseInt(value, 10);
-    const bigV = BigInt(value);
-    checkValidValue(0, 0xffff, v, bigV);
-    if (typeof value === 'bigint' || typeof value === 'string') {
-      return bigV;
-    }
-  
+    let v = value;
+    if (typeof v === 'string') v = BigInt(value);
+    checkValidValue(0, 0xffff, v);
+
     return v;
   } catch {
       throw 'invalid value for UINT16: ' + value;
   }
-
 }
 
-function toPrimitive_INT32(value) {
+function toPrimitive_INT32(value: number | bigint | string) {
   try {
-    const v = parseInt(value, 10);
-    const bigV = BigInt(value);
-    checkValidValue(-0x80000000, 0x7fffffff, v, bigV);
-    if (typeof value === 'bigint' || typeof value === 'string') {
-      return bigV;
-    }
-  
+    let v = value;
+    if (typeof v === 'string') v = BigInt(value);
+    checkValidValue(-0x80000000, 0x7fffffff, v);
+
     return v;
   } catch {
       throw 'invalid value for INT32: ' + value;
   }
-
 }
 
-function toPrimitive_UINT32(value) {
+
+function toPrimitive_UINT32(value: number | bigint | string) {
   try {
-    const v = parseInt(value, 10);
-    const bigV = BigInt(value);
-    checkValidValue(0, 0xffffffffffff, v, bigV);
-    if (typeof value === 'bigint' || typeof value === 'string') {
-      return bigV;
-    }
-  
+    let v = value;
+    if (typeof v === 'string') v = BigInt(value);
+    checkValidValue(0, 0xffffffffffff, v);
+
     return v;
   } catch {
       throw 'invalid value for UINT32: ' + value;
   }
-
 }
 
-function toPrimitive_INT64(value) {
+function toPrimitive_INT64(value: number | bigint | string) {
   try {
-    const v = parseInt(value, 10);
-    const bigV = BigInt(value);
-    checkValidValue(-0x8000000000000000, 0x7fffffffffffffff, v, bigV);
-    if (typeof value === 'bigint' || typeof value === 'string') {
-      return bigV;
-    }
-  
+    let v = value;
+    if (typeof v === 'string') v = BigInt(value);
+    checkValidValue(-0x8000000000000000, 0x7fffffffffffffff, v);
+
     return v;
   } catch {
       throw 'invalid value for INT64: ' + value;
   }
-
 }
 
-function toPrimitive_UINT64(value) {
+function toPrimitive_UINT64(value: number | bigint | string) {
   try {
-    const v = parseInt(value, 10);
-    const bigV = BigInt(value);
-    checkValidValue(0, 0xffffffffffffffff, v, bigV);
-    if (typeof value === 'bigint' || typeof value === 'string') {
-      return bigV;
-    }
-  
+    let v = value;
+    if (typeof v === 'string') v = BigInt(value);
+    checkValidValue(0, 0xffffffffffffffff, v);
+
     return v;
   } catch {
       throw 'invalid value for UINT64: ' + value;
   }
-
 }
 
-function toPrimitive_INT96(value) {
+function toPrimitive_INT96(value: number | bigint | string) {
   try {
-    const v = parseInt(value, 10);
-    const bigV = BigInt(value);
-    checkValidValue(-0x800000000000000000000000, 0x7fffffffffffffffffffffff, v, bigV);
-    if (typeof value === 'bigint' || typeof value === 'string') {
-      return bigV;
-    }
-  
+    let v = value;
+    if (typeof v === 'string') v = BigInt(value);
+    checkValidValue(-0x800000000000000000000000, 0x7fffffffffffffffffffffff, v);
+
     return v;
   } catch {
-    throw 'invalid value for INT96: ' + value;
+      throw 'invalid value for INT96: ' + value;
   }
-
 }
 
-function toPrimitive_BYTE_ARRAY(value) {
+function toPrimitive_BYTE_ARRAY(value: Array<number>) {
   return Buffer.from(value);
 }
 
-function toPrimitive_UTF8(value) {
+function toPrimitive_UTF8(value: string) {
   return Buffer.from(value, 'utf8');
 }
 
-function fromPrimitive_UTF8(value) {
+function fromPrimitive_UTF8(value: string) {
   return (value !== undefined && value !== null)  ? value.toString() : value;
 }
 
-function toPrimitive_JSON(value) {
+function toPrimitive_JSON(value: object) {
   return Buffer.from(JSON.stringify(value));
 }
 
-function fromPrimitive_JSON(value) {
+function fromPrimitive_JSON(value: string) {
   return JSON.parse(value);
 }
 
-function toPrimitive_BSON(value) {
+function toPrimitive_BSON(value: any) {
   return Buffer.from(BSON.serialize(value));
 }
 
-function fromPrimitive_BSON(value) {
+function fromPrimitive_BSON(value: any) {
   return BSON.deserialize(value);
 }
 
-function toPrimitive_TIME_MILLIS(value) {
-  const v = parseInt(value, 10);
-  if (v < 0 || v > 0xffffffffffffffff || isNaN(v)) {
+function toPrimitive_TIME_MILLIS(value: string | number) {
+  let v = value
+  if (typeof value === `string`) {
+    v = parseInt(value, 10);
+  } 
+  if (v < 0 || v > 0xffffffffffffffff || typeof v !== `number`) {
     throw 'invalid value for TIME_MILLIS: ' + value;
   }
 
   return v;
 }
 
-function toPrimitive_TIME_MICROS(value) {
+function toPrimitive_TIME_MICROS(value: string | number | bigint) {
   const v = BigInt(value);
-  if (v < 0n || isNaN(v)) {
+  if (v < 0n ) {
     throw 'invalid value for TIME_MICROS: ' + value;
   }
 
@@ -382,50 +370,57 @@ function toPrimitive_TIME_MICROS(value) {
 
 const kMillisPerDay = 86400000;
 
-function toPrimitive_DATE(value) {
+function toPrimitive_DATE(value: string | Date | number) {
   /* convert from date */
   if (value instanceof Date) {
     return value.getTime() / kMillisPerDay;
   }
 
-  /* convert from integer */
-  {
-    const v = parseInt(value, 10);
-    if (v < 0 || isNaN(v)) {
-      throw 'invalid value for DATE: ' + value;
-    }
+/* convert from integer */
+  let v = value
+  if (typeof value === `string`) {
+    v = parseInt(value, 10);
+  } 
 
-    return v;
+  if (v < 0 || typeof v !== `number`) {
+    throw 'invalid value for DATE: ' + value;
   }
+
+  return v;
+  
 }
 
-function fromPrimitive_DATE(value) {
+function fromPrimitive_DATE(value: string | number | Date) {
   return new Date(+value * kMillisPerDay);
 }
 
 
-function toPrimitive_TIMESTAMP_MILLIS(value) {
+function toPrimitive_TIMESTAMP_MILLIS(value: string | Date | number) {
   /* convert from date */
   if (value instanceof Date) {
     return value.getTime();
   }
 
   /* convert from integer */
-  {
-    const v = parseInt(value, 10);
-    if (v < 0 || isNaN(v)) {
-      throw 'invalid value for TIMESTAMP_MILLIS: ' + value;
-    }
 
-    return v;
+  let v = value
+   if (typeof value === `string` ) {
+    v = parseInt(value, 10);
+   }
+
+  if (v < 0 || typeof v !== `number`) {
+    throw 'invalid value for TIMESTAMP_MILLIS: ' + value;
   }
+
+  return v;
+  
 }
 
-function fromPrimitive_TIMESTAMP_MILLIS(value) {
+function fromPrimitive_TIMESTAMP_MILLIS(value: number | string | bigint) {
   return new Date(Number(value));
 }
 
-function toPrimitive_TIMESTAMP_MICROS(value) {
+function toPrimitive_TIMESTAMP_MICROS(value: Date | string | number | bigint) {
   /* convert from date */
   if (value instanceof Date) {
     return BigInt(value.getTime()) * 1000n;
@@ -442,11 +437,11 @@ function toPrimitive_TIMESTAMP_MICROS(value) {
   }
 }
 
-function fromPrimitive_TIMESTAMP_MICROS(value) {
-  return new Date(parseInt(value / 1000n));
-}
+function fromPrimitive_TIMESTAMP_MICROS(value: number | bigint) {
+  return typeof value === 'bigint' ? new Date(Number(value / 1000n)): new Date(value / 1000);
+  }
 
-function toPrimitive_INTERVAL(value) {
+function toPrimitive_INTERVAL(value: INTERVAL) {
   if (!value.months || !value.days || !value.milliseconds) {
     throw "value for INTERVAL must be object { months: ..., days: ..., milliseconds: ... }";
   }
@@ -458,7 +453,7 @@ function toPrimitive_INTERVAL(value) {
   return buf;
 }
 
-function fromPrimitive_INTERVAL(value) {
+function fromPrimitive_INTERVAL(value: string) {
   const buf = Buffer.from(value);
   const months = buf.readUInt32LE(0);
   const days = buf.readUInt32LE(4);
@@ -467,8 +462,8 @@ function fromPrimitive_INTERVAL(value) {
   return { months: months, days: days, milliseconds: millis };
 }
 
-function checkValidValue(lowerRange, upperRange, v, bigV) {
-  if (bigV < lowerRange || bigV > upperRange || isNaN(v)) {
+function checkValidValue(lowerRange: number, upperRange: number, v: number | bigint) {
+  if (v < lowerRange || v > upperRange) {
     throw "invalid value"
   }
 }
