@@ -1,11 +1,11 @@
-'use strict';
 export {}
+'use strict';
 const  { toPrimitive, fromPrimitive } = require("../lib/types.ts") 
 const chai = require('chai');
 const assert = chai.assert;
 
 describe("toPrimitive INT* should give the correct values back", () => {
-    it('toPrimitive(INT_8, 127)', () => {
+    it('toPrimitive(INT_8, 127n)', () => {
         assert.equal(toPrimitive('INT_8',127n), 127n)
     }),
     it('toPrimitive(UINT_8, 255n)', () => {

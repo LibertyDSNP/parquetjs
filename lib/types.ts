@@ -1,5 +1,4 @@
 'use strict';
-export {}
 const BSON = require('bson');
 
 interface PARQUET_LOGICAL_TYPES {
@@ -157,7 +156,7 @@ const PARQUET_LOGICAL_TYPES: PARQUET_LOGICAL_TYPES = {
  * Convert a value from it's native representation to the internal/underlying
  * primitive type
  */
-function toPrimitive(type: string, value: number | bigint | string | boolean | object) {
+function toPrimitive(type: string, value: number | bigint | string | boolean | object | Date | Array<number>) {
   if (!(type in PARQUET_LOGICAL_TYPES)) {
     throw 'invalid type: ' + type;
   }
@@ -352,7 +351,7 @@ function toPrimitive_TIME_MILLIS(value: string | number) {
   if (typeof value === `string`) {
     v = parseInt(value, 10);
   } 
-  if (v < 0 || v > 0xffffffffffffffff || typeof v !== `number`) {
+  if (v < 0 || v > 0xffffffffffffffff || typeof v !== 'number') {
     throw 'invalid value for TIME_MILLIS: ' + value;
   }
 
@@ -378,11 +377,11 @@ function toPrimitive_DATE(value: string | Date | number) {
 
 /* convert from integer */
   let v = value
-  if (typeof value === `string`) {
+  if (typeof value === 'string') {
     v = parseInt(value, 10);
   } 
 
-  if (v < 0 || typeof v !== `number`) {
+  if (v < 0 || typeof v !== 'number') {
     throw 'invalid value for DATE: ' + value;
   }
 
@@ -404,11 +403,11 @@ function toPrimitive_TIMESTAMP_MILLIS(value: string | Date | number) {
   /* convert from integer */
 
   let v = value
-   if (typeof value === `string` ) {
+   if (typeof value === 'string' ) {
     v = parseInt(value, 10);
    }
 
-  if (v < 0 || typeof v !== `number`) {
+  if (v < 0 || typeof v !== 'number') {
     throw 'invalid value for TIMESTAMP_MILLIS: ' + value;
   }
 
