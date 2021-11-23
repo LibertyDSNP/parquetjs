@@ -1,5 +1,29 @@
-module.exports = class BufferReader {
-  constructor(envelopeReader, options) {
+interface BufferReaderOptions {
+  maxSpan?: number,
+  maxLength?: number,
+  queueWait?: number
+}
+
+interface BufferReaderQueueRow {
+  offset: number,
+  length: number,
+  resolve: (buf: Buffer) => void
+  reject: unknown
+}
+
+interface EnvelopeReader {
+  readFn: (start: number, finish: number) => Promise<Buffer>
+}
+
+export default class BufferReader {
+  maxSpan: number
+  maxLength: number
+  queueWait: number
+  scheduled?: boolean
+  queue: Array<BufferReaderQueueRow>
+  envelopeReader: EnvelopeReader
+
+  constructor(envelopeReader: EnvelopeReader, options: BufferReaderOptions) {
     options = options || {};
     this.envelopeReader = envelopeReader;
     this.maxSpan = options.maxSpan || 100000; // 100k
@@ -9,7 +33,7 @@ module.exports = class BufferReader {
     this.queue = [];
   }
 
-  async read(offset, length) {
+  async read(offset: number, length: number) {
     if (!this.scheduled) {
       this.scheduled = true;
       setTimeout( () => {
@@ -29,7 +53,7 @@ module.exports = class BufferReader {
     this.queue = [];
     queue.sort( (a,b) => a.offset - b.offset);
 
-    var subqueue = [];
+    var subqueue: Array<BufferReaderQueueRow> = [];
 
     const readSubqueue = async () => {
       if (!subqueue.length) {
@@ -61,6 +85,6 @@ module.exports = class BufferReader {
         subqueue = [d];
       }
     });
-    readSubqueue(subqueue);
+    readSubqueue();
   }
 };

@@ -1,11 +1,15 @@
-'use strict';
-const zlib = require('zlib');
-const snappy = require('snappyjs');
+import zlib from 'zlib'
+import snappy from 'snappyjs'
 import { compress as brotliCompress, decompress as brotliDecompress } from 'wasm-brotli'
 
-
+interface PARQUET_COMPRESSION_METHODS {
+  [key:string]: {
+      deflate: Function,
+      inflate: Function
+  }
+}
 // LZO compression is disabled. See: https://github.com/LibertyDSNP/parquetjs/issues/18
-const PARQUET_COMPRESSION_METHODS = {
+export const PARQUET_COMPRESSION_METHODS: PARQUET_COMPRESSION_METHODS = {
   'UNCOMPRESSED': {
     deflate: deflate_identity,
     inflate: inflate_identity
@@ -27,7 +31,7 @@ const PARQUET_COMPRESSION_METHODS = {
 /**
  * Deflate a value using compression method `method`
  */
-async function deflate(method, value) {
+export async function deflate(method: string, value: unknown) {
   if (!(method in PARQUET_COMPRESSION_METHODS)) {
     throw 'invalid compression method: ' + method;
   }
@@ -35,31 +39,33 @@ async function deflate(method, value) {
   return PARQUET_COMPRESSION_METHODS[method].deflate(value);
 }
 
-function deflate_identity(value) {
+function deflate_identity(value: ArrayBuffer | Buffer | Uint8Array) {
   return value;
 }
 
-function deflate_gzip(value) {
+function deflate_gzip(value: ArrayBuffer | Buffer | string) {
   return zlib.gzipSync(value);
 }
 
-function deflate_snappy(value) {
+function deflate_snappy(value: ArrayBuffer | Buffer | Uint8Array) {
   return snappy.compress(value);
 }
 
-async function deflate_brotli(value) {
-  const compressedContent =  await brotliCompress(value, {
+async function deflate_brotli(value: Uint8Array) {
+  const compressedContent =  await brotliCompress(value/*, {
     mode: 0,
     quality: 8,
     lgwin: 22
-  })
+  }
+  */)
+  
   return Buffer.from(compressedContent);
 }
 
 /**
  * Inflate a value using compression method `method`
  */
-async function inflate(method, value) {
+export async function inflate(method: string, value: unknown) {
   if (!(method in PARQUET_COMPRESSION_METHODS)) {
     throw 'invalid compression method: ' + method;
   }
@@ -67,22 +73,21 @@ async function inflate(method, value) {
   return await PARQUET_COMPRESSION_METHODS[method].inflate(value);
 }
 
-function inflate_identity(value) {
+function inflate_identity(value: ArrayBuffer | Buffer | Uint8Array) {
   return value;
 }
 
-function inflate_gzip(value) {
+function inflate_gzip(value: Buffer | ArrayBuffer | string) {
   return zlib.gunzipSync(value);
 }
 
-function inflate_snappy(value) {
+function inflate_snappy(value: ArrayBuffer | Buffer | Uint8Array) {
   return snappy.uncompress(value);
 }
 
-async function inflate_brotli(value) {
+async function inflate_brotli(value: Uint8Array) {
   const uncompressedContent = await brotliDecompress(value)
   return Buffer.from(uncompressedContent);
 }
 
-module.exports = { PARQUET_COMPRESSION_METHODS, deflate, inflate };
 

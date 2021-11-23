@@ -1,6 +1,7 @@
-const varint = require('varint')
+import varint from 'varint'
+import {Cursor, Options} from './types'
 
-function encodeRunBitpacked(values, opts) {
+function encodeRunBitpacked(values: Array<number>, opts: Options) {
   for (let i = 0; i < values.length % 8; i++) {
     values.push(0);
   }
@@ -18,7 +19,7 @@ function encodeRunBitpacked(values, opts) {
   ]);
 }
 
-function encodeRunRepeated(value, count, opts) {
+function encodeRunRepeated(value: number, count: number, opts: Options) {
   let buf = Buffer.alloc(Math.ceil(opts.bitWidth / 8));
 
   for (let i = 0; i < buf.length; ++i) {
@@ -32,7 +33,7 @@ function encodeRunRepeated(value, count, opts) {
   ]);
 }
 
-exports.encodeValues = function(type, values, opts) {
+export const encodeValues = function(type: string, values: Array<number>, opts: Options) {
   if (!('bitWidth' in opts)) {
     throw 'bitWidth is required';
   }
@@ -42,7 +43,7 @@ exports.encodeValues = function(type, values, opts) {
     case 'BOOLEAN':
     case 'INT32':
     case 'INT64':
-      values = values.map((x) => parseInt(x, 10));
+      values = values.map((x) => parseInt(x as unknown as string, 10)); // We should fix unknown as string
       break;
 
     default:
@@ -92,7 +93,7 @@ exports.encodeValues = function(type, values, opts) {
   return envelope;
 };
 
-function decodeRunBitpacked(cursor, count, opts) {
+function decodeRunBitpacked(cursor : Cursor, count: number, opts: Options) {
   if (count % 8 !== 0) {
     throw 'must be a multiple of 8';
   }
@@ -108,7 +109,7 @@ function decodeRunBitpacked(cursor, count, opts) {
   return values;
 }
 
-function decodeRunRepeated(cursor, count, opts) {
+function decodeRunRepeated(cursor: Cursor, count: number, opts: Options) {
   let value = 0;
   for (let i = 0; i < Math.ceil(opts.bitWidth / 8); ++i) {
     value << 8;
@@ -119,7 +120,7 @@ function decodeRunRepeated(cursor, count, opts) {
   return new Array(count).fill(value);
 }
 
-exports.decodeValues = function(type, cursor, count, opts) {
+export const decodeValues = function(_: string, cursor: Cursor, count: number, opts: Options) {
   if (!('bitWidth' in opts)) {
     throw 'bitWidth is required';
   }

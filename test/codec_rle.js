@@ -1,7 +1,7 @@
 'use strict';
 const chai = require('chai');
 const assert = chai.assert;
-const parquet_codec_rle = require('../lib/codec/rle.js');
+const parquet_codec_rle = require('../lib/codec/rle.ts');
 
 describe('ParquetCodec::RLE', function() {
 

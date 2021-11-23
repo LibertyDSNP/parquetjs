@@ -1,6 +1,5 @@
 'use strict';
-const BSON = require('bson');
-
+import * as BSON from "bson"
 interface PARQUET_LOGICAL_TYPES {
     [key:string]: {
         primitiveType: string,
@@ -17,7 +16,7 @@ interface INTERVAL {
   milliseconds: number
 }
 
-const PARQUET_LOGICAL_TYPES: PARQUET_LOGICAL_TYPES = {
+export const PARQUET_LOGICAL_TYPES: PARQUET_LOGICAL_TYPES = {
   'BOOLEAN': {
     primitiveType: 'BOOLEAN',
     toPrimitive: toPrimitive_BOOLEAN,
@@ -156,7 +155,7 @@ const PARQUET_LOGICAL_TYPES: PARQUET_LOGICAL_TYPES = {
  * Convert a value from it's native representation to the internal/underlying
  * primitive type
  */
-function toPrimitive(type: string, value: number | bigint | string | boolean | object | Date | Array<number>) {
+export function toPrimitive(type: string, value: unknown) {
   if (!(type in PARQUET_LOGICAL_TYPES)) {
     throw 'invalid type: ' + type;
   }
@@ -168,7 +167,7 @@ function toPrimitive(type: string, value: number | bigint | string | boolean | o
  * Convert a value from it's internal/underlying primitive representation to
  * the native representation
  */
-function fromPrimitive(type: string, value: number | bigint | string) {
+export function fromPrimitive(type: string, value: unknown) {
   if (!(type in PARQUET_LOGICAL_TYPES)) {
     throw 'invalid type: ' + type;
   }
@@ -338,11 +337,11 @@ function fromPrimitive_JSON(value: string) {
   return JSON.parse(value);
 }
 
-function toPrimitive_BSON(value: any) {
+function toPrimitive_BSON(value: BSON.Document) {
   return Buffer.from(BSON.serialize(value));
 }
 
-function fromPrimitive_BSON(value: any) {
+function fromPrimitive_BSON(value: Buffer) {
   return BSON.deserialize(value);
 }
 
@@ -389,7 +388,7 @@ function toPrimitive_DATE(value: string | Date | number) {
   
 }
 
-function fromPrimitive_DATE(value: string | number | Date) {
+function fromPrimitive_DATE(value: number ) {
   return new Date(+value * kMillisPerDay);
 }
 
@@ -466,7 +465,4 @@ function checkValidValue(lowerRange: number, upperRange: number, v: number | big
     throw "invalid value"
   }
 }
-
-
-module.exports = { PARQUET_LOGICAL_TYPES, toPrimitive, fromPrimitive };
 

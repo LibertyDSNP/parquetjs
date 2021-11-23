@@ -1,7 +1,8 @@
-'use strict';
-const INT53 = require('int53');
 
-function encodeValues_BOOLEAN(values) {
+import INT53 from 'int53'
+import {Cursor, Options} from './types'
+
+function encodeValues_BOOLEAN(values: Array<boolean>) {
   let buf = Buffer.alloc(Math.ceil(values.length / 8));
   buf.fill(0);
 
@@ -14,7 +15,7 @@ function encodeValues_BOOLEAN(values) {
   return buf;
 }
 
-function decodeValues_BOOLEAN(cursor, count) {
+function decodeValues_BOOLEAN(cursor: Cursor, count: number) {
   let values = [];
 
   for (let i = 0; i < count; ++i) {
@@ -26,7 +27,7 @@ function decodeValues_BOOLEAN(cursor, count) {
   return values;
 }
 
-function encodeValues_INT32(values) {
+function encodeValues_INT32(values: Array<number>) {
   let buf = Buffer.alloc(4 * values.length);
   for (let i = 0; i < values.length; i++) {
     buf.writeInt32LE(values[i], i * 4)
@@ -35,7 +36,7 @@ function encodeValues_INT32(values) {
   return buf;
 }
 
-function decodeValues_INT32(cursor, count) {
+function decodeValues_INT32(cursor: Cursor, count: number) {
   let values = [];
 
   for (let i = 0; i < count; ++i) {
@@ -46,7 +47,7 @@ function decodeValues_INT32(cursor, count) {
   return values;
 }
 
-function encodeValues_INT64(values) {
+function encodeValues_INT64(values: Array<number>) {
   let buf = Buffer.alloc(8 * values.length);
   for (let i = 0; i < values.length; i++) {
     buf.writeBigInt64LE(BigInt(values[i]), i*8);
@@ -55,7 +56,7 @@ function encodeValues_INT64(values) {
   return buf;
 }
 
-function decodeValues_INT64(cursor, count) {
+function decodeValues_INT64(cursor: Cursor, count: number) {
   let values = [];
 
   for (let i = 0; i < count; ++i) {
@@ -66,7 +67,7 @@ function decodeValues_INT64(cursor, count) {
   return values;
 }
 
-function encodeValues_INT96(values) {
+function encodeValues_INT96(values: Array<number>) {
   let buf = Buffer.alloc(12 * values.length);
 
   for (let i = 0; i < values.length; i++) {
@@ -82,7 +83,7 @@ function encodeValues_INT96(values) {
   return buf;
 }
 
-function decodeValues_INT96(cursor, count) {
+function decodeValues_INT96(cursor: Cursor, count: number) {
   let values = [];
 
   for (let i = 0; i < count; ++i) {
@@ -101,7 +102,7 @@ function decodeValues_INT96(cursor, count) {
   return values;
 }
 
-function encodeValues_FLOAT(values) {
+function encodeValues_FLOAT(values: Array<number>) {
   let buf = Buffer.alloc(4 * values.length);
   for (let i = 0; i < values.length; i++) {
     buf.writeFloatLE(values[i], i * 4)
@@ -110,7 +111,7 @@ function encodeValues_FLOAT(values) {
   return buf;
 }
 
-function decodeValues_FLOAT(cursor, count) {
+function decodeValues_FLOAT(cursor: Cursor, count: number) {
   let values = [];
 
   for (let i = 0; i < count; ++i) {
@@ -121,7 +122,7 @@ function decodeValues_FLOAT(cursor, count) {
   return values;
 }
 
-function encodeValues_DOUBLE(values) {
+function encodeValues_DOUBLE(values: Array<number>) {
   let buf = Buffer.alloc(8 * values.length);
   for (let i = 0; i < values.length; i++) {
     buf.writeDoubleLE(values[i], i * 8)
@@ -130,7 +131,7 @@ function encodeValues_DOUBLE(values) {
   return buf;
 }
 
-function decodeValues_DOUBLE(cursor, count) {
+function decodeValues_DOUBLE(cursor: Cursor, count: number) {
   let values = [];
 
   for (let i = 0; i < count; ++i) {
@@ -141,26 +142,28 @@ function decodeValues_DOUBLE(cursor, count) {
   return values;
 }
 
-function encodeValues_BYTE_ARRAY(values) {
+// Waylands reminder to check again
+function encodeValues_BYTE_ARRAY(values: Array<Uint8Array>) {
   let buf_len = 0;
+  const returnedValues: Array<Buffer> = []
   for (let i = 0; i < values.length; i++) {
-    values[i] = Buffer.from(values[i]);
-    buf_len += 4 + values[i].length;
+    returnedValues[i] = Buffer.from(values[i]);
+    buf_len += 4 + returnedValues[i].length;
   }
 
   let buf = Buffer.alloc(buf_len);
   let buf_pos = 0;
-  for (let i = 0; i < values.length; i++) {
-    buf.writeUInt32LE(values[i].length, buf_pos)
-    values[i].copy(buf, buf_pos + 4);
-    buf_pos += 4 + values[i].length;
+  for (let i = 0; i < returnedValues.length; i++) {
+    buf.writeUInt32LE(returnedValues[i].length, buf_pos)
+    returnedValues[i].copy(buf, buf_pos + 4);
+    buf_pos += 4 + returnedValues[i].length;
 
   }
 
   return buf;
 }
 
-function decodeValues_BYTE_ARRAY(cursor, count) {
+function decodeValues_BYTE_ARRAY(cursor: Cursor, count: number) {
   let values = [];
 
   for (let i = 0; i < count; ++i) {
@@ -175,24 +178,24 @@ function decodeValues_BYTE_ARRAY(cursor, count) {
 
 
 
-function encodeValues_FIXED_LEN_BYTE_ARRAY(values, opts) {
+function encodeValues_FIXED_LEN_BYTE_ARRAY(values: Array<Uint8Array | string>, opts: Options) {
   if (!opts.typeLength) {
     throw "missing option: typeLength (required for FIXED_LEN_BYTE_ARRAY)";
   }
 
-  let buf_len = 0;
+  const returnedValues: Array<Buffer> = []
   for (let i = 0; i < values.length; i++) {
-    values[i] = Buffer.from(values[i]);
+    returnedValues[i] = Buffer.from(values[i]);
 
-    if (values[i].length !== opts.typeLength) {
-      throw "invalid value for FIXED_LEN_BYTE_ARRAY: " + values[i];
+    if (returnedValues[i].length !== opts.typeLength) {
+      throw "invalid value for FIXED_LEN_BYTE_ARRAY: " + returnedValues[i];
     }
   }
 
-  return Buffer.concat(values);
+  return Buffer.concat(returnedValues);
 }
 
-function decodeValues_FIXED_LEN_BYTE_ARRAY(cursor, count, opts) {
+function decodeValues_FIXED_LEN_BYTE_ARRAY(cursor: Cursor, count: number, opts: Options) {
   let values = [];
 
   if (!opts.typeLength) {
@@ -207,7 +210,8 @@ function decodeValues_FIXED_LEN_BYTE_ARRAY(cursor, count, opts) {
   return values;
 }
 
-exports.encodeValues = function(type, values, opts) {
+// Array<any> should not be any
+export const encodeValues = function(type: string, values: Array<any>, opts: Options) {
   switch (type) {
 
     case 'BOOLEAN':
@@ -240,7 +244,7 @@ exports.encodeValues = function(type, values, opts) {
   }
 }
 
-exports.decodeValues = function(type, cursor, count, opts) {
+export const decodeValues = function(type: string, cursor: Cursor, count: number, opts: Options) {
   switch (type) {
 
     case 'BOOLEAN':
