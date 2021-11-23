@@ -1,6 +1,5 @@
-
-import INT53 from 'int53'
-import {Cursor, Options} from './types'
+import INT53 from "int53";
+import { Cursor, Options } from "./types";
 
 function encodeValues_BOOLEAN(values: Array<boolean>) {
   let buf = Buffer.alloc(Math.ceil(values.length / 8));
@@ -8,7 +7,7 @@ function encodeValues_BOOLEAN(values: Array<boolean>) {
 
   for (let i = 0; i < values.length; ++i) {
     if (values[i]) {
-      buf[Math.floor(i / 8)] |= (1 << (i % 8));
+      buf[Math.floor(i / 8)] |= 1 << i % 8;
     }
   }
 
@@ -20,7 +19,7 @@ function decodeValues_BOOLEAN(cursor: Cursor, count: number) {
 
   for (let i = 0; i < count; ++i) {
     let b = cursor.buffer[cursor.offset + Math.floor(i / 8)];
-    values.push((b & (1 << (i % 8))) > 0);
+    values.push((b & (1 << i % 8)) > 0);
   }
 
   cursor.offset += Math.ceil(count / 8);
@@ -30,7 +29,7 @@ function decodeValues_BOOLEAN(cursor: Cursor, count: number) {
 function encodeValues_INT32(values: Array<number>) {
   let buf = Buffer.alloc(4 * values.length);
   for (let i = 0; i < values.length; i++) {
-    buf.writeInt32LE(values[i], i * 4)
+    buf.writeInt32LE(values[i], i * 4);
   }
 
   return buf;
@@ -50,7 +49,7 @@ function decodeValues_INT32(cursor: Cursor, count: number) {
 function encodeValues_INT64(values: Array<number>) {
   let buf = Buffer.alloc(8 * values.length);
   for (let i = 0; i < values.length; i++) {
-    buf.writeBigInt64LE(BigInt(values[i]), i*8);
+    buf.writeBigInt64LE(BigInt(values[i]), i * 8);
   }
 
   return buf;
@@ -75,7 +74,7 @@ function encodeValues_INT96(values: Array<number>) {
       INT53.writeInt64LE(values[i], buf, i * 12);
       buf.writeUInt32LE(0, i * 12 + 8); // truncate to 64 actual precision
     } else {
-      INT53.writeInt64LE((~-values[i]) + 1, buf, i * 12);
+      INT53.writeInt64LE(~-values[i] + 1, buf, i * 12);
       buf.writeUInt32LE(0xffffffff, i * 12 + 8); // truncate to 64 actual precision
     }
   }
@@ -91,7 +90,7 @@ function decodeValues_INT96(cursor: Cursor, count: number) {
     const high = cursor.buffer.readUInt32LE(cursor.offset + 8);
 
     if (high === 0xffffffff) {
-      values.push((~-low) + 1); // truncate to 64 actual precision
+      values.push(~-low + 1); // truncate to 64 actual precision
     } else {
       values.push(low); // truncate to 64 actual precision
     }
@@ -105,7 +104,7 @@ function decodeValues_INT96(cursor: Cursor, count: number) {
 function encodeValues_FLOAT(values: Array<number>) {
   let buf = Buffer.alloc(4 * values.length);
   for (let i = 0; i < values.length; i++) {
-    buf.writeFloatLE(values[i], i * 4)
+    buf.writeFloatLE(values[i], i * 4);
   }
 
   return buf;
@@ -125,7 +124,7 @@ function decodeValues_FLOAT(cursor: Cursor, count: number) {
 function encodeValues_DOUBLE(values: Array<number>) {
   let buf = Buffer.alloc(8 * values.length);
   for (let i = 0; i < values.length; i++) {
-    buf.writeDoubleLE(values[i], i * 8)
+    buf.writeDoubleLE(values[i], i * 8);
   }
 
   return buf;
@@ -145,7 +144,7 @@ function decodeValues_DOUBLE(cursor: Cursor, count: number) {
 // Waylands reminder to check again
 function encodeValues_BYTE_ARRAY(values: Array<Uint8Array>) {
   let buf_len = 0;
-  const returnedValues: Array<Buffer> = []
+  const returnedValues: Array<Buffer> = [];
   for (let i = 0; i < values.length; i++) {
     returnedValues[i] = Buffer.from(values[i]);
     buf_len += 4 + returnedValues[i].length;
@@ -154,10 +153,9 @@ function encodeValues_BYTE_ARRAY(values: Array<Uint8Array>) {
   let buf = Buffer.alloc(buf_len);
   let buf_pos = 0;
   for (let i = 0; i < returnedValues.length; i++) {
-    buf.writeUInt32LE(returnedValues[i].length, buf_pos)
+    buf.writeUInt32LE(returnedValues[i].length, buf_pos);
     returnedValues[i].copy(buf, buf_pos + 4);
     buf_pos += 4 + returnedValues[i].length;
-
   }
 
   return buf;
@@ -176,14 +174,15 @@ function decodeValues_BYTE_ARRAY(cursor: Cursor, count: number) {
   return values;
 }
 
-
-
-function encodeValues_FIXED_LEN_BYTE_ARRAY(values: Array<Uint8Array | string>, opts: Options) {
+function encodeValues_FIXED_LEN_BYTE_ARRAY(
+  values: Array<Uint8Array | string>,
+  opts: Options
+) {
   if (!opts.typeLength) {
     throw "missing option: typeLength (required for FIXED_LEN_BYTE_ARRAY)";
   }
 
-  const returnedValues: Array<Buffer> = []
+  const returnedValues: Array<Buffer> = [];
   for (let i = 0; i < values.length; i++) {
     returnedValues[i] = Buffer.from(values[i]);
 
@@ -195,7 +194,11 @@ function encodeValues_FIXED_LEN_BYTE_ARRAY(values: Array<Uint8Array | string>, o
   return Buffer.concat(returnedValues);
 }
 
-function decodeValues_FIXED_LEN_BYTE_ARRAY(cursor: Cursor, count: number, opts: Options) {
+function decodeValues_FIXED_LEN_BYTE_ARRAY(
+  cursor: Cursor,
+  count: number,
+  opts: Options
+) {
   let values = [];
 
   if (!opts.typeLength) {
@@ -203,77 +206,85 @@ function decodeValues_FIXED_LEN_BYTE_ARRAY(cursor: Cursor, count: number, opts: 
   }
 
   for (let i = 0; i < count; ++i) {
-    values.push(cursor.buffer.slice(cursor.offset, cursor.offset + opts.typeLength));
+    values.push(
+      cursor.buffer.slice(cursor.offset, cursor.offset + opts.typeLength)
+    );
     cursor.offset += opts.typeLength;
   }
 
   return values;
 }
 
-// Array<any> should not be any
-export const encodeValues = function(type: string, values: Array<any>, opts: Options) {
+export const encodeValues = function (
+  type: string,
+  values: Array<unknown>,
+  opts: Options
+) {
   switch (type) {
+    case "BOOLEAN":
+      return encodeValues_BOOLEAN(values as Array<boolean>);
 
-    case 'BOOLEAN':
-      return encodeValues_BOOLEAN(values);
+    case "INT32":
+      return encodeValues_INT32(values as Array<number>);
 
-    case 'INT32':
-      return encodeValues_INT32(values);
+    case "INT64":
+      return encodeValues_INT64(values as Array<number>);
 
-    case 'INT64':
-      return encodeValues_INT64(values);
+    case "INT96":
+      return encodeValues_INT96(values as Array<number>);
 
-    case 'INT96':
-      return encodeValues_INT96(values);
+    case "FLOAT":
+      return encodeValues_FLOAT(values as Array<number>);
 
-    case 'FLOAT':
-      return encodeValues_FLOAT(values);
+    case "DOUBLE":
+      return encodeValues_DOUBLE(values as Array<number>);
 
-    case 'DOUBLE':
-      return encodeValues_DOUBLE(values);
+    case "BYTE_ARRAY":
+      return encodeValues_BYTE_ARRAY(values as Array<Uint8Array>);
 
-    case 'BYTE_ARRAY':
-      return encodeValues_BYTE_ARRAY(values);
-
-    case 'FIXED_LEN_BYTE_ARRAY':
-      return encodeValues_FIXED_LEN_BYTE_ARRAY(values, opts);
+    case "FIXED_LEN_BYTE_ARRAY":
+      return encodeValues_FIXED_LEN_BYTE_ARRAY(
+        values as Array<Uint8Array | string>,
+        opts
+      );
 
     default:
-      throw 'unsupported type: ' + type;
-
+      throw "unsupported type: " + type;
   }
-}
+};
 
-export const decodeValues = function(type: string, cursor: Cursor, count: number, opts: Options) {
+export const decodeValues = function (
+  type: string,
+  cursor: Cursor,
+  count: number,
+  opts: Options
+) {
   switch (type) {
-
-    case 'BOOLEAN':
+    case "BOOLEAN":
       return decodeValues_BOOLEAN(cursor, count);
 
-    case 'INT32':
+    case "INT32":
       return decodeValues_INT32(cursor, count);
 
-    case 'INT64':
+    case "INT64":
       return decodeValues_INT64(cursor, count);
 
-    case 'INT96':
+    case "INT96":
       return decodeValues_INT96(cursor, count);
 
-    case 'FLOAT':
+    case "FLOAT":
       return decodeValues_FLOAT(cursor, count);
 
-    case 'DOUBLE':
+    case "DOUBLE":
       return decodeValues_DOUBLE(cursor, count);
 
-    case 'BYTE_ARRAY':
+    case "BYTE_ARRAY":
       return decodeValues_BYTE_ARRAY(cursor, count);
 
-    case 'FIXED_LEN_BYTE_ARRAY':
+    case "FIXED_LEN_BYTE_ARRAY":
       return decodeValues_FIXED_LEN_BYTE_ARRAY(cursor, count, opts);
 
     default:
-      throw 'unsupported type: ' + type;
-
+      throw "unsupported type: " + type;
   }
-}
-
+};
