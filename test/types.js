@@ -1,4 +1,3 @@
-export {}
 'use strict';
 const  { toPrimitive, fromPrimitive } = require("../lib/types.ts") 
 const chai = require('chai');

@@ -175,7 +175,7 @@ function decodeValues_BYTE_ARRAY(cursor: Cursor, count: number) {
 }
 
 function encodeValues_FIXED_LEN_BYTE_ARRAY(
-  values: Array<Uint8Array | string>,
+  values: Array<Uint8Array>,
   opts: Options
 ) {
   if (!opts.typeLength) {
@@ -244,7 +244,7 @@ export const encodeValues = function (
 
     case "FIXED_LEN_BYTE_ARRAY":
       return encodeValues_FIXED_LEN_BYTE_ARRAY(
-        values as Array<Uint8Array | string>,
+        values as Array<Uint8Array>,
         opts
       );
 
