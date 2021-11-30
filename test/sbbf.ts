@@ -285,8 +285,10 @@ describe("Split Block Bloom Filters", () => {
                 try {
                     await filter.insert(tc.val)
                 } catch (e) {
-                    gotError = true
-                    expect(e.message).to.match(/unsupported type:/)
+                    if (e instanceof Error) {
+                        gotError = true
+                        expect(e.message).to.match(/unsupported type:/)
+                    } 
                 }
                 expect(gotError).to.eq(true)
             })

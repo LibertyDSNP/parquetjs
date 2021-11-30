@@ -70,7 +70,8 @@ const getBloomFilterHeader = async (
       headerByteSizeEstimate
     );
   } catch (e) {
-    throw new Error(e);
+    if (typeof e === 'string') throw new Error(e);
+    else throw e
   }
 
   const bloomFilterHeader = new parquet_thrift.BloomFilterHeader();
@@ -105,7 +106,8 @@ const readFilterData = async (
 
     return buffer;
   } catch (e) {
-    throw new Error(e);
+    if (typeof e === 'string') throw new Error(e);
+    else throw e
   }
 };
 
