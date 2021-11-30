@@ -256,7 +256,7 @@ export const encodeValues = function (
 };
 
 export const decodeValues = function (
-  type: string,
+  type: ValidValueTypes | string,
   cursor: Cursor,
   count: number,
   opts: Options
