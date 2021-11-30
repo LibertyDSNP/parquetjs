@@ -33,6 +33,14 @@ function encodeRunRepeated(value: number, count: number, opts: Options) {
   ]);
 }
 
+function unknownToParsedInt(value: string | number) {
+  if (typeof value === 'string') {
+    return parseInt(value, 10)
+  } else {
+    return value
+  }
+}
+
 export const encodeValues = function(type: string, values: Array<number>, opts: Options) {
   if (!('bitWidth' in opts)) {
     throw 'bitWidth is required';
@@ -43,7 +51,7 @@ export const encodeValues = function(type: string, values: Array<number>, opts: 
     case 'BOOLEAN':
     case 'INT32':
     case 'INT64':
-      values = values.map((x) => parseInt(x as unknown as string, 10)); // We should fix unknown as string
+      values = values.map((x) => unknownToParsedInt(x));
       break;
 
     default:

@@ -1,7 +1,7 @@
 'use strict';
 const chai = require('chai');
 const assert = chai.assert;
-const parquet_codec_plain = require('../lib/codec/plain.ts');
+const parquet_codec_plain = require('../lib/codec/plain');
 const assert_util = require('./util/assert_util.js');
 
 describe('ParquetCodec::PLAIN', function() {

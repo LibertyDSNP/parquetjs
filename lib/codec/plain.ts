@@ -215,8 +215,10 @@ function decodeValues_FIXED_LEN_BYTE_ARRAY(
   return values;
 }
 
+type ValidValueTypes = "BOOLEAN" | "INT32" | "INT64" | "INT96" | "FLOAT" | "DOUBLE" | "BYTE_ARRAY" | "FIXED_LEN_BYTE_ARRAY"
+
 export const encodeValues = function (
-  type: string,
+  type: ValidValueTypes | string,
   values: Array<unknown>,
   opts: Options
 ) {
