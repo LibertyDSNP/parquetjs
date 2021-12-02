@@ -123,6 +123,8 @@ function buildFields(schema: SchemaDefinition, rLevelParentMax?: number, dLevelP
               dLevelMax,
               path.concat(name))
       };
+      
+      if (opts.type == 'LIST' || opts.type == 'MAP') fieldList[name].originalType = opts.type;
 
       continue;
     }
