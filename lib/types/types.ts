@@ -56,12 +56,14 @@ export interface FieldDefinition {
     optional?: boolean;
     repeated?: boolean;
     fields?: SchemaDefinition;
+    statistics?: any
 }
 
 export interface ParquetField {
     name: string;
     path: string[];
-    key: string;
+    // key: string;
+    statistics?: any
     primitiveType?: PrimitiveType;
     originalType?: OriginalType;
     repetitionType: RepetitionType;
