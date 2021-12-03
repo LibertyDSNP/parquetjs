@@ -70,8 +70,8 @@ export interface FieldDefinition {
 
 export interface ParquetField {
     name: string;
-    path: string[];
-    statistics?: Statistics
+    path: string[] | string;
+    key: string;
     primitiveType?: PrimitiveType;
     originalType?: OriginalType;
     repetitionType: RepetitionType;
@@ -93,6 +93,7 @@ export interface ParquetBuffer {
 export interface ParquetData {
     dlevels: number[];
     rlevels: number[];
+    distinct_values: Set<any>
     values: any[];
     count: number;
 }

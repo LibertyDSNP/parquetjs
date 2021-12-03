@@ -1,6 +1,6 @@
-'use strict';
-const parquet_types = require('./types');
-const parquet_schema = require('./schema');
+import * as parquet_types from './types'
+import * as schema from './schema'
+import { ParquetData, ParquetField, SchemaDefinition } from './types/types' 
 
 /**
  * 'Shred' a record into a list of <value, repetition_level, definition_level>
@@ -25,11 +25,26 @@ const parquet_schema = require('./schema');
  *   }
  *
  */
-exports.shredRecord = function(schema, record, buffer) {
+
+interface ParquetSchema {
+  schema: SchemaDefinition
+  fields: Record<string, ParquetField>
+  fieldList: Array<ParquetField>
+}
+
+interface ShreddedRecordBuffer {
+  columnData: Record<string, ParquetData>
+  rowCount: number,
+  pageRowCount: number,
+  pages: Record<string,object>
+}
+
+export const shredRecord = function(schema: ParquetSchema, record: Record<string, object[]>, buffer: ShreddedRecordBuffer) {
   /* shred the record, this may raise an exception */
-  var recordShredded = {};
+  var recordShredded: Record<string, ParquetData> = {};
   for (let field of schema.fieldList) {
-    recordShredded[field.path] = {
+    let path = field.path as string
+    recordShredded[path] = {
       dlevels: [],
       rlevels: [],
       values: [],
@@ -48,22 +63,24 @@ exports.shredRecord = function(schema, record, buffer) {
     buffer.pages = {};
 
     for (let field of schema.fieldList) {
-      buffer.columnData[field.path] = {
+      let path = field.path as string
+      buffer.columnData[path] = {
         dlevels: [],
         rlevels: [],
         values: [],
         distinct_values: new Set(),
         count: 0
       };
-      buffer.pages[field.path] = [];
+      buffer.pages[path] = [];
     }
   }
 
   buffer.rowCount += 1;
   buffer.pageRowCount += 1;
   for (let field of schema.fieldList) {
-    let record = recordShredded[field.path];
-    let column = buffer.columnData[field.path];
+    let path = field.path as string
+    let record = recordShredded[path];
+    let column = buffer.columnData[path];
 
     for (let i = 0; i < record.rlevels.length; i++) {
       column.rlevels.push(record.rlevels[i]);
@@ -73,19 +90,20 @@ exports.shredRecord = function(schema, record, buffer) {
       }
     }
 
-    [...recordShredded[field.path].distinct_values].forEach(value => buffer.columnData[field.path].distinct_values.add(value));
+    [...recordShredded[path].distinct_values].forEach(value => buffer.columnData[path].distinct_values.add(value));
 
-    buffer.columnData[field.path].count += recordShredded[field.path].count;
+    buffer.columnData[path].count += recordShredded[path].count;
   }
 };
 
-function shredRecordInternal(fields, record, data, rlvl, dlvl) {
+function shredRecordInternal(fields: Record<string, ParquetField>, record: Record<string, object[]> | null, data: Record<string, ParquetData>, rlvl: number, dlvl: number) {
   for (let fieldName in fields) {
     const field = fields[fieldName];
     const fieldType = field.originalType || field.primitiveType;
+    const path = field.path as string
 
     // fetch values
-    let values = [];
+    let values: Array<object> = [];
     if (record && (fieldName in record) && record[fieldName] !== undefined && record[fieldName] !== null) {
       if (record[fieldName].constructor === Array) {
         values = record[fieldName];
@@ -105,7 +123,7 @@ function shredRecordInternal(fields, record, data, rlvl, dlvl) {
 
     // push null
     if (values.length == 0) {
-      if (field.isNested) {
+      if (isDefined(field.fields)) {
         shredRecordInternal(
             field.fields,
             null,
@@ -113,9 +131,9 @@ function shredRecordInternal(fields, record, data, rlvl, dlvl) {
             rlvl,
             dlvl);
       } else {
-        data[field.path].rlevels.push(rlvl);
-        data[field.path].dlevels.push(dlvl);
-        data[field.path].count += 1;
+        data[path].rlevels.push(rlvl);
+        data[path].dlevels.push(dlvl);
+        data[path].count += 1;
       }
       continue;
     }
@@ -124,7 +142,7 @@ function shredRecordInternal(fields, record, data, rlvl, dlvl) {
     for (let i = 0; i < values.length; ++i) {
       const rlvl_i = i === 0 ? rlvl : field.rLevelMax;
 
-      if (field.isNested) {
+      if (isDefined(field.fields)) {
         shredRecordInternal(
             field.fields,
             values[i],
@@ -132,11 +150,11 @@ function shredRecordInternal(fields, record, data, rlvl, dlvl) {
             rlvl_i,
             field.dLevelMax);
       } else {
-        data[field.path].distinct_values.add(values[i]);
-        data[field.path].values.push(parquet_types.toPrimitive(fieldType, values[i]));
-        data[field.path].rlevels.push(rlvl_i);
-        data[field.path].dlevels.push(field.dLevelMax);
-        data[field.path].count += 1;
+        data[path].distinct_values.add(values[i]);
+        data[path].values.push(parquet_types.toPrimitive(fieldType, values[i]));
+        data[path].rlevels.push(rlvl_i);
+        data[path].dlevels.push(field.dLevelMax);
+        data[path].count += 1;
       }
     }
   }
@@ -162,7 +180,7 @@ function shredRecordInternal(fields, record, data, rlvl, dlvl) {
  *   }
  *
  */
-exports.materializeRecords = function(schema, buffer, records) {
+exports.materializeRecords = function(schema: schema.ParquetSchema, buffer: ShreddedRecordBuffer, records: Array<Record<string,object[]>>) {
   if (!records) {
     records = [];
   }
@@ -183,7 +201,7 @@ exports.materializeRecords = function(schema, buffer, records) {
       rLevels.fill(0, rLevel + 1);
 
       let value = null;
-      if (dLevel === field.dLevelMax) {
+      if (dLevel === field.dLevelMax && isDefined(field.originalType)) {
         value = parquet_types.fromPrimitive(
             field.originalType || field.primitiveType,
             values.next().value);
@@ -203,7 +221,7 @@ exports.materializeRecords = function(schema, buffer, records) {
   return records;
 }
 
-function materializeRecordField(record, branch, rLevels, dLevel, value) {
+function materializeRecordField(record: Record<string, object[]> | Record<string, object>, branch: Array<ParquetField>, rLevels: Array<number>, dLevel: number, value: object[]) {
   const node = branch[0];
 
   if (dLevel < node.dLevelMax) {
@@ -212,16 +230,17 @@ function materializeRecordField(record, branch, rLevels, dLevel, value) {
 
   if (branch.length > 1) {
     if (node.repetitionType === "REPEATED") {
+      let recordArray = record[node.name] as object[]
       if (!(node.name in record)) {
         record[node.name] = [];
       }
 
-      while (record[node.name].length < rLevels[0] + 1) {
-        record[node.name].push({});
+      while (recordArray.length < rLevels[0] + 1) {
+        recordArray.push({});
       }
 
       materializeRecordField(
-          record[node.name][rLevels[0]],
+          recordArray[rLevels[0]] as Record<string, object>,
           branch.slice(1),
           rLevels.slice(1),
           dLevel,
@@ -230,7 +249,7 @@ function materializeRecordField(record, branch, rLevels, dLevel, value) {
       record[node.name] = record[node.name] || {};
 
       materializeRecordField(
-          record[node.name],
+          record[node.name] as Record<string,object[]>,
           branch.slice(1),
           rLevels,
           dLevel,
@@ -238,17 +257,22 @@ function materializeRecordField(record, branch, rLevels, dLevel, value) {
     }
   } else {
     if (node.repetitionType === "REPEATED") {
+      let recordArray = record[node.name] as object[]
       if (!(node.name in record)) {
         record[node.name] = [];
       }
 
-      while (record[node.name].length < rLevels[0] + 1) {
-        record[node.name].push(null);
+      while (recordArray.length < rLevels[0] + 1) {
+        recordArray.push({});
       }
 
-      record[node.name][rLevels[0]] = value;
+      recordArray[rLevels[0]] = value;
     } else {
       record[node.name] = value;
     }
   }
+}
+
+function isDefined<T>(val: T | undefined): val is T {
+  return val !== undefined;
 }
