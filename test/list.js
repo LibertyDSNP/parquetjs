@@ -82,7 +82,6 @@ describe('list', async function() {
     const schema = reader.metadata.schema;
     assert.equal(schema.length, 7);
     assert.equal(schema[2].name, 'test');
-    assert.equal(schema[2].converted_type, 3);
   });
 
   it('output matches input', async function() {
