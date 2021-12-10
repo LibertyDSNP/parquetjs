@@ -1,6 +1,6 @@
 import * as parquet_types from './types'
 import * as schema from './schema'
-import { ParquetData, ParquetField, SchemaDefinition } from './types/types' 
+import { ParquetData, ParquetField, SchemaDefinition, ParquetType } from './types/types' 
 
 /**
  * 'Shred' a record into a list of <value, repetition_level, definition_level>
@@ -39,7 +39,9 @@ interface ShreddedRecordBuffer {
   pages: Record<string,object>
 }
 
-export const shredRecord = function(schema: ParquetSchema, record: Record<string, object[]>, buffer: ShreddedRecordBuffer) {
+
+
+export const shredRecord = function(schema: ParquetSchema, record: Record<string, ParquetType>, buffer: ShreddedRecordBuffer) {
   /* shred the record, this may raise an exception */
   var recordShredded: Record<string, ParquetData> = {};
   for (let field of schema.fieldList) {
@@ -96,14 +98,14 @@ export const shredRecord = function(schema: ParquetSchema, record: Record<string
   }
 };
 
-function shredRecordInternal(fields: Record<string, ParquetField>, record: Record<string, object[]> | null, data: Record<string, ParquetData>, rlvl: number, dlvl: number) {
+function shredRecordInternal(fields: Record<string, ParquetField>, record: Record<string, any> | Record<string, any[]> | null, data: Record<string, ParquetData>, rlvl: number, dlvl: number) {
   for (let fieldName in fields) {
     const field = fields[fieldName];
     const fieldType = field.originalType || field.primitiveType;
     const path = field.path as string
 
     // fetch values
-    let values: Array<object> = [];
+    let values: Array<any> = [];
     if (record && (fieldName in record) && record[fieldName] !== undefined && record[fieldName] !== null) {
       if (record[fieldName].constructor === Array) {
         values = record[fieldName];
@@ -151,7 +153,7 @@ function shredRecordInternal(fields: Record<string, ParquetField>, record: Recor
             field.dLevelMax);
       } else {
         data[path].distinct_values.add(values[i]);
-        data[path].values.push(parquet_types.toPrimitive(fieldType, values[i]));
+        data[path].values.push(parquet_types.toPrimitive(fieldType as string, values[i]));
         data[path].rlevels.push(rlvl_i);
         data[path].dlevels.push(field.dLevelMax);
         data[path].count += 1;
