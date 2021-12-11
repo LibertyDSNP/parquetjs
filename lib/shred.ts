@@ -40,7 +40,9 @@ interface RecordBuffer {
   pages: Record<string,object>
 }
 
-export const shredRecord = function(schema: ParquetSchema, record: Record<string, unknown | unknown[]>, buffer: RecordBuffer) {
+type RecordTypes = string | number | boolean
+
+export const shredRecord = function(schema: ParquetSchema, record: Record<string, RecordTypes | RecordTypes[]>, buffer: RecordBuffer) {
   /* shred the record, this may raise an exception */
   var recordShredded: Record<string, ParquetData> = {};
   for (let field of schema.fieldList) {
@@ -97,7 +99,7 @@ export const shredRecord = function(schema: ParquetSchema, record: Record<string
   }
 };
 
-function shredRecordInternal(fields: Record<string, ParquetField>, record: Record<string, any | any[]> | null, data: Record<string, ParquetData>, rlvl: number, dlvl: number) {
+function shredRecordInternal(fields: Record<string, ParquetField>, record: Record<string, RecordTypes | RecordTypes[]> | null, data: Record<string, ParquetData>, rlvl: number, dlvl: number) {
   for (let fieldName in fields) {
     const field = fields[fieldName];
     const fieldType = field.originalType || field.primitiveType;
