@@ -1,16 +1,22 @@
-'use strict';
-const fs = require('fs');
-const thrift = require('thrift');
-const parquet_thrift = require('../gen-nodejs/parquet_types')
-
+import { TTransportCallback } from "thrift";
+import thrift from "thrift"
+import fs from 'fs'
+import parquet_thrift from '../gen-nodejs/parquet_types'
 
 /** We need to use a patched version of TFramedTransport where
   * readString returns the original buffer instead of a string if the 
   * buffer can not be safely encoded as utf8 (see http://bit.ly/2GXeZEF)
   */
-
+ 
 class fixedTFramedTransport extends thrift.TFramedTransport {
-  readString(len) {
+  inBuf: Buffer
+  readPos: number
+  constructor(inBuf: Buffer) {
+    super(inBuf)
+    this.inBuf = inBuf
+    this.readPos = 0
+  }
+  readString(len: number) {
     this.ensureAvailable(len);
     var buffer = this.inBuf.slice(this.readPos, this.readPos + len);
     var str = this.inBuf.toString('utf8', this.readPos, this.readPos + len);
@@ -31,9 +37,9 @@ const PageLocation = parquet_thrift.PageLocation.prototype = [];
 PageLocation.write = previousPageLocation.write;
 PageLocation.read = previousPageLocation.read;
 
-const getterSetter = index => ({
-  get: function() { return this[index]; },
-  set: function(value) { return this[index] = value;}
+const getterSetter = (index: number) => ({
+  get: function(): number { return this[index]; },
+  set: function(value: number): number { return this[index] = value;}
 });
 
 Object.defineProperty(PageLocation,'offset', getterSetter(0));
@@ -41,7 +47,7 @@ Object.defineProperty(PageLocation,'compressed_page_size', getterSetter(1));
 Object.defineProperty(PageLocation,'first_row_index', getterSetter(2));
 
 
-exports.force32 = function() {
+export const force32 = function() {
   const protocol = thrift.TCompactProtocol.prototype;
   protocol.zigzagToI64 = protocol.zigzagToI32;
   protocol.readVarint64 = protocol.readVarint32 = function() {
@@ -49,7 +55,7 @@ exports.force32 = function() {
     let shift = 0;
     let b;
     while (true) {
-      b = this.trans.readByte();
+      b = protocol.readByte();
       lo = lo | ((b & 0x7f) << shift);
       shift += 7;
       if (!(b & 0x80)) {
@@ -63,12 +69,14 @@ exports.force32 = function() {
 /**
  * Helper function that serializes a thrift object into a buffer
  */
-exports.serializeThrift = function(obj) {
-  let output = []
+export const serializeThrift = function(obj: thrift.Thrift.TApplicationException) {
+  let output:Array<Uint8Array> = []
 
-  let transport = new thrift.TBufferedTransport(null, function (buf) {
-    output.push(buf)
-  })
+  const callBack:TTransportCallback = function (buf: Buffer | undefined) {
+    output.push(buf as Buffer)
+  }
+
+  let transport = new thrift.TBufferedTransport(undefined, callBack)
 
   let protocol = new thrift.TCompactProtocol(transport)
   obj.write(protocol)
@@ -77,7 +85,7 @@ exports.serializeThrift = function(obj) {
   return Buffer.concat(output)
 }
 
-exports.decodeThrift = function(obj, buf, offset) {
+export const decodeThrift = function(obj: thrift.Thrift.TApplicationException, buf: Buffer, offset: number) {
   if (!offset) {
     offset = 0;
   }
@@ -92,7 +100,7 @@ exports.decodeThrift = function(obj, buf, offset) {
 /**
  * Get the number of bits required to store a given value
  */
-exports.getBitWidth = function(val) {
+export const getBitWidth = function(val: number) {
   if (val === 0) {
     return 0;
   } else {
@@ -103,7 +111,7 @@ exports.getBitWidth = function(val) {
 /**
  * FIXME not ideal that this is linear
  */
-exports.getThriftEnum = function(klass, value) {
+export const getThriftEnum = function(klass: Array<unknown>, value: unknown) {
   for (let k in klass) {
     if (klass[k] === value) {
       return k;
@@ -113,7 +121,7 @@ exports.getThriftEnum = function(klass, value) {
   throw 'Invalid ENUM value';
 }
 
-exports.fopen = function(filePath) {
+export const fopen = function(filePath: string | Buffer | URL) {
   return new Promise((resolve, reject) => {
     fs.open(filePath, 'r', (err, fd) => {
       if (err) {
@@ -125,7 +133,7 @@ exports.fopen = function(filePath) {
   });
 }
 
-exports.fstat = function(filePath) {
+export const fstat = function(filePath: string | Buffer | URL) {
   return new Promise((resolve, reject) => {
     fs.stat(filePath, (err, stat) => {
       if (err) {
@@ -137,7 +145,7 @@ exports.fstat = function(filePath) {
   });
 }
 
-exports.fread = function(fd, position, length) {
+export const fread = function(fd: number, position: number | null, length: number) {
   let buffer = Buffer.alloc(length);
 
   return new Promise((resolve, reject) => {
@@ -151,7 +159,7 @@ exports.fread = function(fd, position, length) {
   });
 }
 
-exports.fclose = function(fd) {
+export const fclose = function(fd: number) {
   return new Promise((resolve, reject) => {
     fs.close(fd, (err) => {
       if (err) {
@@ -163,31 +171,31 @@ exports.fclose = function(fd) {
   });
 }
 
-exports.oswrite = function(os, buf) {
+export const oswrite = function(os, buf: Buffer) {
   return new Promise((resolve, reject) => {
-    os.write(buf, (err) => {
+    os.write(buf, (err: Error) => {
       if (err) {
         reject(err);
       } else {
-        resolve();
+        resolve(err);
       }
     });
   });
 }
 
-exports.osend = function(os) {
+export const osend = function(os) {
   return new Promise((resolve, reject) => {
-    os.end((err) => {
+    os.end((err: Error) => {
       if (err) {
         reject(err);
       } else {
-        resolve();
+        resolve(err);
       }
     });
   });
 }
 
-exports.osopen = function(path, opts) {
+export const osopen = function(path: string | Buffer | URL, opts: string) {
   return new Promise((resolve, reject) => {
     let outputStream = fs.createWriteStream(path, opts);
 
@@ -201,7 +209,7 @@ exports.osopen = function(path, opts) {
   });
 }
 
-exports.fieldIndexOf = function(arr, elem) {
+export const fieldIndexOf = function(arr: Array<Array<unknown>>, elem: Array<unknown>) {
   for (let j = 0; j < arr.length; ++j) {
     if (arr[j].length !== elem.length) {
       continue;
