@@ -44,6 +44,15 @@ export type OriginalType =
     | 'BSON' // 20
     | 'INTERVAL'; // 21
 
+export interface Statistics {
+    max: number
+    min: number
+    null_count: number
+    distinct_count: number
+    max_value: number
+    min_value: number
+}
+
 export interface SchemaDefinition {
     [string: string]: FieldDefinition;
 }
@@ -56,14 +65,14 @@ export interface FieldDefinition {
     optional?: boolean;
     repeated?: boolean;
     fields?: SchemaDefinition;
-    statistics?: any
+    statistics?: Statistics
 }
 
 export interface ParquetField {
     name: string;
     path: string[];
     // key: string;
-    statistics?: any
+    statistics?: Statistics
     primitiveType?: PrimitiveType;
     originalType?: OriginalType;
     repetitionType: RepetitionType;

@@ -1,7 +1,7 @@
 import * as parquet_codec from './codec';
 import * as parquet_compression from './compression'
 import * as parquet_types from './types'
-import { SchemaDefinition, ParquetField, RepetitionType, ParquetType } from './types/types'
+import { SchemaDefinition, ParquetField, RepetitionType } from './types/types'
 
 const PARQUET_COLUMN_KEY_SEPARATOR = '.';
 
