@@ -1,4 +1,4 @@
-import parquet_util from "../util";
+import * as parquet_util from "../util";
 import parquet_thrift from "../../gen-nodejs/parquet_types";
 import sbbf from "../bloom/sbbf";
 import { ParquetEnvelopeReader } from "../reader"

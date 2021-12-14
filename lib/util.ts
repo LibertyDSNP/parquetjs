@@ -1,6 +1,6 @@
 import { TTransportCallback } from "thrift";
 import thrift from "thrift"
-import fs from 'fs'
+import fs, { WriteStream } from 'fs'
 import parquet_thrift from '../gen-nodejs/parquet_types'
 
 /** We need to use a patched version of TFramedTransport where
@@ -16,11 +16,13 @@ class fixedTFramedTransport extends thrift.TFramedTransport {
     this.inBuf = inBuf
     this.readPos = 0
   }
-  readString(len: number) {
+  //@ts-ignore
+  readString(len = 0): string {
     this.ensureAvailable(len);
     var buffer = this.inBuf.slice(this.readPos, this.readPos + len);
     var str = this.inBuf.toString('utf8', this.readPos, this.readPos + len);
     this.readPos += len;
+    //@ts-ignore
     return (Buffer.from(str).equals(buffer)) ? str : buffer;
   }
 }
@@ -33,13 +35,16 @@ class fixedTFramedTransport extends thrift.TFramedTransport {
   */
 
 const previousPageLocation = parquet_thrift.PageLocation.prototype;
+//@ts-ignore
 const PageLocation = parquet_thrift.PageLocation.prototype = [];
+//@ts-ignore
 PageLocation.write = previousPageLocation.write;
+//@ts-ignore
 PageLocation.read = previousPageLocation.read;
 
 const getterSetter = (index: number) => ({
-  get: function(): number { return this[index]; },
-  set: function(value: number): number { return this[index] = value;}
+  get: function(this: Array<number>): number { return this[index]; },
+  set: function(this: Array<number>, value: number): number { return this[index] = value;}
 });
 
 Object.defineProperty(PageLocation,'offset', getterSetter(0));
@@ -49,7 +54,9 @@ Object.defineProperty(PageLocation,'first_row_index', getterSetter(2));
 
 export const force32 = function() {
   const protocol = thrift.TCompactProtocol.prototype;
+  //@ts-ignore
   protocol.zigzagToI64 = protocol.zigzagToI32;
+  //@ts-ignore
   protocol.readVarint64 = protocol.readVarint32 = function() {
     let lo = 0;
     let shift = 0;
@@ -69,7 +76,7 @@ export const force32 = function() {
 /**
  * Helper function that serializes a thrift object into a buffer
  */
-export const serializeThrift = function(obj: thrift.Thrift.TApplicationException) {
+export const serializeThrift = function(obj: any) {
   let output:Array<Uint8Array> = []
 
   const callBack:TTransportCallback = function (buf: Buffer | undefined) {
@@ -85,9 +92,9 @@ export const serializeThrift = function(obj: thrift.Thrift.TApplicationException
   return Buffer.concat(output)
 }
 
-export const decodeThrift = function(obj: thrift.Thrift.TApplicationException, buf: Buffer, offset: number) {
+export const decodeThrift = function(obj: any, buf: Buffer, offset?: number) {
   if (!offset) {
-    offset = 0;
+    offset = 0
   }
 
   var transport = new fixedTFramedTransport(buf);
@@ -171,9 +178,9 @@ export const fclose = function(fd: number) {
   });
 }
 
-export const oswrite = function(os, buf: Buffer) {
+export const oswrite = function(os: WriteStream, buf: Buffer) {
   return new Promise((resolve, reject) => {
-    os.write(buf, (err: Error) => {
+    os.write(buf, (err: Error | undefined | null) => {
       if (err) {
         reject(err);
       } else {
@@ -183,7 +190,7 @@ export const oswrite = function(os, buf: Buffer) {
   });
 }
 
-export const osend = function(os) {
+export const osend = function(os: WriteStream) {
   return new Promise((resolve, reject) => {
     os.end((err: Error) => {
       if (err) {
