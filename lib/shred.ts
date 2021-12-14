@@ -111,7 +111,7 @@ function shredRecordInternal(fields: Record<string, ParquetField>, record: Recor
       if (record[fieldName].constructor === Array) {
         values = record[fieldName];
       } else {
-        values.push(record[fieldName];
+        values.push(record[fieldName]);
       }
     }
 
