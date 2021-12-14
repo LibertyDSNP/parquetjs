@@ -1,7 +1,7 @@
 import { TTransportCallback } from "thrift";
 import thrift from "thrift"
 import fs, { WriteStream } from 'fs'
-import parquet_thrift from '../gen-nodejs/parquet_types'
+import * as parquet_thrift from '../gen-nodejs/parquet_types'
 
 /** We need to use a patched version of TFramedTransport where
   * readString returns the original buffer instead of a string if the 
@@ -76,7 +76,7 @@ export const force32 = function() {
 /**
  * Helper function that serializes a thrift object into a buffer
  */
-export const serializeThrift = function(obj: any) {
+export const serializeThrift = function(obj: parquet_thrift.BloomFilterHeader) {
   let output:Array<Uint8Array> = []
 
   const callBack:TTransportCallback = function (buf: Buffer | undefined) {
@@ -86,13 +86,14 @@ export const serializeThrift = function(obj: any) {
   let transport = new thrift.TBufferedTransport(undefined, callBack)
 
   let protocol = new thrift.TCompactProtocol(transport)
+  //@ts-ignore
   obj.write(protocol)
   transport.flush()
 
   return Buffer.concat(output)
 }
 
-export const decodeThrift = function(obj: any, buf: Buffer, offset?: number) {
+export const decodeThrift = function(obj: parquet_thrift.BloomFilterHeader, buf: Buffer, offset?: number) {
   if (!offset) {
     offset = 0
   }
@@ -100,6 +101,7 @@ export const decodeThrift = function(obj: any, buf: Buffer, offset?: number) {
   var transport = new fixedTFramedTransport(buf);
   transport.readPos = offset;
   var protocol = new thrift.TCompactProtocol(transport);
+  //@ts-ignore
   obj.read(protocol);
   return transport.readPos - offset;
 }
