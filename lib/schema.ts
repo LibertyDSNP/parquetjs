@@ -34,9 +34,9 @@ export class ParquetSchema {
 
     let n = this.fields;
     for (; path.length > 1; path.shift()) {
-      let field = n[path[0]].fields
-      if (isDefined(field)) {
-        n = field;
+      let fields = n[path[0]]?.fields
+      if (isDefined(fields)) {
+        n = fields;
       }
     }
 
@@ -56,9 +56,9 @@ export class ParquetSchema {
     for (; path.length > 0; path.shift()) {
       branch.push(n[path[0]]);
 
-      let field = n[path[0]].fields
-      if (path.length > 1 && isDefined(field)) {
-        n = field;
+      let fields = n[path[0]].fields
+      if (path.length > 1 && isDefined(fields)) {
+        n = fields;
       }
     }
 
@@ -124,15 +124,14 @@ function buildFields(schema: SchemaDefinition, rLevelParentMax?: number, dLevelP
               path.concat(name))
       };
       
+      if (opts.type == 'LIST' || opts.type == 'MAP') fieldList[name].originalType = opts.type;
+
       continue;
     }
 
-    let typeDef ;
-    /* field type */
-    if (!opts.type) {
-      throw 'invalid parquet type: ' + opts.type;
-    } else {
-      typeDef = parquet_types.PARQUET_LOGICAL_TYPES[opts.type];
+    const typeDef = opts.type ? parquet_types.PARQUET_LOGICAL_TYPES[opts.type] : undefined;
+    if (!typeDef) {
+      throw 'invalid parquet type: ' + (opts.type || "missing type");
     }
 
     /* field encoding */
@@ -177,9 +176,9 @@ function listFields(fields: Record<string, ParquetField>) {
   for (let k in fields) {
     list.push(fields[k]);
 
-    let field = fields[k].fields
-    if (fields[k].isNested && isDefined(field)) {
-      list = list.concat(listFields(field));
+    const nestedFields = fields[k].fields
+    if (fields[k].isNested && isDefined(nestedFields)) {
+      list = list.concat(listFields(nestedFields));
     }
   }
 

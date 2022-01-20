@@ -10,7 +10,7 @@ export type ParquetType = PrimitiveType | OriginalType;
 
 export type PrimitiveType =
 // Base Types
-    'BOOLEAN' // 0
+    |'BOOLEAN' // 0
     | 'INT32' // 1
     | 'INT64' // 2
     | 'INT96' // 3
@@ -22,9 +22,9 @@ export type PrimitiveType =
 export type OriginalType =
 // Converted Types
     | 'UTF8' // 0
-    // | 'MAP' // 1
+    | 'MAP' // 1
     // | 'MAP_KEY_VALUE' // 2
-    // | 'LIST' // 3
+     | 'LIST' // 3
     // | 'ENUM' // 4
     // | 'DECIMAL' // 5
     | 'DATE' // 6
