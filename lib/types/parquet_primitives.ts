@@ -3,7 +3,7 @@ import BSON = require('bson');
 import { OriginalType, ParquetType, PrimitiveType } from './types';
 
 export interface ParquetTypeKit {
-    primitiveType: PrimitiveType;
+    primitiveType?: PrimitiveType;
     originalType?: OriginalType;
     typeLength?: number;
     toPrimitive: Function;
@@ -136,6 +136,14 @@ export const PARQUET_LOGICAL_TYPES: Record<ParquetType, ParquetTypeKit> = {
         typeLength: 12,
         toPrimitive: toPrimitive_INTERVAL,
         fromPrimitive: fromPrimitive_INTERVAL
+    },
+    MAP: {
+        originalType: 'MAP',
+        toPrimitive: toPrimitive_MAP,
+    },
+    LIST: {
+        originalType: 'LIST',
+        toPrimitive: toPrimitive_LIST,
     }
 };
 
@@ -273,6 +281,14 @@ function toPrimitive_INT96(value: any) {
     }
 
     return v;
+}
+
+function toPrimitive_MAP(value: any) {
+    return value;
+}
+
+function toPrimitive_LIST(value: any) {
+    return value;
 }
 
 function toPrimitive_BYTE_ARRAY(value: any) {
