@@ -1,15 +1,14 @@
-'use strict';
-const Int64 = require('node-int64');
-const parquet_thrift = require('../gen-nodejs/parquet_types')
-const parquet_shredder = require('./shred')
-const parquet_util = require('./util')
-const parquet_schema = require('./schema')
-const parquet_codec = require('./codec')
-const parquet_compression = require('./compression')
-const parquet_types = require('./types');
-const BufferReader = require('./bufferReader');
-const bloomFilterReader = require('./bloomFilterIO/bloomFilterReader');
-const fetch = require('cross-fetch');
+import Int64 from 'node-int64';
+import parquet_thrift from '../gen-nodejs/parquet_types';
+import parquet_shredder from './shred';
+import parquet_util from './util';
+import parquet_schema from './schema';
+import * as parquet_codec from './codec';
+import * as parquet_compression from './compression';
+import * as parquet_types from './types';
+import BufferReader from './bufferReader';
+import * as bloomFilterReader from './bloomFilterIO/bloomFilterReader';
+import fetch from 'cross-fetch';
 
 const {
   getBloomFiltersFor,
@@ -38,13 +37,19 @@ const PARQUET_RDLVL_ENCODING = 'RLE';
  */
 class ParquetCursor  {
 
+  metadata: unknown;
+  envelopeReader: ParquetEnvelopeReader;
+  schema: unknown
+  columnList: unknown;
+  rowGroup: unknown;
+  rowGroupIndex: unknown;
   /**
    * Create a new parquet reader from the file metadata and an envelope reader.
    * It is usually not recommended to call this constructor directly except for
    * advanced and internal use cases. Consider using getCursor() on the
    * ParquetReader instead
    */
-  constructor(metadata, envelopeReader, schema, columnList) {
+  constructor(metadata: unknown, envelopeReader: ParquetEnvelopeReader, schema: unknown, columnList: unknown) {
     this.metadata = metadata;
     this.envelopeReader = envelopeReader;
     this.schema = schema;
@@ -221,7 +226,7 @@ class ParquetReader {
       columnList = [];
     }
 
-    columnList = columnList.map((x) => x.constructor === Array ? x : [x]);
+    columnList = columnList.map((x: Array<unknown>) => x.constructor === Array ? x : [x]);
 
     return new ParquetCursor(
         this.metadata,
