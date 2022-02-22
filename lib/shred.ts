@@ -1,6 +1,6 @@
 import * as parquet_types from './types'
-import * as parquet_schema from './schema'
-import { ParquetData, ParquetField, SchemaDefinition } from './types/types';
+import { ParquetSchema } from './schema'
+import { ParquetData, ParquetField } from './types/types';
 
 /**
  * 'Shred' a record into a list of <value, repetition_level, definition_level>
@@ -25,13 +25,6 @@ import { ParquetData, ParquetField, SchemaDefinition } from './types/types';
  *   }
  *
  */
-
-// Replace with imported Parquet Schema when merged with Typescript version of schema
-interface ParquetSchema {
-  schema: SchemaDefinition
-  fields: Record<string, ParquetField>
-  fieldList: Array<ParquetField>
-}
 
 interface RecordBuffer {
   columnData: Record<string, ParquetData>
@@ -182,7 +175,7 @@ function shredRecordInternal(fields: Record<string, ParquetField>, record: Recor
  *
  */
 
-export const materializeRecords = function(schema: parquet_schema.ParquetSchema, buffer: RecordBuffer, records?: Array<unknown>) {
+export const materializeRecords = function(schema: ParquetSchema, buffer: RecordBuffer, records?: Array<unknown>) {
   if (!records) {
     records = [];
   }
@@ -205,7 +198,7 @@ export const materializeRecords = function(schema: parquet_schema.ParquetSchema,
       let value = null;
       if (dLevel === field.dLevelMax) {
         value = parquet_types.fromPrimitive(
-            field.originalType || field.primitiveType,
+            (field.originalType || field.primitiveType) as string,
             values.next().value);
       }
 
