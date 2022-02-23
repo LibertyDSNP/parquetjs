@@ -156,9 +156,9 @@ export const PARQUET_LOGICAL_TYPES: PARQUET_LOGICAL_TYPES = {
  * Convert a value from it's native representation to the internal/underlying
  * primitive type
  */
-export function toPrimitive(type: string, value: unknown) {
-  if (!(type in PARQUET_LOGICAL_TYPES)) {
-    throw 'invalid type: ' + type;
+export function toPrimitive(type: string | undefined, value: unknown) {
+  if (type === undefined || !(type in PARQUET_LOGICAL_TYPES)) {
+    throw 'invalid type: ' + type || "undefined";
   }
 
   return PARQUET_LOGICAL_TYPES[type].toPrimitive(value);
@@ -168,9 +168,9 @@ export function toPrimitive(type: string, value: unknown) {
  * Convert a value from it's internal/underlying primitive representation to
  * the native representation
  */
-export function fromPrimitive(type: string, value: unknown) {
-  if (!(type in PARQUET_LOGICAL_TYPES)) {
-    throw 'invalid type: ' + type;
+export function fromPrimitive(type: string | undefined, value: unknown) {
+  if (type === undefined || !(type in PARQUET_LOGICAL_TYPES)) {
+    throw 'invalid type: ' + type || "undefined";
   }
   
   const typeFromPrimitive = PARQUET_LOGICAL_TYPES[type].fromPrimitive

@@ -37,8 +37,7 @@ export const shredRecord = function(schema: ParquetSchema, record: Record<string
   /* shred the record, this may raise an exception */
   var recordShredded: Record<string, ParquetData> = {};
   for (let field of schema.fieldList) {
-    let path = field.path as string
-    recordShredded[path] = {
+    recordShredded[field.path.join(',')] = {
       dlevels: [],
       rlevels: [],
       values: [],
@@ -57,7 +56,7 @@ export const shredRecord = function(schema: ParquetSchema, record: Record<string
     buffer.pages = {};
 
     for (let field of schema.fieldList) {
-      let path = field.path as string
+      let path = field.path.join(',')
       buffer.columnData[path] = {
         dlevels: [],
         rlevels: [],
@@ -72,7 +71,7 @@ export const shredRecord = function(schema: ParquetSchema, record: Record<string
   buffer.rowCount += 1;
   buffer.pageRowCount += 1;
   for (let field of schema.fieldList) {
-    let path = field.path as string
+    let path = field.path.join(',')
     let record = recordShredded[path];
     let column = buffer.columnData[path];
 
@@ -94,7 +93,7 @@ function shredRecordInternal(fields: Record<string, ParquetField>, record: Recor
   for (let fieldName in fields) {
     const field = fields[fieldName];
     const fieldType = field.originalType || field.primitiveType;
-    const path = field.path as string
+    const path = field.path.join(',')
 
     // fetch values
     let values: Array<unknown> = [];
@@ -175,7 +174,7 @@ function shredRecordInternal(fields: Record<string, ParquetField>, record: Recor
  *
  */
 
-export const materializeRecords = function(schema: ParquetSchema, buffer: RecordBuffer, records?: Array<unknown>) {
+export const materializeRecords = function(schema: ParquetSchema, buffer: RecordBuffer, records?: Array<Record<string, unknown>>) {
   if (!records) {
     records = [];
   }
@@ -198,7 +197,7 @@ export const materializeRecords = function(schema: ParquetSchema, buffer: Record
       let value = null;
       if (dLevel === field.dLevelMax) {
         value = parquet_types.fromPrimitive(
-            (field.originalType || field.primitiveType) as string,
+            field.originalType || field.primitiveType,
             values.next().value);
       }
 

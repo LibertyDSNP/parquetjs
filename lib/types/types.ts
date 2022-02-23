@@ -70,7 +70,7 @@ export interface FieldDefinition {
 
 export interface ParquetField {
     name: string;
-    path: string[] | string;
+    path: string[];
     statistics?: Statistics
     primitiveType?: PrimitiveType;
     originalType?: OriginalType;
