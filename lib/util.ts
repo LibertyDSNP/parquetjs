@@ -8,6 +8,7 @@ import * as parquet_thrift from '../gen-nodejs/parquet_types'
   * buffer can not be safely encoded as utf8 (see http://bit.ly/2GXeZEF)
   */
  
+// May not be needed anymore, Issue at https://github.com/LibertyDSNP/parquetjs/issues/41
 class fixedTFramedTransport extends thrift.TFramedTransport {
   inBuf: Buffer
   readPos: number
@@ -16,7 +17,7 @@ class fixedTFramedTransport extends thrift.TFramedTransport {
     this.inBuf = inBuf
     this.readPos = 0
   }
-  //@ts-ignore
+
   readString(len = 0): string {
     this.ensureAvailable(len);
     var buffer = this.inBuf.slice(this.readPos, this.readPos + len);
@@ -34,7 +35,8 @@ class fixedTFramedTransport extends thrift.TFramedTransport {
   * names for every PageLocation
   */
 
-const previousPageLocation = parquet_thrift.PageLocation.prototype;
+// Issue at https://github.com/LibertyDSNP/parquetjs/issues/42
+const previousPageLocation = new parquet_thrift.PageLocation();
 //@ts-ignore
 const PageLocation = parquet_thrift.PageLocation.prototype = [];
 //@ts-ignore
@@ -51,7 +53,7 @@ Object.defineProperty(PageLocation,'offset', getterSetter(0));
 Object.defineProperty(PageLocation,'compressed_page_size', getterSetter(1));
 Object.defineProperty(PageLocation,'first_row_index', getterSetter(2));
 
-
+// Dangerous code, investigate removal, Issue at https://github.com/LibertyDSNP/parquetjs/issues/43
 export const force32 = function() {
   const protocol = thrift.TCompactProtocol.prototype;
   //@ts-ignore
@@ -86,7 +88,7 @@ export const serializeThrift = function(obj: parquet_thrift.BloomFilterHeader) {
   let transport = new thrift.TBufferedTransport(undefined, callBack)
 
   let protocol = new thrift.TCompactProtocol(transport)
-  //@ts-ignore
+  //@ts-ignore, https://issues.apache.org/jira/browse/THRIFT-3872
   obj.write(protocol)
   transport.flush()
 
@@ -101,7 +103,7 @@ export const decodeThrift = function(obj: parquet_thrift.BloomFilterHeader, buf:
   var transport = new fixedTFramedTransport(buf);
   transport.readPos = offset;
   var protocol = new thrift.TCompactProtocol(transport);
-  //@ts-ignore
+  //@ts-ignore, https://issues.apache.org/jira/browse/THRIFT-3872
   obj.read(protocol);
   return transport.readPos - offset;
 }
