@@ -1,7 +1,10 @@
+import { ParquetEnvelopeReader } from "./reader"
+
 export interface BufferReaderOptions {
   maxSpan?: number,
   maxLength?: number,
   queueWait?: number
+  default_dictionary_size?: number;
 }
 
 interface BufferReaderQueueRow {
@@ -11,19 +14,15 @@ interface BufferReaderQueueRow {
   reject: unknown
 }
 
-interface EnvelopeReader {
-  readFn: (start: number, finish: number) => Promise<Buffer>
-}
-
 export default class BufferReader {
   maxSpan: number
   maxLength: number
   queueWait: number
   scheduled?: boolean
   queue: Array<BufferReaderQueueRow>
-  envelopeReader: EnvelopeReader
+  envelopeReader: ParquetEnvelopeReader
 
-  constructor(envelopeReader: EnvelopeReader, options: BufferReaderOptions) {
+  constructor(envelopeReader: ParquetEnvelopeReader, options: BufferReaderOptions) {
     options = options || {};
     this.envelopeReader = envelopeReader;
     this.maxSpan = options.maxSpan || 100000; // 100k

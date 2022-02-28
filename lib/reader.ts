@@ -7,7 +7,7 @@ import * as parquet_schema from './schema';
 import * as parquet_codec from './codec';
 import * as parquet_compression from './compression';
 import * as parquet_types from './types';
-import BufferReader, { BufferReaderOptions } from './bufferReader';
+import BufferReader , { BufferReaderOptions } from './bufferReader';
 import * as bloomFilterReader from './bloomFilterIO/bloomFilterReader';
 import fetch from 'cross-fetch';
 import { ColumnMetaData } from './types/types';
@@ -334,11 +334,11 @@ class ParquetReader {
  * rows from a parquet file use the ParquetReader instead
  */
 let ParquetEnvelopeReaderIdCounter = 0;
-class ParquetEnvelopeReader {
+export class ParquetEnvelopeReader {
   readFn: Function;
   close: Function;
   id: number;
-  fileSize: () => Promise<string|null>;
+  fileSize: number;
   default_dictionary_size: number;
 
 
@@ -423,7 +423,7 @@ class ParquetEnvelopeReader {
     return new ParquetEnvelopeReader(readFn, closeFn, filesize, options);
   }
 
-  constructor(readFn: Function, closeFn: Function, fileSize: () => Promise<string|null>, options: BufferReaderOptions) {
+  constructor(readFn: Function, closeFn: Function, fileSize: number, options: BufferReaderOptions) {
     options = options || {};
     this.readFn = readFn;
     this.id = ++ParquetEnvelopeReaderIdCounter;
