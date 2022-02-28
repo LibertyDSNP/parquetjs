@@ -26,7 +26,7 @@ import { ParquetData, ParquetField } from './types/types';
  *
  */
 
-interface RecordBuffer {
+export interface RecordBuffer {
   columnData: Record<string, ParquetData>
   rowCount: number,
   pageRowCount: number,

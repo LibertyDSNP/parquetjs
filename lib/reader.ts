@@ -1,14 +1,16 @@
 import Int64 from 'node-int64';
 import parquet_thrift from '../gen-nodejs/parquet_types';
-import parquet_shredder from './shred';
-import parquet_util from './util';
-import parquet_schema from './schema';
+import {RowGroup} from '../gen-nodejs/parquet_types';
+import * as parquet_shredder from './shred';
+import * as parquet_util from './util';
+import * as parquet_schema from './schema';
 import * as parquet_codec from './codec';
 import * as parquet_compression from './compression';
 import * as parquet_types from './types';
-import BufferReader from './bufferReader';
+import BufferReader, { BufferReaderOptions } from './bufferReader';
 import * as bloomFilterReader from './bloomFilterIO/bloomFilterReader';
 import fetch from 'cross-fetch';
+import { ColumnMetaData } from './types/types';
 
 const {
   getBloomFiltersFor,
@@ -37,19 +39,19 @@ const PARQUET_RDLVL_ENCODING = 'RLE';
  */
 class ParquetCursor  {
 
-  metadata: unknown;
+  metadata: parquet_thrift.FileMetaData;
   envelopeReader: ParquetEnvelopeReader;
-  schema: unknown
-  columnList: unknown;
-  rowGroup: unknown;
-  rowGroupIndex: unknown;
+  schema: parquet_schema.ParquetSchema;
+  columnList: Array<Array<unknown>>;
+  rowGroup: Array<unknown>;
+  rowGroupIndex: number;
   /**
    * Create a new parquet reader from the file metadata and an envelope reader.
    * It is usually not recommended to call this constructor directly except for
    * advanced and internal use cases. Consider using getCursor() on the
    * ParquetReader instead
    */
-  constructor(metadata: unknown, envelopeReader: ParquetEnvelopeReader, schema: unknown, columnList: unknown) {
+  constructor(metadata: parquet_thrift.FileMetaData, envelopeReader: ParquetEnvelopeReader, schema: parquet_schema.ParquetSchema, columnList: Array<Array<unknown>>) {
     this.metadata = metadata;
     this.envelopeReader = envelopeReader;
     this.schema = schema;
@@ -102,12 +104,12 @@ class ParquetReader {
    * Open the parquet file pointed to by the specified path and return a new
    * parquet reader
    */
-  static async openFile(filePath, options) {
+  static async openFile(filePath: string | Buffer | URL, options: BufferReaderOptions) {
     let envelopeReader = await ParquetEnvelopeReader.openFile(filePath, options);
     return this.openEnvelopeReader(envelopeReader, options);
   }
 
-  static async openBuffer(buffer, options) {
+  static async openBuffer(buffer: Buffer, options: BufferReaderOptions) {
     let envelopeReader = await ParquetEnvelopeReader.openBuffer(buffer, options);
     return this.openEnvelopeReader(envelopeReader, options);
   }
@@ -117,7 +119,7 @@ class ParquetReader {
    * The params have to include `Bucket` and `Key` to the file requested
    * This function returns a new parquet reader
    */
-  static async openS3(client, params, options) {
+  static async openS3(client, params, options: BufferReaderOptions) {
     let envelopeReader = await ParquetEnvelopeReader.openS3(client, params, options);
     return this.openEnvelopeReader(envelopeReader, options);
   }
@@ -128,7 +130,7 @@ class ParquetReader {
    * a `url` property.
    * This function returns a new parquet reader
    */
-  static async openUrl(params, options) {
+  static async openUrl(params, options: BufferReaderOptions) {
     let envelopeReader = await ParquetEnvelopeReader.openUrl(params, options);
     return this.openEnvelopeReader(envelopeReader, options);
   }
@@ -333,12 +335,18 @@ class ParquetReader {
  */
 let ParquetEnvelopeReaderIdCounter = 0;
 class ParquetEnvelopeReader {
+  readFn: Function;
+  close: Function;
+  id: number;
+  fileSize: () => Promise<string|null>;
+  default_dictionary_size: number;
 
-  static async openFile(filePath, options) {
+
+  static async openFile(filePath: string | Buffer | URL, options: BufferReaderOptions) {
     let fileStat = await parquet_util.fstat(filePath);
     let fileDescriptor = await parquet_util.fopen(filePath);
 
-    let readFn = (offset, length, file) => {
+    let readFn = (offset: number, length: number, file: boolean) => {
       if (file) {
         return Promise.reject('external references are not supported');
       }
@@ -351,8 +359,8 @@ class ParquetEnvelopeReader {
     return new ParquetEnvelopeReader(readFn, closeFn, fileStat.size, options);
   }
 
-  static async openBuffer(buffer, options) {
-    let readFn = (offset, length, file) => {
+  static async openBuffer(buffer: Buffer, options: BufferReaderOptions) {
+    let readFn = (offset: number, length: number, file: boolean) => {
       if (file) {
         return Promise.reject('external references are not supported');
       }
@@ -364,10 +372,10 @@ class ParquetEnvelopeReader {
     return new ParquetEnvelopeReader(readFn, closeFn, buffer.length, options);
   }
 
-  static async openS3(client, params, options) {
+  static async openS3(client, params, options: BufferReaderOptions) {
     let fileStat = async () => client.headObject(params).promise().then(d => d.ContentLength);
 
-    let readFn = async (offset, length, file) => {
+    let readFn = async (offset: number, length: number, file: boolean) => {
       if (file) {
         return Promise.reject('external references are not supported');
       }
@@ -382,7 +390,7 @@ class ParquetEnvelopeReader {
     return new ParquetEnvelopeReader(readFn, closeFn, fileStat, options);
   }
 
-  static async openUrl(params, options) {
+  static async openUrl(params, options: BufferReaderOptions) {
      if (typeof params === 'string')
       params = {url: params};
     if (!params.url)
@@ -399,7 +407,7 @@ class ParquetEnvelopeReader {
       return headers.get('Content-Length');
     };
 
-    let readFn = async (offset, length, file) => {
+    let readFn = async (offset: number, length: number, file: boolean) => {
       let url = file ? base+file : params.url;
       let range = `bytes=${offset}-${offset+length-1}`;
       let headers = Object.assign({}, defaultHeaders, {range});
@@ -415,7 +423,7 @@ class ParquetEnvelopeReader {
     return new ParquetEnvelopeReader(readFn, closeFn, filesize, options);
   }
 
-  constructor(readFn, closeFn, fileSize, options) {
+  constructor(readFn: Function, closeFn: Function, fileSize: () => Promise<string|null>, options: BufferReaderOptions) {
     options = options || {};
     this.readFn = readFn;
     this.id = ++ParquetEnvelopeReaderIdCounter;
@@ -428,7 +436,7 @@ class ParquetEnvelopeReader {
     }
   }
 
-  read(offset, length, file) {
+  read(offset: number, length: number, file: boolean) {
     return this.readFn(offset, length, file);
   }
 
@@ -558,21 +566,23 @@ class ParquetEnvelopeReader {
     return parquet_shredder.materializeRecords(this.schema, data, records);
   }
 
-  async readRowGroup(schema, rowGroup, columnList) {
-    var buffer = {
+  async readRowGroup(schema: parquet_schema.ParquetSchema, rowGroup: RowGroup, columnList: Array<Array<unknown>>) {
+    var buffer: parquet_shredder.RecordBuffer = {
       rowCount: +rowGroup.num_rows,
-      columnData: {}
+      columnData: {},
+      pageRowCount: 0,
+      pages: {}
     };
 
     for (let colChunk of rowGroup.columns) {
-      const colMetadata = colChunk.meta_data;
+      const colMetadata = colChunk.meta_data as ColumnMetaData;
       const colKey = colMetadata.path_in_schema;
 
       if (columnList.length > 0 && parquet_util.fieldIndexOf(columnList, colKey) < 0) {
         continue;
       }
 
-      buffer.columnData[colKey] = await this.readColumnChunk(schema, colChunk);
+      buffer.columnData[colKey.join(',')] = await this.readColumnChunk(schema, colChunk);
     }
 
     return buffer;

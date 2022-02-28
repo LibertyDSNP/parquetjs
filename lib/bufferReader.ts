@@ -1,4 +1,4 @@
-interface BufferReaderOptions {
+export interface BufferReaderOptions {
   maxSpan?: number,
   maxLength?: number,
   queueWait?: number
