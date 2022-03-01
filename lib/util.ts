@@ -3,6 +3,7 @@ import thrift from "thrift"
 import fs, { WriteStream } from 'fs'
 import * as parquet_thrift from '../gen-nodejs/parquet_types'
 import { NewFileMetaData } from './types/types'
+import { streamOptions } from "./types/types";
 
 /**
  * We need to patch Thrift's TFramedTransport class bc the TS type definitions
@@ -167,7 +168,7 @@ export const osend = function(os: WriteStream) {
   });
 }
 
-export const osopen = function(path: string | Buffer | URL, opts: string) {
+export const osopen = function(path: string | Buffer | URL, opts?: string | streamOptions): Promise<WriteStream> {
   return new Promise((resolve, reject) => {
     let outputStream = fs.createWriteStream(path, opts);
 

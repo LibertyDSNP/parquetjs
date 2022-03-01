@@ -224,3 +224,16 @@ export class NewPageHeader extends parquet_thrift.PageHeader {
   }
   
   
+export type streamOptions = {
+    rowGroupSize?: number;
+    
+    flags?: string;
+    encoding?: BufferEncoding;
+    fd?: number;
+    mode?: number;
+    autoClose?: boolean;
+    emitClose?: boolean;
+    start?: number;
+    highWaterMark?: number;
+  }
+  

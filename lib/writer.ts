@@ -1,14 +1,16 @@
-'use strict';
-const stream = require('stream');
-const parquet_thrift = require('../gen-nodejs/parquet_types')
-const parquet_shredder = require('./shred')
-const parquet_util = require('./util')
-const parquet_codec = require('./codec')
-const parquet_compression = require('./compression')
-const parquet_types = require('./types');
-const bloomFilterWriter = require("./bloomFilterIO/bloomFilterWriter")
+import stream from 'stream'
+import parquet_thrift from '../gen-nodejs/parquet_types'
+import * as parquet_shredder from './shred'
+import * as parquet_util from './util'
+import * as parquet_codec from './codec'
+import * as parquet_compression from './compression'
+import * as parquet_types from './types'
+import * as bloomFilterWriter from "./bloomFilterIO/bloomFilterWriter"
+import { streamOptions } from './types/types'
 
-const Long = require('long');
+import Long from 'long'
+import { ParquetSchema } from './schema'
+import { WriteStream } from 'fs'
 
 /**
  * Parquet File Magic String
@@ -39,11 +41,18 @@ const PARQUET_RDLVL_ENCODING = 'RLE';
  */
 class ParquetWriter {
 
+  schema: ParquetSchema;
+  envelopeWriter: ParquetEnvelopeWriter;
+  rowBuffer: unknown;
+  rowGroupSize: number;
+  closed: boolean;
+  userMetadata: unknown;
+
   /**
    * Convenience method to create a new buffered parquet writer that writes to
    * the specified file
    */
-  static async openFile(schema, path, opts) {
+  static async openFile(schema: ParquetSchema, path: string | Buffer | URL, opts?: string | streamOptions) {
     let outputStream = await parquet_util.osopen(path, opts);
     return ParquetWriter.openStream(schema, outputStream, opts);
   }
@@ -52,7 +61,7 @@ class ParquetWriter {
    * Convenience method to create a new buffered parquet writer that writes to
    * the specified stream
    */
-  static async openStream(schema, outputStream, opts) {
+  static async openStream(schema: ParquetSchema, outputStream: WriteStream, opts?: string | streamOptions) {
     if (!opts) {
       opts = {};
     }
@@ -68,11 +77,11 @@ class ParquetWriter {
   /**
    * Create a new buffered parquet writer for a given envelope writer
    */
-  constructor(schema, envelopeWriter, opts) {
+  constructor(schema: ParquetSchema, envelopeWriter: ParquetEnvelopeWriter, opts?: string | streamOptions) {
     this.schema = schema;
     this.envelopeWriter = envelopeWriter;
     this.rowBuffer = {};
-    this.rowGroupSize = opts.rowGroupSize || PARQUET_DEFAULT_ROW_GROUP_SIZE;
+    this.rowGroupSize = (opts as streamOptions).rowGroupSize || PARQUET_DEFAULT_ROW_GROUP_SIZE;
     this.closed = false;
     this.userMetadata = {};
 
@@ -179,7 +188,7 @@ class ParquetEnvelopeWriter {
   /**
    * Create a new parquet envelope writer that writes to the specified stream
    */
-  static async openStream(schema, outputStream, opts) {
+  static async openStream(schema: ParquetSchema, outputStream: WriteStream, opts?: string | streamOptions) {
     let writeFn = parquet_util.oswrite.bind(undefined, outputStream);
     let closeFn = parquet_util.osend.bind(undefined, outputStream);
     return new ParquetEnvelopeWriter(schema, writeFn, closeFn, 0, opts);
