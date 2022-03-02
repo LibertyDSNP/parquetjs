@@ -1,7 +1,8 @@
 // Lifted from https://github.com/kbajalc/parquets
 
-import { RowGroup } from "gen-nodejs/parquet_types";
+import { Statistics } from "gen-nodejs/parquet_types";
 import SplitBlockBloomFilter from "lib/bloom/sbbf";
+import { Options } from "lib/codec/types";
 
 export type ParquetCodec = 'PLAIN' | 'RLE';
 export type ParquetCompression = 'UNCOMPRESSED' | 'GZIP' | 'SNAPPY' | 'LZO' | 'BROTLI' | 'LZ4';
@@ -43,15 +44,6 @@ export type OriginalType =
     | 'JSON' // 19
     | 'BSON' // 20
     | 'INTERVAL'; // 21
-
-export interface Statistics {
-    max: number
-    min: number
-    null_count: number
-    distinct_count: number
-    max_value: number
-    min_value: number
-}
 
 export interface SchemaDefinition {
     [string: string]: FieldDefinition;
@@ -142,3 +134,16 @@ export interface BloomFilterData {
     columnName: string,
     RowGroupIndex: number,
 };
+
+export interface DecodeOptions {
+    rLevelMax: number,
+    dLevelMax: number,
+    compression?: string,
+    column: Options,
+    type: string,
+    rawStatistics: Statistics,
+}
+
+export interface Parameter {
+    url: string;
+}
