@@ -1,6 +1,6 @@
 // Lifted from https://github.com/kbajalc/parquets
 
-import { Statistics, OffsetIndex, ColumnIndex, PageType, DataPageHeader, DataPageHeaderV2, DictionaryPageHeader, IndexPageHeader } from "gen-nodejs/parquet_types";
+import { Statistics, OffsetIndex, ColumnIndex, PageType, DataPageHeader, DataPageHeaderV2, DictionaryPageHeader, IndexPageHeader } from "../../gen-nodejs/parquet_types";
 import SplitBlockBloomFilter from "lib/bloom/sbbf";
 import { Options } from "lib/codec/types";
 
@@ -132,6 +132,13 @@ export interface ColumnData {
     file_path: string,
     file_offset: Offset,
     meta_data: ColumnMetaData
+    offset_index_length?: number;
+    column_index_length?: number;
+    encrypted_column_metadata?: Buffer;
+    offsetIndex?: OffsetIndex;
+    offset_index_offset?: number;
+    columnIndex?: ColumnIndex;
+    column_index_offset?: number;
 }
 
 export interface ColumnChunkData {
@@ -139,7 +146,7 @@ export interface ColumnChunkData {
     column: ColumnData
 }
 
-export declare class FileMetaData {
+export interface FileMetaData {
     version: number;
     schema: SchemaElement[];
     row_groups: RowGroup[];
@@ -148,8 +155,6 @@ export declare class FileMetaData {
     footer_signing_key_metadata?: Buffer;
     num_rows: number;
     json: JSON;
-    constructor(args?: {});
-
 }
 
 export declare class SchemaElement {
@@ -165,7 +170,7 @@ export declare class SchemaElement {
 }
 
 export declare class RowGroup {
-    columns: ColumnChunk[];
+    columns: ColumnData[];
     num_rows: number;
     ordinal?: number;
 }
