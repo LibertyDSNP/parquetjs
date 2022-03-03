@@ -1,10 +1,14 @@
+import { Statistics } from "gen-nodejs/parquet_types"
 import { ParquetEnvelopeReader } from "./reader"
+import { FileMetaData } from "./types/types"
 
 export interface BufferReaderOptions {
   maxSpan?: number,
   maxLength?: number,
   queueWait?: number
   default_dictionary_size?: number;
+  metadata?: FileMetaData
+  rawStatistics?: Statistics
 }
 
 interface BufferReaderQueueRow {

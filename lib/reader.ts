@@ -1,6 +1,5 @@
 import Int64 from 'node-int64';
 import parquet_thrift from '../gen-nodejs/parquet_types';
-import {RowGroup} from '../gen-nodejs/parquet_types';
 import * as parquet_shredder from './shred';
 import * as parquet_util from './util';
 import * as parquet_schema from './schema';
@@ -10,8 +9,9 @@ import * as parquet_types from './types';
 import BufferReader , { BufferReaderOptions } from './bufferReader';
 import * as bloomFilterReader from './bloomFilterIO/bloomFilterReader';
 import fetch from 'cross-fetch';
-import { ColumnMetaData, DecodeOptions, Parameter, ParquetField, Statistics } from './types/types';
+import { ColumnMetaData, DecodeOptions, Parameter, ColumnChunk, RowGroup, FileMetaData, Dictionary, PageHeader, PageData } from './types/types';
 import { Cursor } from './codec/types';
+import {  KeyValue, PageLocation } from 'gen-nodejs/parquet_types';
 
 const {
   getBloomFiltersFor,
@@ -40,7 +40,7 @@ const PARQUET_RDLVL_ENCODING = 'RLE';
  */
 class ParquetCursor  {
 
-  metadata: parquet_thrift.FileMetaData;
+  metadata?: FileMetaData;
   envelopeReader: ParquetEnvelopeReader;
   schema: parquet_schema.ParquetSchema;
   columnList: Array<Array<unknown>>;
@@ -52,7 +52,7 @@ class ParquetCursor  {
    * advanced and internal use cases. Consider using getCursor() on the
    * ParquetReader instead
    */
-  constructor(metadata: parquet_thrift.FileMetaData, envelopeReader: ParquetEnvelopeReader, schema: parquet_schema.ParquetSchema, columnList: Array<Array<unknown>>) {
+  constructor(envelopeReader: ParquetEnvelopeReader, schema: parquet_schema.ParquetSchema, columnList: Array<Array<unknown>>, metadata?: FileMetaData) {
     this.metadata = metadata;
     this.envelopeReader = envelopeReader;
     this.schema = schema;
@@ -66,14 +66,15 @@ class ParquetCursor  {
    * of the file was reached
    */
   async next() {
+    let metadata = this.metadata as FileMetaData;
     if (this.rowGroup.length === 0) {
-      if (this.rowGroupIndex >= this.metadata.row_groups.length) {
+      if (this.rowGroupIndex >= metadata.row_groups.length) {
         return null;
       }
 
       let rowBuffer = await this.envelopeReader.readRowGroup(
           this.schema,
-          this.metadata.row_groups[this.rowGroupIndex],
+          (this.metadata as FileMetaData).row_groups[this.rowGroupIndex],
           this.columnList);
 
       this.rowGroup = parquet_shredder.materializeRecords(this.schema, rowBuffer);
@@ -102,7 +103,7 @@ class ParquetCursor  {
 class ParquetReader {
 
   envelopeReader: ParquetEnvelopeReader | null;
-  metadata: parquet_thrift.FileMetaData | null;
+  metadata: FileMetaData | null;
   schema: parquet_schema.ParquetSchema
 
   /**
@@ -140,7 +141,7 @@ class ParquetReader {
     return this.openEnvelopeReader(envelopeReader, options);
   }
 
-  static async openEnvelopeReader(envelopeReader: ParquetEnvelopeReader, opts: unknown) {
+  static async openEnvelopeReader(envelopeReader: ParquetEnvelopeReader, opts: BufferReaderOptions) {
     if (opts && opts.metadata) {
       return new ParquetReader(opts.metadata, envelopeReader, opts);
     }
@@ -162,7 +163,7 @@ class ParquetReader {
    * and internal use cases. Consider using one of the open{File,Buffer} methods
    * instead
    */
-  constructor(metadata: parquet_thrift.FileMetaData, envelopeReader: ParquetEnvelopeReader, opts: unknown) {
+  constructor(metadata: FileMetaData, envelopeReader: ParquetEnvelopeReader, opts: BufferReaderOptions) {
     opts = opts || {};
     if (metadata.version != PARQUET_VERSION) {
       throw 'invalid parquet version';
@@ -236,7 +237,6 @@ class ParquetReader {
     columnList = columnList.map((x: Array<unknown>) => x.constructor === Array ? x : [x]);
 
     return new ParquetCursor(
-        this.metadata as parquet_thrift.FileMetaData,
         this.envelopeReader as ParquetEnvelopeReader,
         this.schema,
         columnList);
@@ -256,7 +256,7 @@ class ParquetReader {
    * not neccessarily equal to the number of rows in each column.
    */
   getRowCount() {
-    return (this.metadata as parquet_thrift.FileMetaData).num_rows;
+    return (this.metadata as FileMetaData).num_rows;
   }
 
   /**
@@ -270,8 +270,8 @@ class ParquetReader {
    * Returns the user (key/value) metadata for this file
    */
   getMetadata() {
-    let md = {};
-    for (let kv of (this.metadata as parquet_thrift.FileMetaData).key_value_metadata as parquet_thrift.KeyValue[]) {
+    let md: Record<string, unknown> = {};
+    for (let kv of (this.metadata as FileMetaData).key_value_metadata as KeyValue[]) {
       md[kv.key] = kv.value;
     }
 
@@ -326,7 +326,7 @@ class ParquetReader {
     this.metadata = null;
   }
 
-  decodePages(buffer: Buffer, opts) {
+  decodePages(buffer: Buffer, opts: BufferReaderOptions) {
     return decodePages(buffer,opts);
   }
 
@@ -343,9 +343,9 @@ export class ParquetEnvelopeReader {
   readFn: Function;
   close: Function;
   id: number;
-  fileSize: number;
+  fileSize: Function | number;
   default_dictionary_size: number;
-  metadata?: parquet_thrift.FileMetaData;
+  metadata?: FileMetaData;
   schema?: parquet_schema.ParquetSchema
 
 
@@ -427,10 +427,10 @@ export class ParquetEnvelopeReader {
 
     let closeFn = () => ({});
 
-    return new ParquetEnvelopeReader(readFn, closeFn, Number(filesize), options);
+    return new ParquetEnvelopeReader(readFn, closeFn, filesize, options);
   }
 
-  constructor(readFn: Function, closeFn: Function, fileSize: number, options: BufferReaderOptions, metadata?: parquet_thrift.FileMetaData) {
+  constructor(readFn: Function, closeFn: Function, fileSize: Function | number, options: BufferReaderOptions, metadata?: FileMetaData) {
     options = options || {};
     this.readFn = readFn;
     this.id = ++ParquetEnvelopeReaderIdCounter;
@@ -444,12 +444,12 @@ export class ParquetEnvelopeReader {
     }
   }
 
-  read(offset: number, length: number, file?: boolean) {
+  read(offset: number, length: number, file?: string) {
     return this.readFn(offset, length, file);
   }
 
   readHeader() {
-    return this.read(0, PARQUET_MAGIC.length).then(buf => {
+    return this.read(0, PARQUET_MAGIC.length).then((buf: Buffer) => {
 
       if (buf.toString() != PARQUET_MAGIC) {
         throw 'not valid parquet file'
@@ -458,17 +458,19 @@ export class ParquetEnvelopeReader {
   }
 
   // Helper function to get the column object for a particular path and row_group
-  getColumn(path: string, row_group: parquet_thrift.RowGroup | number) {
+  getColumn(path: string | ColumnChunk, row_group: RowGroup | number | null) {
     let column;
     if (!isNaN(row_group as number)) {
-      row_group = this.metadata.row_groups[row_group];
+      row_group = (this.metadata as FileMetaData).row_groups[row_group as number];
     }
 
     if (typeof path === 'string') {
       if (!row_group) {
        throw `Missing RowGroup ${row_group}`;
       }
-      column = row_group.columns.find(d => d.meta_data.path_in_schema.join(',') === path);
+      if (row_group instanceof RowGroup) {
+        column = row_group.columns.find(d => (d.meta_data as ColumnMetaData).path_in_schema.join(',') === path);
+      }
       if (!column) {
         throw `Column ${path} Not Found`;
       }
@@ -478,9 +480,9 @@ export class ParquetEnvelopeReader {
     return column;
   }
 
-  getAllColumnChunkDataFor(paths, row_groups?: Array<parquet_thrift.RowGroup>) {
+  getAllColumnChunkDataFor(paths: Array<string>, row_groups?: Array<RowGroup>) {
     if (!row_groups) {
-      row_groups = this.metadata.row_groups;
+      row_groups = (this.metadata as FileMetaData).row_groups;
     }
 
     return row_groups.flatMap((rowGroup, index) =>
@@ -491,7 +493,7 @@ export class ParquetEnvelopeReader {
             )
   }
 
-  readOffsetIndex(path, row_group, opts) {
+  readOffsetIndex(path: string | ColumnChunk, row_group: RowGroup | number | null, opts) {
     let column = this.getColumn(path, row_group);
     if (column.offsetIndex) {
       return Promise.resolve(column.offsetIndex);
@@ -499,7 +501,7 @@ export class ParquetEnvelopeReader {
       return Promise.reject('Offset Index Missing');
     }
 
-    const data = this.read(+column.offset_index_offset, column.offset_index_length).then(data => {
+    const data = this.read(+column.offset_index_offset, column.offset_index_length).then((data: Buffer) => {
       let offset_index = new parquet_thrift.OffsetIndex();
       parquet_util.decodeThrift(offset_index, data);
       Object.defineProperty(offset_index,'column', {value: column, enumerable: false});
@@ -515,7 +517,7 @@ export class ParquetEnvelopeReader {
     return data;
   }
 
-  readColumnIndex(path, row_group, opts) {
+  readColumnIndex(path: string | ColumnChunk, row_group: RowGroup | number, opts) {
     let column = this.getColumn(path, row_group);
     if (column.columnIndex) {
       return Promise.resolve(column.columnIndex);
@@ -523,13 +525,13 @@ export class ParquetEnvelopeReader {
       return Promise.reject(new Error('Column Index Missing'));
     }
 
-    const data = this.read(+column.column_index_offset, column.column_index_length).then(data => {
+    const data = this.read(+column.column_index_offset, (column.column_index_length as number)).then((data: Buffer) => {
       let column_index = new parquet_thrift.ColumnIndex();
       parquet_util.decodeThrift(column_index, data);
       Object.defineProperty(column_index, 'column', { value: column });
 
       // decode the statistics values
-      const field = this.schema.findField(column.meta_data.path_in_schema);
+      const field = (this.schema as parquet_schema.ParquetSchema).findField((column.meta_data as ColumnMetaData).path_in_schema);
       if (column_index.max_values) {
         column_index.max_values = column_index.max_values.map(max_value => decodeStatisticsValue(max_value, field));
       }
@@ -550,7 +552,7 @@ export class ParquetEnvelopeReader {
     return data;
   }
 
-  async readPage(column, page, records, opts) {
+  async readPage(column: ColumnChunk, page: PageLocation, records: Array<Record<string, unknown>>, opts) {
     column = Object.assign({},column);
     column.meta_data = Object.assign({},column.meta_data);
 
@@ -565,13 +567,13 @@ export class ParquetEnvelopeReader {
       column.meta_data.data_page_offset = offsetIndex.page_locations[page].offset;
       column.meta_data.total_compressed_size =  offsetIndex.page_locations[page].compressed_page_size;
     }
-    const chunk = await this.readColumnChunk(this.schema, column);
+    const chunk = await this.readColumnChunk(this.schema as parquet_schema.ParquetSchema, column);
     Object.defineProperty(chunk,'column', {value: column});
     let data = {
       columnData: {[chunk.column.meta_data.path_in_schema.join(',')]: chunk}
     };
 
-    return parquet_shredder.materializeRecords(this.schema, data, records);
+    return parquet_shredder.materializeRecords(this.schema as parquet_schema.ParquetSchema, data, records);
   }
 
   async readRowGroup(schema: parquet_schema.ParquetSchema, rowGroup: RowGroup, columnList: Array<Array<unknown>>) {
@@ -596,21 +598,22 @@ export class ParquetEnvelopeReader {
     return buffer;
   }
 
-  async readColumnChunk(schema, colChunk, opts) {
-    let field = schema.findField(colChunk.meta_data.path_in_schema);
+  async readColumnChunk(schema: parquet_schema.ParquetSchema, colChunk: ColumnChunk, opts?) {
+    let metadata = colChunk.meta_data as ColumnMetaData
+    let field = schema.findField(metadata.path_in_schema);
     let type = parquet_util.getThriftEnum(
         parquet_thrift.Type,
-        colChunk.meta_data.type);
+        metadata.type);
 
     let compression = parquet_util.getThriftEnum(
         parquet_thrift.CompressionCodec,
-        colChunk.meta_data.codec);
+        metadata.codec);
 
-    let pagesOffset = +colChunk.meta_data.data_page_offset;
-    let pagesSize = +colChunk.meta_data.total_compressed_size;
+    let pagesOffset = +metadata.data_page_offset;
+    let pagesSize = +metadata.total_compressed_size;
 
     if (!colChunk.file_path) {
-      pagesSize = Math.min(this.fileSize - pagesOffset, +colChunk.meta_data.total_compressed_size);
+      pagesSize = Math.min((this.fileSize as number) - pagesOffset, +metadata.total_compressed_size);
     }
 
     opts = Object.assign({},opts, {
@@ -619,22 +622,22 @@ export class ParquetEnvelopeReader {
       dLevelMax: field.dLevelMax,
       compression: compression,
       column: field,
-      num_values: colChunk.meta_data.num_values
+      num_values: metadata.num_values
     });
 
-    if (colChunk.meta_data.dictionary_page_offset) {
-      const offset = +colChunk.meta_data.dictionary_page_offset;
+    if (metadata.dictionary_page_offset) {
+      const offset = +metadata.dictionary_page_offset;
       const size = Math.min(+this.fileSize - offset, this.default_dictionary_size);
 
-      await this.read(offset, size, colChunk.file_path).then(async buffer => {
+      await this.read(offset, size, colChunk.file_path).then(async (buffer: Buffer) => {
         await decodePage({offset: 0, buffer, size: buffer.length}, opts).then(dict => {
-          opts.dictionary = opts.dictionary || dict.dictionary;
+          opts.dictionary = opts.dictionary || (dict as Dictionary).dictionary;
         })
       })
 
     }
 
-    return this.read(pagesOffset, pagesSize, colChunk.file_path).then(pagesBuf => decodePages(pagesBuf, opts));
+    return this.read(pagesOffset, pagesSize, colChunk.file_path).then((pagesBuf: Buffer) => decodePages(pagesBuf, opts));
   }
 
   async readFooter() {
@@ -644,20 +647,20 @@ export class ParquetEnvelopeReader {
 
     let trailerLen = PARQUET_MAGIC.length + 4;
 
-    let trailerBuf = await this.read(this.fileSize - trailerLen, trailerLen);
+    let trailerBuf = await this.read((this.fileSize as number) - trailerLen, trailerLen);
 
     if (trailerBuf.slice(4).toString() != PARQUET_MAGIC) {
       throw 'not a valid parquet file';
     }
 
     let metadataSize = trailerBuf.readUInt32LE(0);
-    let metadataOffset = this.fileSize - metadataSize - trailerLen;
+    let metadataOffset = (this.fileSize as number) - metadataSize - trailerLen;
     if (metadataOffset < PARQUET_MAGIC.length) {
       throw 'invalid metadata size';
     }
 
     let metadataBuf = await this.read(metadataOffset, metadataSize);
-    let metadata = new parquet_thrift.FileMetaData();
+    let metadata = new FileMetaData();
     parquet_util.decodeThrift(metadata, metadataBuf);
     return metadata;
   }
@@ -667,7 +670,7 @@ export class ParquetEnvelopeReader {
 /**
  * Decode a consecutive array of data using one of the parquet encodings
  */
-function decodeValues(type, encoding: string, cursor, count, opts) {
+function decodeValues(type: string, encoding: string, cursor: Cursor, count: number, opts) {
   if (!(encoding in parquet_codec)) {
     throw 'invalid encoding: ' + encoding;
   }
@@ -711,15 +714,13 @@ function decodeStatistics(statistics: parquet_thrift.Statistics, column) {
 async function decodePage(cursor: Cursor, opts: DecodeOptions) {
   opts = opts || {};
   let page;
-  const pageHeader = new parquet_thrift.PageHeader();
+  const pageHeader = new PageHeader();
   const dataPageHeader = pageHeader.data_page_header as parquet_thrift.DataPageHeader
   const dataPageHeaderV2 = pageHeader.data_page_header_v2 as parquet_thrift.DataPageHeaderV2
-
 
   const headerOffset = cursor.offset;
   const headerSize = parquet_util.decodeThrift(pageHeader, cursor.buffer.slice(cursor.offset));
   cursor.offset += headerSize;
-
 
   const pageType = parquet_util.getThriftEnum(
       parquet_thrift.PageType,
@@ -766,36 +767,32 @@ async function decodePages(buffer: Buffer, opts) {
     size: buffer.length
   };
 
-  let data = {
-    rlevels: [],
-    dlevels: [],
-    values: [],
-    pageHeaders: [],
-    count: 0
-  };
+  let data = new PageData();
 
   while (cursor.offset < cursor.size && (!opts.num_values || data.dlevels.length < opts.num_values)) {
     const pageData = await decodePage(cursor, opts);
 
-    if (pageData.dictionary) {
+    if (pageData instanceof Dictionary) {
       opts.dictionary = pageData.dictionary;
       continue;
-    }
+    } 
 
+    let pageDataObject = pageData as PageData
+    
     if (opts.dictionary) {
-      pageData.values = pageData.values.map(d => opts.dictionary[d]);
+      pageDataObject.values = pageDataObject.values.map(d => opts.dictionary[d]);
     }
 
-    for (let i = 0; i < pageData.rlevels.length; i++) {
-      data.rlevels.push(pageData.rlevels[i]);
-      data.dlevels.push(pageData.dlevels[i]);
-      let value = pageData.values[i];
+    for (let i = 0; i < pageDataObject.rlevels.length; i++) {
+      data.rlevels.push(pageDataObject.rlevels[i]);
+      data.dlevels.push(pageDataObject.dlevels[i]);
+      let value = pageDataObject.values[i];
       if (value !== undefined) {
         data.values.push(value);
       }
     }
-    data.count += pageData.count;
-    data.pageHeaders.push(pageData.pageHeader);
+    data.count += pageDataObject.count;
+    data.pageHeaders.push(pageDataObject.pageHeader);
   }
 
   return data;

@@ -2,6 +2,7 @@ import { TTransportCallback } from "thrift";
 import thrift from "thrift"
 import fs, { WriteStream } from 'fs'
 import * as parquet_thrift from '../gen-nodejs/parquet_types'
+import {FileMetaData} from './types/types'
 
 /** We need to use a patched version of TFramedTransport where
   * readString returns the original buffer instead of a string if the 
@@ -98,7 +99,7 @@ export const serializeThrift = function(obj: parquet_thrift.BloomFilterHeader) {
   return Buffer.concat(output)
 }
 
-export const decodeThrift = function(obj: parquet_thrift.PageHeader | parquet_thrift.BloomFilterHeader | parquet_thrift.OffsetIndex | parquet_thrift.ColumnIndex | parquet_thrift.FileMetaData, buf: Buffer, offset?: number) {
+export const decodeThrift = function(obj: parquet_thrift.PageHeader | parquet_thrift.BloomFilterHeader | parquet_thrift.OffsetIndex | parquet_thrift.ColumnIndex | FileMetaData, buf: Buffer, offset?: number) {
   if (!offset) {
     offset = 0
   }

@@ -7,5 +7,5 @@ export interface Options {
 export interface Cursor {
     buffer: Buffer,
     offset: number,
-    size: number,
+    size?: number,
 }

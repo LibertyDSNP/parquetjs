@@ -28,9 +28,9 @@ import { ParquetData, ParquetField } from './types/types';
 
 export interface RecordBuffer {
   columnData: Record<string, ParquetData>
-  rowCount: number,
-  pageRowCount: number,
-  pages: Record<string,object>
+  rowCount?: number,
+  pageRowCount?: number,
+  pages?: Record<string,object>
 }
 
 export const shredRecord = function(schema: ParquetSchema, record: Record<string, unknown>, buffer: RecordBuffer) {
@@ -68,8 +68,8 @@ export const shredRecord = function(schema: ParquetSchema, record: Record<string
     }
   }
 
-  buffer.rowCount += 1;
-  buffer.pageRowCount += 1;
+  (buffer.rowCount as number) += 1;
+  (buffer.pageRowCount as number) += 1;
   for (let field of schema.fieldList) {
     let path = field.path.join(',')
     let record = recordShredded[path];
