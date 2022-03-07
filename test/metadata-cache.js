@@ -32,7 +32,7 @@ describe('metadata-cache', function() {
       metadata: metadata
     });
     const column = reader.metadata.row_groups[0].columns[2];
-    //console.log(JSON.stringify(column))
+    console.log(JSON.stringify(column))
     
     // verify that the json metadata is loaded
     assert.equal(reader.metadata.json,true);

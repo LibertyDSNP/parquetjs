@@ -283,7 +283,7 @@ class ParquetReader {
   exportMetadata(indent: string | number | undefined) {
     function replacer(key: any, value: any) {
       if (value instanceof parquet_thrift.PageLocation) {
-        return [value.offset, value.first_row_index, value.compressed_page_size];
+        return [value.offset, value.compressed_page_size, value.first_row_index];
       }
 
       if (typeof value === 'object') {
