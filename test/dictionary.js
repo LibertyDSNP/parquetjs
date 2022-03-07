@@ -13,7 +13,6 @@ describe('dictionary encoding', async function() {
     for (let i = 0; i < 5; i++) {
       records.push(await cursor.next());
     }
-    console.log(records)
 
     assert.deepEqual(records.map(d => d.name),['apples','oranges','kiwi','banana','apples']);
   });

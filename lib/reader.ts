@@ -9,7 +9,7 @@ import * as parquet_types from './types';
 import BufferReader , { BufferReaderOptions } from './bufferReader';
 import * as bloomFilterReader from './bloomFilterIO/bloomFilterReader';
 import fetch from 'cross-fetch';
-import { ColumnMetaData, ReaderOptions, Parameter, ColumnChunk, RowGroup, FileMetaData, Dictionary, PageHeader, PageData, ColumnData } from './types/types';
+import { ColumnMetaData, ReaderOptions, Parameter, ColumnChunk, RowGroup, FileMetaData, PageHeader, PageData, ColumnData } from './types/types';
 import { Cursor } from './codec/types';
 import { KeyValue, PageLocation } from '../gen-nodejs/parquet_types';
 
@@ -68,7 +68,6 @@ class ParquetCursor  {
   async next() {
     if (this.rowGroup.length === 0) {
       if (this.rowGroupIndex >= this.metadata.row_groups.length) {
-        console.log("NULLLLLL")
 
         return null;
       }
@@ -82,7 +81,6 @@ class ParquetCursor  {
       this.rowGroupIndex++;
     }
 
-    console.log("I am here " + JSON.stringify(this.columnList))
     return this.rowGroup.shift();
   }
 
@@ -634,7 +632,7 @@ export class ParquetEnvelopeReader {
 
       await this.read(offset, size, colChunk.file_path).then(async (buffer: Buffer) => {
         await decodePage({offset: 0, buffer, size: buffer.length}, opts).then(dict => {
-          opts.dictionary = opts.dictionary || (dict as Dictionary).dictionary;
+          opts.dictionary = opts.dictionary || (dict as PageData).dictionary;
         })
       })
 
@@ -663,7 +661,7 @@ export class ParquetEnvelopeReader {
     }
 
     let metadataBuf = await this.read(metadataOffset, metadataSize);
-    let metadata = new parquet_thrift.FileMetaData()
+    let metadata = new parquet_thrift.FileMetaData();
     parquet_util.decodeThrift(metadata, metadataBuf);
     return metadata;
   }
@@ -715,7 +713,7 @@ function decodeStatistics(statistics: parquet_thrift.Statistics, column: any) {
   return statistics;
 }
 
-async function decodePage(cursor: Cursor, opts: ReaderOptions): Promise<Dictionary | PageData> {
+async function decodePage(cursor: Cursor, opts: ReaderOptions): Promise<PageData> {
   opts = opts || {};
   let page: any;
   const pageHeader = new parquet_thrift.PageHeader();
@@ -778,9 +776,9 @@ async function decodePages(buffer: Buffer, opts: ReaderOptions) {
   };
 
   while (cursor.offset < cursor.size && (!opts.num_values || data.dlevels.length < opts.num_values)) {
-    const pageData: Dictionary | PageData = await decodePage(cursor, opts);
+    const pageData: PageData = await decodePage(cursor, opts);
 
-    if (pageData instanceof Dictionary) {
+    if (pageData.dictionary) {
       opts.dictionary = pageData.dictionary;
       continue;
     } 

@@ -201,10 +201,6 @@ export interface Parameter {
     headers?: string
 }
 
-export class Dictionary {
-    dictionary: any;
-}
-
 export interface PageData {
     rlevels: number[];
     dlevels: number[];
@@ -212,6 +208,7 @@ export interface PageData {
     pageHeaders: PageHeader[];
     pageHeader?: PageHeader;
     count: number;
+    dictionary?: any
 }
 
 export declare class PageHeader {
