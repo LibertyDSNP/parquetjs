@@ -1,6 +1,6 @@
 // Lifted from https://github.com/kbajalc/parquets
 
-import { Statistics, OffsetIndex, ColumnIndex, PageType, DataPageHeader, DataPageHeaderV2, DictionaryPageHeader, IndexPageHeader } from "../../gen-nodejs/parquet_types";
+import { Statistics, OffsetIndex, ColumnIndex, PageType, DataPageHeader, DataPageHeaderV2, DictionaryPageHeader, IndexPageHeader, Type, SchemaElement } from "../../gen-nodejs/parquet_types";
 import SplitBlockBloomFilter from "lib/bloom/sbbf";
 import { Options } from "lib/codec/types";
 
@@ -112,7 +112,7 @@ export declare class ColumnChunk {
 }
 
 export interface ColumnMetaData {
-    type: number,
+    type: Type,
     encodings: Array<any>,
     path_in_schema: Array<string>,
     codec: number,
@@ -146,7 +146,7 @@ export interface ColumnChunkData {
     column: ColumnData
 }
 
-export interface FileMetaData {
+export declare class FileMetaData {
     version: number;
     schema: SchemaElement[];
     row_groups: RowGroup[];
@@ -155,18 +155,9 @@ export interface FileMetaData {
     footer_signing_key_metadata?: Buffer;
     num_rows: number;
     json: JSON;
-}
 
-export declare class SchemaElement {
-    type?: string;
-    type_length?: number;
-    repetition_type?: RepetitionType;
-    name: string;
-    num_children?: number;
-    converted_type?: ParquetType;
-    scale?: number;
-    precision?: number;
-    field_id?: number;
+    constructor(args?: { version: number; schema: SchemaElement[]; num_rows: number; row_groups: RowGroup[]; key_value_metadata?: KeyValue[]; created_by?: string; footer_signing_key_metadata?: Buffer; });
+
 }
 
 export declare class RowGroup {
@@ -188,13 +179,21 @@ export interface BloomFilterData {
     RowGroupIndex: number,
 };
 
-export interface DecodeOptions {
+export interface ReaderOptions {
     rLevelMax: number,
     dLevelMax: number,
     compression?: string,
     column: Options,
     type: string,
     rawStatistics: Statistics,
+    maxSpan?: number,
+    maxLength?: number,
+    queueWait?: number
+    default_dictionary_size?: number;
+    metadata?: FileMetaData
+    num_values: number
+    dictionary: any
+
 }
 
 export interface Parameter {
@@ -206,15 +205,13 @@ export class Dictionary {
     dictionary: any;
 }
 
-export declare class PageData {
+export interface PageData {
     rlevels: number[];
     dlevels: number[];
     values: number[];
     pageHeaders: PageHeader[];
-    pageHeader: PageHeader;
+    pageHeader?: PageHeader;
     count: number;
-
-    constructor(args?: {});
 }
 
 export declare class PageHeader {
@@ -231,3 +228,4 @@ export declare class PageHeader {
   
       constructor(args?: { type: PageType; uncompressed_page_size: number; compressed_page_size: number; crc?: number; data_page_header?: DataPageHeader; index_page_header?: IndexPageHeader; dictionary_page_header?: DictionaryPageHeader; data_page_header_v2?: DataPageHeaderV2; });
   }
+  
