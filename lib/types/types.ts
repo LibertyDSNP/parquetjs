@@ -3,6 +3,7 @@
 import { Statistics, OffsetIndex, ColumnIndex, PageType, DataPageHeader, DataPageHeaderV2, DictionaryPageHeader, IndexPageHeader, Type, SchemaElement } from "../../gen-nodejs/parquet_types";
 import SplitBlockBloomFilter from "lib/bloom/sbbf";
 import { Options } from "lib/codec/types";
+import Int64 from "node-int64";
 
 export type ParquetCodec = 'PLAIN' | 'RLE';
 export type ParquetCompression = 'UNCOMPRESSED' | 'GZIP' | 'SNAPPY' | 'LZO' | 'BROTLI' | 'LZ4';
@@ -77,6 +78,7 @@ export interface ParquetField {
     isNested?: boolean;
     fieldCount?: number;
     fields?: Record<string, ParquetField>;
+    disableEnvelope?: boolean;
 }
 
 interface ParentField {
@@ -195,7 +197,7 @@ export interface ReaderOptions {
     rLevelMax: number,
     dLevelMax: number,
     compression?: string,
-    column: Options,
+    column: ParquetField,
     type: string,
     rawStatistics: Statistics,
     maxSpan?: number,
@@ -205,7 +207,7 @@ export interface ReaderOptions {
     metadata?: FileMetaData
     num_values: number
     dictionary: any
-
+    cache?: any
 }
 
 export interface Parameter {
@@ -214,12 +216,12 @@ export interface Parameter {
 }
 
 export interface PageData {
-    rlevels: number[];
-    dlevels: number[];
-    values: number[];
-    pageHeaders: PageHeader[];
+    rlevels?: number[];
+    dlevels?: number[];
+    values?: number[];
+    pageHeaders?: PageHeader[];
     pageHeader?: PageHeader;
-    count: number;
+    count?: number;
     dictionary?: any
 }
 
@@ -237,4 +239,3 @@ export declare class PageHeader {
   
       constructor(args?: { type: PageType; uncompressed_page_size: number; compressed_page_size: number; crc?: number; data_page_header?: DataPageHeader; index_page_header?: IndexPageHeader; dictionary_page_header?: DictionaryPageHeader; data_page_header_v2?: DataPageHeaderV2; });
   }
-  
