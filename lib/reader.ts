@@ -9,7 +9,7 @@ import * as parquet_types from './types';
 import BufferReader , { BufferReaderOptions } from './bufferReader';
 import * as bloomFilterReader from './bloomFilterIO/bloomFilterReader';
 import fetch from 'cross-fetch';
-import { ColumnMetaData, ReaderOptions, Parameter, ColumnChunk, RowGroup, FileMetaData, PageHeader, PageData, ColumnData } from './types/types';
+import { ColumnMetaData, ReaderOptions, Parameter, ColumnChunk, RowGroup, FileMetaData, PageHeader, PageData, ColumnData, SchemaDefinition, ParquetType, FieldDefinition } from './types/types';
 import { Cursor } from './codec/types';
 import { KeyValue, PageLocation } from '../gen-nodejs/parquet_types';
 
@@ -204,7 +204,7 @@ class ParquetReader {
     this.envelopeReader = envelopeReader;
     this.schema = envelopeReader.schema = new parquet_schema.ParquetSchema(
         decodeSchema(
-            this.metadata.schema.slice(1)));
+            this.metadata.schema.slice(1)) as SchemaDefinition);
 
     /* decode any statistics values */
     if (this.metadata.row_groups && !this.metadata.json && !opts.rawStatistics) {
@@ -999,8 +999,8 @@ async function decodeDataPageV2(cursor: Cursor, header: parquet_thrift.PageHeade
 }
 
 function decodeSchema(schemaElements: Array<parquet_thrift.SchemaElement>) {
-   let schema: any = {};
-  // let schema: Record<string, parquet_thrift.SchemaElement> = {};
+   // let schema: any = {};
+   let schema: SchemaDefinition | FieldDefinition = {};
   schemaElements.forEach(schemaElement => {
 
     let repetitionType = parquet_util.getThriftEnum(
@@ -1021,7 +1021,7 @@ function decodeSchema(schemaElements: Array<parquet_thrift.SchemaElement>) {
     };
 
     if (schemaElement.num_children != undefined && schemaElement.num_children > 0) {
-      schema[schemaElement.name] = {
+      (schema as SchemaDefinition)[schemaElement.name] = {
         optional: optional,
         repeated: repeated,
         fields: Object.create({},{
@@ -1037,7 +1037,7 @@ function decodeSchema(schemaElements: Array<parquet_thrift.SchemaElement>) {
         })
       };
       /* move the schema pointer to the children */
-      schema = schema[schemaElement.name].fields;
+      schema = (schema as SchemaDefinition)[schemaElement.name].fields as SchemaDefinition;
     } else {
       let logicalType = parquet_util.getThriftEnum(
           parquet_thrift.Type,
@@ -1049,8 +1049,8 @@ function decodeSchema(schemaElements: Array<parquet_thrift.SchemaElement>) {
             schemaElement.converted_type);
       }
 
-      schema[schemaElement.name] = {
-        type: logicalType,
+      (schema as SchemaDefinition)[schemaElement.name] = {
+        type: logicalType as ParquetType,
         typeLength: schemaElement.type_length,
         optional: optional,
         repeated: repeated
@@ -1059,7 +1059,7 @@ function decodeSchema(schemaElements: Array<parquet_thrift.SchemaElement>) {
 
     /* if we have processed all children we move schema pointer to parent again */
     while (schema.parent && Object.keys(schema).length === schema.num_children) {
-      schema = schema.parent;
+      schema = schema.parent as FieldDefinition;
     }
   });
   return schema;

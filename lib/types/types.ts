@@ -58,6 +58,8 @@ export interface FieldDefinition {
     repeated?: boolean;
     fields?: SchemaDefinition;
     statistics?: Statistics
+    parent?: ParentField
+    num_children?: NumChildrenField
 }
 
 export interface ParquetField {
@@ -75,6 +77,16 @@ export interface ParquetField {
     isNested?: boolean;
     fieldCount?: number;
     fields?: Record<string, ParquetField>;
+}
+
+interface ParentField {
+    value: SchemaDefinition
+    enumerable: boolean
+}
+
+interface NumChildrenField {
+    value: number
+    enumerable:boolean
 }
 
 export interface ParquetBuffer {
