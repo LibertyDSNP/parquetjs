@@ -32,13 +32,11 @@ describe('metadata-cache', function() {
       metadata: metadata
     });
     const column = reader.metadata.row_groups[0].columns[2];
-    console.log(JSON.stringify(column))
     
     // verify that the json metadata is loaded
     assert.equal(reader.metadata.json,true);
 
     const data = await reader.envelopeReader.readPage(column, 1, []);
-
     assert.equal(data.length,2000);
     assert.deepEqual(data[0],{price: 2.6});
     assert.deepEqual(data[1],{price: 2.7});

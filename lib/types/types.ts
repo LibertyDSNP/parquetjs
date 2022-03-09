@@ -78,7 +78,7 @@ export interface ParquetField {
     isNested?: boolean;
     fieldCount?: number;
     fields?: Record<string, ParquetField>;
-    disableEnvelope?: boolean;
+    disableEnvelope?: boolean
 }
 
 interface ParentField {
@@ -239,3 +239,20 @@ export declare class PageHeader {
   
       constructor(args?: { type: PageType; uncompressed_page_size: number; compressed_page_size: number; crc?: number; data_page_header?: DataPageHeader; index_page_header?: IndexPageHeader; dictionary_page_header?: DictionaryPageHeader; data_page_header_v2?: DataPageHeaderV2; });
   }
+
+  export interface ClientParameters {
+    Bucket: string,
+    Key: string
+  }
+
+  export interface PromiseS3 {
+      promise: () => Promise<any>
+  }
+
+  export interface ClientS3 {
+    accessKeyId: string,
+    secretAccessKey: string,
+    headObject: (params: ClientParameters) => PromiseS3
+    getObject: (args: any) => PromiseS3
+}
+  
