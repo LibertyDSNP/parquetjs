@@ -3,8 +3,6 @@
 import parquet_thrift from "../../gen-nodejs/parquet_types";
 import { Statistics, OffsetIndex, ColumnIndex, PageType, DataPageHeader, DataPageHeaderV2, DictionaryPageHeader, IndexPageHeader, Type, SchemaElement } from "../../gen-nodejs/parquet_types";
 import SplitBlockBloomFilter from "lib/bloom/sbbf";
-import { Options } from "lib/codec/types";
-import Int64 from "node-int64";
 
 export type ParquetCodec = 'PLAIN' | 'RLE';
 export type ParquetCompression = 'UNCOMPRESSED' | 'GZIP' | 'SNAPPY' | 'LZO' | 'BROTLI' | 'LZ4';
@@ -147,20 +145,6 @@ export interface ColumnData {
 export interface ColumnChunkData {
     rowGroupIndex: number,
     column: ColumnData
-}
-
-export declare class FileMetaData {
-    version: number;
-    schema: SchemaElement[];
-    row_groups: RowGroup[];
-    key_value_metadata?: KeyValue[];
-    created_by?: string;
-    footer_signing_key_metadata?: Buffer;
-    num_rows: number;
-    json: JSON;
-
-    constructor(args?: { version: number; schema: SchemaElement[]; num_rows: number; row_groups: RowGroup[]; key_value_metadata?: KeyValue[]; created_by?: string; footer_signing_key_metadata?: Buffer; });
-
 }
 
 export declare class RowGroup {

@@ -2,7 +2,7 @@ import { TTransportCallback } from "thrift";
 import thrift from "thrift"
 import fs, { WriteStream } from 'fs'
 import * as parquet_thrift from '../gen-nodejs/parquet_types'
-import {FileMetaData, NewFileMetaData} from './types/types'
+import { NewFileMetaData } from './types/types'
 
 /** We need to use a patched version of TFramedTransport where
   * readString returns the original buffer instead of a string if the 
@@ -12,7 +12,7 @@ import {FileMetaData, NewFileMetaData} from './types/types'
 
 type Enums = typeof parquet_thrift.Encoding | typeof parquet_thrift.FieldRepetitionType | typeof parquet_thrift.Type | typeof parquet_thrift.CompressionCodec | typeof parquet_thrift.PageType | typeof parquet_thrift.ConvertedType;
  
-type ThriftObject = NewFileMetaData | parquet_thrift.PageHeader | parquet_thrift.BloomFilterHeader | parquet_thrift.OffsetIndex | parquet_thrift.ColumnIndex | FileMetaData;
+type ThriftObject = NewFileMetaData | parquet_thrift.PageHeader | parquet_thrift.BloomFilterHeader | parquet_thrift.OffsetIndex | parquet_thrift.ColumnIndex | NewFileMetaData;
 
 // May not be needed anymore, Issue at https://github.com/LibertyDSNP/parquetjs/issues/41
 class fixedTFramedTransport extends thrift.TFramedTransport {
