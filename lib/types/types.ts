@@ -1,5 +1,6 @@
 // Lifted from https://github.com/kbajalc/parquets
 
+import parquet_thrift from "../../gen-nodejs/parquet_types";
 import { Statistics, OffsetIndex, ColumnIndex, PageType, DataPageHeader, DataPageHeaderV2, DictionaryPageHeader, IndexPageHeader, Type, SchemaElement } from "../../gen-nodejs/parquet_types";
 import SplitBlockBloomFilter from "lib/bloom/sbbf";
 import { Options } from "lib/codec/types";
@@ -113,24 +114,12 @@ export interface Offset {
     offset: number
 }
 
-export declare class ColumnChunk {
-    file_path?: string;
-    meta_data?: ColumnMetaData;
-    offset_index_length?: number;
-    column_index_length?: number;
-    encrypted_column_metadata?: Buffer;
-    offsetIndex?: OffsetIndex;
-    offset_index_offset?: number;
-    columnIndex?: ColumnIndex;
-    column_index_offset?: number;
-}
-
 export interface ColumnMetaData {
     type: Type,
     encodings: Array<any>,
     path_in_schema: Array<string>,
     codec: number,
-    num_values: any,
+    num_values: number,
     total_uncompressed_size: any,
     total_compressed_size: any,
     key_value_metadata: any,
@@ -193,23 +182,6 @@ export interface BloomFilterData {
     RowGroupIndex: number,
 };
 
-export interface ReaderOptions {
-    rLevelMax: number,
-    dLevelMax: number,
-    compression?: string,
-    column: ParquetField,
-    type: string,
-    rawStatistics: Statistics,
-    maxSpan?: number,
-    maxLength?: number,
-    queueWait?: number
-    default_dictionary_size?: number;
-    metadata?: FileMetaData
-    num_values: number
-    dictionary: any
-    cache?: any
-}
-
 export interface Parameter {
     url: string;
     headers?: string
@@ -222,7 +194,7 @@ export interface PageData {
     pageHeaders?: PageHeader[];
     pageHeader?: PageHeader;
     count?: number;
-    dictionary?: any
+    dictionary?: Array<unknown>
 }
 
 export declare class PageHeader {
@@ -255,4 +227,22 @@ export declare class PageHeader {
     headObject: (params: ClientParameters) => PromiseS3
     getObject: (args: any) => PromiseS3
 }
+
+export class NewFileMetaData extends parquet_thrift.FileMetaData {
+    json?:JSON;
+    //@ts-ignore
+    row_groups:RowGroup[];
+    constructor() {
+      super()
+    } 
+  }
+
+export class NewPageHeader extends parquet_thrift.PageHeader {
+    offset?: number;
+    headerSize?: number;
+    constructor() {
+      super()
+    } 
+  }
+  
   
