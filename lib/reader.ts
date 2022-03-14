@@ -277,7 +277,7 @@ class ParquetReader {
   }
 
   exportMetadata(indent: string | number | undefined) {
-    function replacer(key: any, value: parquet_thrift.PageLocation | bigint | {[string:string]: any}) {
+    function replacer(_key: unknown, value: parquet_thrift.PageLocation | bigint | {[string:string]: any}) {
       if (value instanceof parquet_thrift.PageLocation) {
         return [value.offset, value.compressed_page_size, value.first_row_index];
       }
@@ -338,8 +338,8 @@ class ParquetReader {
  */
 let ParquetEnvelopeReaderIdCounter = 0;
 export class ParquetEnvelopeReader {
-  readFn: Function;
-  close: Function;
+  readFn: (offset: number, length: number, file?: string) => Promise<Buffer>;
+  close: () => unknown;
   id: number;
   fileSize: Function | number;
   default_dictionary_size: number;
@@ -350,7 +350,7 @@ export class ParquetEnvelopeReader {
     let fileStat = await parquet_util.fstat(filePath);
     let fileDescriptor = await parquet_util.fopen(filePath);
 
-    let readFn = (offset: number, length: number, file: string) => {
+    let readFn = (offset: number, length: number, file?: string) => {
       if (file) {
         return Promise.reject('external references are not supported');
       }
@@ -364,7 +364,7 @@ export class ParquetEnvelopeReader {
   }
 
   static async openBuffer(buffer: Buffer, options: BufferReaderOptions) {
-    let readFn = (offset: number, length: number, file: string) => {
+    let readFn = (offset: number, length: number, file?: string) => {
       if (file) {
         return Promise.reject('external references are not supported');
       }
@@ -379,7 +379,7 @@ export class ParquetEnvelopeReader {
   static async openS3(client: ClientS3, params: ClientParameters, options: BufferReaderOptions) {
     let fileStat = async () => client.headObject(params).promise().then((d: {ContentLength: number}) => d.ContentLength);
 
-    let readFn = async (offset: number, length: number, file: boolean) => {
+    let readFn = async (offset: number, length: number, file?: string) => {
       if (file) {
         return Promise.reject('external references are not supported');
       }
@@ -400,8 +400,8 @@ export class ParquetEnvelopeReader {
     if (!params.url)
       throw new Error('URL missing');
 
-    let base: string | string[] = params.url.split('/');
-    base = base.slice(0, base.length-1).join('/')+'/';
+    const baseArr = params.url.split('/');
+    const base = baseArr.slice(0, baseArr.length-1).join('/')+'/';
 
     let defaultHeaders = params.headers || {};
 
@@ -411,11 +411,11 @@ export class ParquetEnvelopeReader {
       return headers.get('Content-Length');
     };
 
-    let readFn = async (offset: number, length: number, file: string) => {
+    let readFn = async (offset: number, length: number, file?: string) => {
       let url = file ? base+file : params.url;
       let range = `bytes=${offset}-${offset+length-1}`;
       let headers = Object.assign({}, defaultHeaders, {range});
-      const response = await fetch(url as string, { headers });
+      const response = await fetch(url, { headers });
       const arrayBuffer = await response.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
@@ -427,7 +427,7 @@ export class ParquetEnvelopeReader {
     return new ParquetEnvelopeReader(readFn, closeFn, filesize, options);
   }
 
-  constructor(readFn: Function, closeFn: Function, fileSize: Function | number, options: BufferReaderOptions, metadata?: NewFileMetaData) {
+  constructor(readFn: (offset: number, length: number, file?: string) => Promise<Buffer> , closeFn: () => unknown, fileSize: Function | number, options: BufferReaderOptions, metadata?: NewFileMetaData) {
     options = options || {};
     this.readFn = readFn;
     this.id = ++ParquetEnvelopeReaderIdCounter;
@@ -442,7 +442,7 @@ export class ParquetEnvelopeReader {
   }
 
   read(offset: number, length: number, file?: string) {
-    return this.readFn(offset, length, file);
+    return this.readFn(offset, length, file!);
   }
 
   readHeader() {
@@ -508,6 +508,7 @@ export class ParquetEnvelopeReader {
     });
 
     if (opts && opts.cache) {
+      //@ts-ignore
       column.offsetIndex = data;
     }
     return data;
@@ -543,6 +544,7 @@ export class ParquetEnvelopeReader {
     });
 
     if (opts && opts.cache) {
+      //@ts-ignore
       column.columnIndex = data;
     }
     return data;
@@ -566,7 +568,7 @@ export class ParquetEnvelopeReader {
     const chunk = await this.readColumnChunk(this.schema!, column);
     Object.defineProperty(chunk,'column', {value: column});
     let data = {
-      columnData: {[chunk.column.meta_data.path_in_schema.join(',')]: chunk}
+      columnData: {[chunk.column!.meta_data.path_in_schema.join(',')]: chunk}
     };
 
     return parquet_shredder.materializeRecords(this.schema!, data, records);

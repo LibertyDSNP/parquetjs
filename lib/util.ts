@@ -162,7 +162,7 @@ export const fstat = function(filePath: string | Buffer | URL): Promise<fs.Stats
   });
 }
 
-export const fread = function(fd: number, position: number | null, length: number) {
+export const fread = function(fd: number, position: number | null, length: number): Promise<Buffer> {
   let buffer = Buffer.alloc(length);
 
   return new Promise((resolve, reject) => {

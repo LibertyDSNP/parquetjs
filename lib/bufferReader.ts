@@ -36,7 +36,7 @@ export default class BufferReader {
     this.queue = [];
   }
 
-  async read(offset: number, length: number) {
+  async read(offset: number, length: number): Promise<Buffer> {
     if (!this.scheduled) {
       this.scheduled = true;
       setTimeout( () => {

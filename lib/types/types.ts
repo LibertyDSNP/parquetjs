@@ -92,15 +92,7 @@ interface NumChildrenField {
 
 export interface ParquetBuffer {
     rowCount?: number;
-    columnData?: Record<string, ParquetData>;
-}
-
-export interface ParquetData {
-    dlevels: number[];
-    rlevels: number[];
-    distinct_values: Set<any>
-    values: any[];
-    count: number;
+    columnData?: Record<string, PageData>;
 }
 
 export interface ParquetRecord {
@@ -174,11 +166,13 @@ export interface Parameter {
 export interface PageData {
     rlevels?: number[];
     dlevels?: number[];
+    distinct_values?: Set<any>
     values?: number[];
     pageHeaders?: PageHeader[];
     pageHeader?: PageHeader;
     count?: number;
     dictionary?: Array<unknown>
+    column?: ColumnData
 }
 
 export declare class PageHeader {
