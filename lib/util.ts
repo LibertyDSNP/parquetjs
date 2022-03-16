@@ -4,6 +4,21 @@ import fs, { WriteStream } from 'fs'
 import * as parquet_thrift from '../gen-nodejs/parquet_types'
 import { NewFileMetaData } from './types/types'
 
+/**
+ * We need to patch Thrift's TFramedTransport class bc the TS type definitions
+ * do not define a `readPos` field, even though the class implementation has
+ * one.
+ */
+class fixedTFramedTransport extends thrift.TFramedTransport {
+  inBuf: Buffer
+  readPos: number
+  constructor(inBuf: Buffer) {
+    super(inBuf)
+    this.inBuf = inBuf
+    this.readPos = 0
+  }
+}
+
 type Enums = typeof parquet_thrift.Encoding | typeof parquet_thrift.FieldRepetitionType | typeof parquet_thrift.Type | typeof parquet_thrift.CompressionCodec | typeof parquet_thrift.PageType | typeof parquet_thrift.ConvertedType;
  
 type ThriftObject = NewFileMetaData | parquet_thrift.PageHeader | parquet_thrift.BloomFilterHeader | parquet_thrift.OffsetIndex | parquet_thrift.ColumnIndex | NewFileMetaData;/** Patch PageLocation to be three element array that has getters/setters
@@ -77,7 +92,7 @@ export const decodeThrift = function(obj: ThriftObject, buf: Buffer, offset?: nu
     offset = 0
   }
 
-  var transport = new thrift.TFramedTransport(buf);
+  var transport = new fixedTFramedTransport(buf);
   transport.readPos = offset;
   var protocol = new thrift.TCompactProtocol(transport);
   //@ts-ignore, https://issues.apache.org/jira/browse/THRIFT-3872
