@@ -4,38 +4,9 @@ import fs, { WriteStream } from 'fs'
 import * as parquet_thrift from '../gen-nodejs/parquet_types'
 import { NewFileMetaData } from './types/types'
 
-/** We need to use a patched version of TFramedTransport where
-  * readString returns the original buffer instead of a string if the 
-  * buffer can not be safely encoded as utf8 (see http://bit.ly/2GXeZEF)
-  */
-
-
 type Enums = typeof parquet_thrift.Encoding | typeof parquet_thrift.FieldRepetitionType | typeof parquet_thrift.Type | typeof parquet_thrift.CompressionCodec | typeof parquet_thrift.PageType | typeof parquet_thrift.ConvertedType;
  
-type ThriftObject = NewFileMetaData | parquet_thrift.PageHeader | parquet_thrift.BloomFilterHeader | parquet_thrift.OffsetIndex | parquet_thrift.ColumnIndex | NewFileMetaData;
-
-// May not be needed anymore, Issue at https://github.com/LibertyDSNP/parquetjs/issues/41
-class fixedTFramedTransport extends thrift.TFramedTransport {
-  inBuf: Buffer
-  readPos: number
-  constructor(inBuf: Buffer) {
-    super(inBuf)
-    this.inBuf = inBuf
-    this.readPos = 0
-  }
-
-  readString(len = 0): string {
-    this.ensureAvailable(len);
-    var buffer = this.inBuf.slice(this.readPos, this.readPos + len);
-    var str = this.inBuf.toString('utf8', this.readPos, this.readPos + len);
-    this.readPos += len;
-    //@ts-ignore
-    return (Buffer.from(str).equals(buffer)) ? str : buffer;
-  }
-}
-
-
-/** Patch PageLocation to be three element array that has getters/setters
+type ThriftObject = NewFileMetaData | parquet_thrift.PageHeader | parquet_thrift.BloomFilterHeader | parquet_thrift.OffsetIndex | parquet_thrift.ColumnIndex | NewFileMetaData;/** Patch PageLocation to be three element array that has getters/setters
   * for each of the properties (offset, compressed_page_size, first_row_index)
   * This saves space considerably as we do not need to store the full variable
   * names for every PageLocation
@@ -106,7 +77,7 @@ export const decodeThrift = function(obj: ThriftObject, buf: Buffer, offset?: nu
     offset = 0
   }
 
-  var transport = new fixedTFramedTransport(buf);
+  var transport = new thrift.TFramedTransport(buf);
   transport.readPos = offset;
   var protocol = new thrift.TCompactProtocol(transport);
   //@ts-ignore, https://issues.apache.org/jira/browse/THRIFT-3872
