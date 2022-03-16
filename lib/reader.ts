@@ -610,7 +610,7 @@ export class ParquetEnvelopeReader {
         continue;
       }
 
-      buffer.columnData[colKey.join(',')] = await this.readColumnChunk(schema, colChunk);
+      buffer.columnData![colKey.join(',')] = await this.readColumnChunk(schema, colChunk);
     }
 
     return buffer;

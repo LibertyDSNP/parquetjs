@@ -1,8 +1,9 @@
 // Lifted from https://github.com/kbajalc/parquets
 
 import parquet_thrift from "../../gen-nodejs/parquet_types";
-import { Statistics, OffsetIndex, ColumnIndex, PageType, DataPageHeader, DataPageHeaderV2, DictionaryPageHeader, IndexPageHeader, Type, SchemaElement } from "../../gen-nodejs/parquet_types";
+import { Statistics, OffsetIndex, ColumnIndex, PageType, DataPageHeader, DataPageHeaderV2, DictionaryPageHeader, IndexPageHeader, Type } from "../../gen-nodejs/parquet_types";
 import SplitBlockBloomFilter from "lib/bloom/sbbf";
+import { createSBBFParams } from "lib/bloomFilterIO/bloomFilterWriter";
 
 export type ParquetCodec = 'PLAIN' | 'RLE';
 export type ParquetCompression = 'UNCOMPRESSED' | 'GZIP' | 'SNAPPY' | 'LZO' | 'BROTLI' | 'LZ4';
@@ -119,6 +120,8 @@ export interface ColumnMetaData {
     statistics: any,
     encoding_stats: any,
     bloom_filter_offset: Offset
+    columnIndex?: ColumnIndex;
+    offsetIndex?: OffsetIndex;
 }
 
 export interface ColumnData {
@@ -209,7 +212,7 @@ export declare class PageHeader {
 export class NewFileMetaData extends parquet_thrift.FileMetaData {
     json?:JSON;
     //@ts-ignore
-    row_groups:RowGroup[];
+    row_groups: RowGroup[];
     constructor() {
       super()
     } 
@@ -222,11 +225,27 @@ export class NewPageHeader extends parquet_thrift.PageHeader {
       super()
     } 
   }
+
+  export class NewRowGroup extends parquet_thrift.RowGroup {
+    //@ts-ignore
+    columns: ColumnData[];
+    //@ts-ignore
+    num_rows: number;
+    //@ts-ignore
+    ordinal?: number;
+    constructor() {
+      super()
+    } 
+  }
+
   
-  
-export type streamOptions = {
+export type WriterOptions = {
+    pageIndex?: boolean;
+    pageSize?: number;
+    useDataPageV2?: boolean;
+    bloomFilters?: createSBBFParams[];
+    baseOffset?: number;
     rowGroupSize?: number;
-    
     flags?: string;
     encoding?: BufferEncoding;
     fd?: number;
@@ -235,5 +254,13 @@ export type streamOptions = {
     emitClose?: boolean;
     start?: number;
     highWaterMark?: number;
-  }
-  
+}
+
+export type Page = {
+    page: Buffer,
+    statistics: parquet_thrift.Statistics,
+    first_row_index: number,
+    distinct_values: Set<any>,
+    num_values: number,
+    count?: number,
+}

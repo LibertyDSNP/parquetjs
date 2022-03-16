@@ -1,6 +1,6 @@
 import * as parquet_types from './types'
 import { ParquetSchema } from './schema'
-import { PageData, ParquetField } from './types/types';
+import { Page, PageData, ParquetField } from './types/types';
 
 /**
  * 'Shred' a record into a list of <value, repetition_level, definition_level>
@@ -27,10 +27,10 @@ import { PageData, ParquetField } from './types/types';
  */
 
 export interface RecordBuffer {
-  columnData: Record<string, PageData>
+  columnData?: Record<string, PageData>
   rowCount?: number,
   pageRowCount?: number,
-  pages?: Record<string,object>
+  pages?: Record<string,Page[]>
 }
 
 export const shredRecord = function(schema: ParquetSchema, record: Record<string, unknown>, buffer: RecordBuffer) {
@@ -73,7 +73,7 @@ export const shredRecord = function(schema: ParquetSchema, record: Record<string
   for (let field of schema.fieldList) {
     let path = field.path.join(',')
     let record = recordShredded[path];
-    let column = buffer.columnData[path];
+    let column = buffer.columnData![path];
 
     for (let i = 0; i < record.rlevels!.length; i++) {
       column.rlevels!.push(record.rlevels![i]);
@@ -83,9 +83,9 @@ export const shredRecord = function(schema: ParquetSchema, record: Record<string
       }
     }
 
-    [...recordShredded[path].distinct_values!].forEach(value => buffer.columnData[path].distinct_values!.add(value));
+    [...recordShredded[path].distinct_values!].forEach(value => buffer.columnData![path].distinct_values!.add(value));
 
-    buffer.columnData[path].count! += recordShredded[path].count!;
+    buffer.columnData![path].count! += recordShredded[path].count!;
   }
 };
 
