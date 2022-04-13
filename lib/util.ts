@@ -27,23 +27,14 @@ type ThriftObject = NewFileMetaData | parquet_thrift.PageHeader | parquet_thrift
   * names for every PageLocation
   */
 
-// Issue at https://github.com/LibertyDSNP/parquetjs/issues/42
-const previousPageLocation = new parquet_thrift.PageLocation();
-//@ts-ignore
-const PageLocation = parquet_thrift.PageLocation.prototype = [];
-//@ts-ignore
-PageLocation.write = previousPageLocation.write;
-//@ts-ignore
-PageLocation.read = previousPageLocation.read;
-
 const getterSetter = (index: number) => ({
   get: function(this: Array<number>): number { return this[index]; },
   set: function(this: Array<number>, value: number): number { return this[index] = value;}
 });
 
-Object.defineProperty(PageLocation,'offset', getterSetter(0));
-Object.defineProperty(PageLocation,'compressed_page_size', getterSetter(1));
-Object.defineProperty(PageLocation,'first_row_index', getterSetter(2));
+Object.defineProperty(parquet_thrift.PageLocation.prototype,'offset', getterSetter(0));
+Object.defineProperty(parquet_thrift.PageLocation.prototype,'compressed_page_size', getterSetter(1));
+Object.defineProperty(parquet_thrift.PageLocation.prototype,'first_row_index', getterSetter(2));
 
 /**
  * Helper function that serializes a thrift object into a buffer
