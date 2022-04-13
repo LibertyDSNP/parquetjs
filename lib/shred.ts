@@ -100,9 +100,13 @@ function shredRecordInternal(fields: Record<string, ParquetField>, record: Recor
     if (record && (fieldName in record) && record[fieldName] !== undefined && record[fieldName] !== null) {
       if (Array.isArray(record[fieldName])) {
         values = record[fieldName] as Array<unknown>;
-      // checks all typed arrays and wrap them in a buffer, since typed arrays are not supported by parquet_thrift
-      } else if(ArrayBuffer.isView(record[fieldName])) {
-        values.push(Buffer.from(record[fieldName] as ArrayBuffer));
+      } else if(ArrayBuffer.isView(record[fieldName])) { // checks if any typed array
+        if (record[fieldName] instanceof Uint8Array) {
+          // wrap in a buffer, since not supported by parquet_thrift
+          values.push(Buffer.from(record[fieldName] as ArrayBuffer));
+        } else {
+          throw Object.prototype.toString.call(record[fieldName]) + ' is not supported';
+        }
       } else {
         values.push(record[fieldName]);
       }
@@ -274,3 +278,4 @@ function materializeRecordField(record: Record<string, unknown>, branch: Array<P
 function isDefined<T>(val: T | undefined): val is T {
   return val !== undefined;
 }
+
