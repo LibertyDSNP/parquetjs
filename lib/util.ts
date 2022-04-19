@@ -45,28 +45,6 @@ Object.defineProperty(PageLocation,'offset', getterSetter(0));
 Object.defineProperty(PageLocation,'compressed_page_size', getterSetter(1));
 Object.defineProperty(PageLocation,'first_row_index', getterSetter(2));
 
-// Dangerous code, investigate removal, Issue at https://github.com/LibertyDSNP/parquetjs/issues/43
-export const force32 = function() {
-  const protocol = thrift.TCompactProtocol.prototype;
-  //@ts-ignore
-  protocol.zigzagToI64 = protocol.zigzagToI32;
-  //@ts-ignore
-  protocol.readVarint64 = protocol.readVarint32 = function() {
-    let lo = 0;
-    let shift = 0;
-    let b;
-    while (true) {
-      b = protocol.readByte();
-      lo = lo | ((b & 0x7f) << shift);
-      shift += 7;
-      if (!(b & 0x80)) {
-        break;
-      }
-    }
-    return lo;
-  };
-}
-
 /**
  * Helper function that serializes a thrift object into a buffer
  */

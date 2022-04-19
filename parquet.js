@@ -12,5 +12,4 @@ module.exports = {
   ParquetTransformer: writer.ParquetTransformer,
   ParquetSchema: schema.ParquetSchema,
   ParquetShredder: shredder,
-  force32: util.force32
 };
