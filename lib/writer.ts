@@ -6,8 +6,9 @@ import * as parquet_codec from './codec'
 import * as parquet_compression from './compression'
 import * as parquet_types from './types'
 import * as bloomFilterWriter from "./bloomFilterIO/bloomFilterWriter"
-import { WriterOptions, RowGroup, NewFileMetaData, NewRowGroup, ParquetCodec, ParquetField } from './types/types'
+import { Offset, WriterOptions, RowGroup, NewFileMetaData, NewRowGroup, ParquetCodec, ParquetField } from './types/types'
 import { Options } from './codec/types'
+import Long from 'long'
 import { ParquetSchema } from './schema'
 import { WriteStream } from 'fs'
 import Int64 from 'node-int64'
@@ -181,7 +182,7 @@ class ParquetWriter {
 /**
  * Create a parquet file from a schema and a number of row groups. This class
  * performs direct, unbuffered writes to the underlying output stream and is
- * intendend for advanced and internal users; the writeXXX methods must be
+ * intended for advanced and internal users; the writeXXX methods must be
  * called in the correct order to produce a valid file.
  */
 class ParquetEnvelopeWriter {
@@ -189,13 +190,13 @@ class ParquetEnvelopeWriter {
   schema: ParquetSchema;
   write: Function;
   close: Function;
-  offset: number;
-  rowCount: number;
-  pageSize: number;
-  pageIndex: boolean;
-  useDataPageV2: boolean;
+  offset: Offset // TODO: was number, not quite sure if Offset is correct
+  rowCount: Int64
   rowGroups: RowGroup[]
-  bloomFilters: Record<string, SplitBlockBloomFilter>
+  pageSize: number;
+  useDataPageV2: boolean;
+  pageIndex: boolean;
+  bloomFilters: Record<string, SplitBlockBloomFilter> // TODO: OR filterCollection
 
   /**
    * Create a new parquet envelope writer that writes to the specified stream
