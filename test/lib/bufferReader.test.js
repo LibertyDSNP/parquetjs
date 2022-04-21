@@ -7,7 +7,7 @@ import BufferReader from "../../lib/bufferReader"
 chai.use(sinonChai);
 chai.use(sinonChaiInOrder);
 
-describe.only("bufferReader", () => {
+describe("bufferReader", () => {
   let reader;
 
   beforeEach(() => {
@@ -105,7 +105,7 @@ describe.only("bufferReader", () => {
         .subsequently.calledWith("buffer");
     })
 
-    it.only("should read even if the maxSpan has been exceeded", async () => {
+    it("should read even if the maxSpan has been exceeded", async () => {
       const mockResolve = sinon.spy();
       reader.maxSpan = 5;
       reader.envelopeReader = {readFn: sinon.fake.returns("willslicefrombeginning")}
