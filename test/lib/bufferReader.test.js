@@ -3,6 +3,7 @@ import sinon from "sinon"
 import sinonChai from "sinon-chai";
 import sinonChaiInOrder from 'sinon-chai-in-order';
 import BufferReader from "../../lib/bufferReader"
+import { ParquetEnvelopeReader } from "../../lib/reader";
 
 chai.use(sinonChai);
 chai.use(sinonChaiInOrder);
@@ -140,6 +141,28 @@ describe("bufferReader", () => {
         .subsequently.calledWith("willslice")
         .subsequently.calledWith("willslicefrom")
         .subsequently.calledWith("willslicefrombeginning");
+    })
+  })
+})
+
+describe("bufferReader Integration Tests", () => {
+  let reader;
+  let envelopeReader;
+
+  describe("Reading a file", async () => {
+    beforeEach(async () => {
+      envelopeReader = await ParquetEnvelopeReader.openFile("./test/lib/test.txt", {});
+      reader = new BufferReader(envelopeReader);
+    })
+
+    it("should properly read the file", async () => {
+      const buffer = await reader.read(0, 5);
+      const buffer2 = await reader.read(6, 5);
+      const buffer3 = await reader.read(12, 5);
+
+      expect(buffer).to.eql(Buffer.from("Lorem"));
+      expect(buffer2).to.eql(Buffer.from("ipsum"));
+      expect(buffer3).to.eql(Buffer.from("dolor"));
     })
   })
 })
