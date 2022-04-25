@@ -1,5 +1,6 @@
 "use strict";
 const chai = require("chai");
+const path = require("path");
 const assert = chai.assert;
 const parquet = require("../parquet.js");
 const server = require("./mocks/server");
@@ -92,4 +93,19 @@ describe("ParquetReader", () => {
       assert.deepEqual(null, await cursor.next());
     });
   });
+
+  describe("#asyncIterator", () => {
+    it("responds to for await", async () => {
+      const reader = await parquet.ParquetReader.openFile(
+        path.join(__dirname,'test-files','fruits.parquet')
+      );
+
+      let counter = 0;
+      for await(const record of reader) {
+        counter++;
+      }
+
+      assert.equal(counter, 40000);
+    })
+  })
 });

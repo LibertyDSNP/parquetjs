@@ -218,6 +218,26 @@ class ParquetReader {
   }
 
   /**
+   * Support `for await` iterators on the reader object
+   * Uses `ParquetCursor` still under the hood.
+   *
+   * ```js
+   *  for await (const record of reader) {
+   *    console.log(record);
+   *  }
+   * ```
+   */
+  async* [Symbol.asyncIterator]() {
+    const cursor = this.getCursor();
+    let record = null;
+    while (record = await cursor.next()) {
+      yield record;
+    }
+}
+
+
+
+  /**
    * Return a cursor to the file. You may open more than one cursor and use
    * them concurrently. All cursors become invalid once close() is called on
    * the reader object.
@@ -251,7 +271,7 @@ class ParquetReader {
 
   /**
    * Return the number of rows in this file. Note that the number of rows is
-   * not neccessarily equal to the number of rows in each column.
+   * not necessarily equal to the number of rows in each column.
    */
   getRowCount() {
     return this.metadata!.num_rows;
