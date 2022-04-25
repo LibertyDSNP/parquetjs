@@ -1,7 +1,7 @@
 'use strict';
 const chai = require('chai');
 const assert = chai.assert;
-const parquet = require('../parquet.js');
+const parquet = require('../parquet');
 
 describe('ParquetShredder', function() {
 
@@ -526,7 +526,7 @@ describe('ParquetShredder', function() {
       values: [],
       count: 0
     };
-    
+
     buffer.columnData['fruit,name'] = {
       dlevels: [0],
       rlevels: [0],
@@ -542,7 +542,7 @@ describe('ParquetShredder', function() {
       values: [],
       count: 1
     };
-    
+
     let records = parquet.ParquetShredder.materializeRecords(schema, buffer);
 
     assert.equal(records.length, 1);

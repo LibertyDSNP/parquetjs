@@ -1,8 +1,7 @@
-const reader = require('./lib/reader');
-const writer = require('./lib/writer');
-const schema = require('./lib/schema');
-const shredder = require('./lib/shred');
-const util = require('./lib/util');
+import * as reader from './lib/reader';
+import writer from './lib/writer';
+import * as schema from './lib/schema';
+import * as shredder from './lib/shred';
 
 module.exports = {
   ParquetEnvelopeReader: reader.ParquetEnvelopeReader,

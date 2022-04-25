@@ -2,7 +2,7 @@
 const chai = require("chai");
 const path = require("path");
 const assert = chai.assert;
-const parquet = require("../parquet.js");
+const parquet = require("../parquet");
 const server = require("./mocks/server");
 
 describe("ParquetReader", () => {

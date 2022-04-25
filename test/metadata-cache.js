@@ -2,13 +2,13 @@
 const chai = require('chai');
 const assert = chai.assert;
 const path = require('path');
-const parquet = require('../parquet.js');
+const parquet = require('../parquet');
 
-describe('metadata-cache', function() {  
+describe('metadata-cache', function() {
   let metadata;
 
   before(async function() {
-    const reader = await parquet.ParquetReader.openFile(path.join(__dirname,'test-files','fruits.parquet'));   
+    const reader = await parquet.ParquetReader.openFile(path.join(__dirname,'test-files','fruits.parquet'));
     for (let i = 0; i < reader.metadata.row_groups.length; i++) {
       const rowGroup = reader.metadata.row_groups[i];
       for (let j = 0; j < rowGroup.columns.length; j++) {
@@ -32,7 +32,7 @@ describe('metadata-cache', function() {
       metadata: metadata
     });
     const column = reader.metadata.row_groups[0].columns[2];
-    
+
     // verify that the json metadata is loaded
     assert.equal(reader.metadata.json,true);
 

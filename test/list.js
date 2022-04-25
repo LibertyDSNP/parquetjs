@@ -1,7 +1,7 @@
 'use strict';
 const chai = require('chai');
 const assert = chai.assert;
-const parquet = require('../parquet.js');
+const parquet = require('../parquet');
 
 
 /*
@@ -22,11 +22,11 @@ const parquet = require('../parquet.js');
     id string,
     `test` array<struct<a:string,b:int>>
   )
-  ROW FORMAT SERDE 
-    'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe' 
-  STORED AS INPUTFORMAT 
-    'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat' 
-  OUTPUTFORMAT 
+  ROW FORMAT SERDE
+    'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
+  STORED AS INPUTFORMAT
+    'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat'
+  OUTPUTFORMAT
     'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat'
   LOCATION
     's3://s3bucket/.../list.parquet'
@@ -73,7 +73,7 @@ describe('list', async function() {
 
     writer.appendRow(row1);
     writer.appendRow(row2);
-   
+
     await writer.close();
     reader = await parquet.ParquetReader.openFile('list.parquet');
   });

@@ -1,5 +1,5 @@
 import { assert }from "chai";
-const parquet = require("../parquet.js");
+const parquet = require("../parquet");
 const TEST_VTIME = new Date();
 
 type BloomFilters = {

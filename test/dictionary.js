@@ -1,7 +1,7 @@
 'use strict';
 const chai = require('chai');
 const assert = chai.assert;
-const parquet = require('../parquet.js');
+const parquet = require('../parquet');
 const path = require('path');
 
 describe('dictionary encoding', async function() {

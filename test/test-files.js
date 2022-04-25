@@ -3,7 +3,7 @@ const chai = require('chai');
 const fs = require('fs');
 const assert = chai.assert;
 const path = require('path');
-const parquet = require('../parquet.js');
+const parquet = require('../parquet');
 const {promisify} = require('util');
 
 describe('test-files', function() {
