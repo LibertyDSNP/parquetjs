@@ -62,7 +62,7 @@
   },
   "scripts": {
     "build": "npm run build:node && npm run build:types",
-    "build:types": "tsc -p tsconfig.types.json",
+    "build:types": "tsc -p tsconfig.types.json && cp gen-nodejs/parquet_types.d.ts dist/gen-nodejs/parquet_types.d.ts",
     "build:node": "tsc -b",
     "build:browser": "node esbuild.js",
     "type": "tsc --noEmit",
