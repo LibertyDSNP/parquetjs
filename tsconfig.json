@@ -10,7 +10,7 @@
     "noImplicitAny": true,
     "outDir": "dist",
     "resolveJsonModule": true,
-    "sourceMap": true,
+    "sourceMap": false,
     "strict": true,
     "target": "ESNext",
     "watch": false,

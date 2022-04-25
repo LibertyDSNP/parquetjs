@@ -97,7 +97,7 @@ class ParquetCursor  {
  * important that you call close() after you are finished reading the file to
  * avoid leaking file descriptors.
  */
-class ParquetReader {
+export class ParquetReader {
 
   envelopeReader: ParquetEnvelopeReader | null;
   metadata: NewFileMetaData | null;
@@ -795,8 +795,8 @@ async function decodePages(buffer: Buffer, opts: Options) {
     if (pageData.dictionary) {
       opts.dictionary = pageData.dictionary as number[];
       continue;
-    } 
-    
+    }
+
     if (opts.dictionary) {
       pageData.values = pageData.values!.map(d => opts.dictionary![d]);
     }
