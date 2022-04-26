@@ -461,18 +461,23 @@ function toPrimitive_TIMESTAMP_MICROS(value: Date | string | number | bigint) {
   }
 
   /* convert from integer */
-  {
+  try {
+    // Will throw if NaN
     const v = BigInt(value);
-    if (v < 0n /*|| isNaN(v)*/) {
-      throw 'invalid value for TIMESTAMP_MICROS: ' + value;
+    if (v < 0n) {
+      throw 'Cannot be less than zero';
     }
 
     return v;
+  } catch (e) {
+    throw 'invalid value for TIMESTAMP_MICROS: ' + value;
   }
 }
 
 function fromPrimitive_TIMESTAMP_MICROS(value: number | bigint) {
-  return typeof value === 'bigint' ? new Date(Number(value / 1000n)): new Date(value / 1000);
+    if (value === undefined) return new Date(NaN);
+    if (typeof value === 'bigint') return new Date(Number(value / 1000n));
+    return new Date(value / 1000);
   }
 
 function toPrimitive_INTERVAL(value: INTERVAL) {
