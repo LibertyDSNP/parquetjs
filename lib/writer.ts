@@ -6,7 +6,7 @@ import * as parquet_codec from './codec'
 import * as parquet_compression from './compression'
 import * as parquet_types from './types'
 import * as bloomFilterWriter from "./bloomFilterIO/bloomFilterWriter"
-import { Offset, WriterOptions, RowGroup, NewFileMetaData, NewRowGroup, ParquetCodec, ParquetField } from './types/types'
+import { Offset, WriterOptions, RowGroup, NewFileMetaData, NewRowGroup, ParquetCodec, ParquetField, BloomFilterStreamOption, StreamOptions, filterOptions } from './types/types'
 import { Options } from './codec/types'
 import Long from 'long'
 import { ParquetSchema } from './schema'
@@ -141,11 +141,13 @@ class ParquetWriter {
       this.rowBuffer = {};
     }
 
-    await this.envelopeWriter!.writeBloomFilters();
-    await this.envelopeWriter!.writeIndex();
-    await this.envelopeWriter!.writeFooter(this.userMetadata);
-    await this.envelopeWriter!.close();
-    this.envelopeWriter = null;
+    if (this.envelopeWriter) {
+      await this.envelopeWriter.writeBloomFilters();
+      await this.envelopeWriter.writeIndex();
+      await this.envelopeWriter.writeFooter(this.userMetadata);
+      await this.envelopeWriter.close();
+      this.envelopeWriter = null;
+    }
 
     if (callback) {
       callback();
@@ -186,11 +188,10 @@ class ParquetWriter {
  * called in the correct order to produce a valid file.
  */
 class ParquetEnvelopeWriter {
-
-  schema: ParquetSchema;
+  schema: ParquetSchema
   write: Function;
   close: Function;
-  offset: Offset // TODO: was number, not quite sure if Offset is correct
+  offset: Offset  // TODO: was number, not quite sure if Offset is correct
   rowCount: Int64
   rowGroups: RowGroup[]
   pageSize: number;
@@ -204,15 +205,15 @@ class ParquetEnvelopeWriter {
   static async openStream(schema: ParquetSchema, outputStream: WriteStream, opts: WriterOptions) {
     let writeFn = parquet_util.oswrite.bind(undefined, outputStream);
     let closeFn = parquet_util.osend.bind(undefined, outputStream);
-    return new ParquetEnvelopeWriter(schema, writeFn, closeFn, 0, opts);
+    return new ParquetEnvelopeWriter(schema, writeFn, closeFn, new Int64(0), opts);
   }
 
-  constructor(schema: ParquetSchema, writeFn: Function, closeFn: Function, fileOffset: number, opts: WriterOptions) {
+  constructor(schema: ParquetSchema, writeFn: Function, closeFn: Function, fileOffset: Offset, opts: StreamOptions) {
     this.schema = schema;
     this.write = writeFn;
     this.close = closeFn;
     this.offset = fileOffset;
-    this.rowCount = 0;
+    this.rowCount = new Int64(0);
     this.rowGroups = [];
     this.pageSize =  opts.pageSize || PARQUET_DEFAULT_PAGE_SIZE;
     this.useDataPageV2 = ("useDataPageV2" in opts) ? opts.useDataPageV2! : true;
@@ -225,7 +226,7 @@ class ParquetEnvelopeWriter {
   }
 
   writeSection(buf: Buffer) {
-    this.offset += buf.length;
+    this.offset += new Offset() // buf.length;
     return this.write(buf);
   }
 
@@ -256,9 +257,8 @@ class ParquetEnvelopeWriter {
     return this.writeSection(rgroup.body);
   }
 
-  writeBloomFilters(_rowGroups?: RowGroup[]) {
-    let rowGroups = _rowGroups || this.rowGroups;
-    rowGroups.forEach(group => {
+  writeBloomFilters() {
+    this.rowGroups.forEach(group => {
       group.columns.forEach(column => {
         const columnName = column.meta_data.path_in_schema[0];
         if (columnName in this.bloomFilters === false) return;
@@ -276,10 +276,9 @@ class ParquetEnvelopeWriter {
   /**
    * Write the columnIndices and offsetIndices
    */
-  writeIndex(_rowGroups?: RowGroup[]) {
-    let rowGroups = _rowGroups || this.rowGroups;
+  writeIndex() {
     this.schema.fieldList.forEach( (c,i) => {
-      rowGroups.forEach(group => {
+      this.rowGroups.forEach(group => {
         let column = group.columns[i];
         if (!column) return;
 
@@ -305,7 +304,7 @@ class ParquetEnvelopeWriter {
   /**
    * Write the parquet file footer
    */
-  writeFooter(userMetadata: Record<string, string>, _schema?: ParquetSchema, _rowCount?: number, _rowGroups?: RowGroup[]) {
+  writeFooter(userMetadata: Record<string, string>) {
     if (!userMetadata) {
       userMetadata = {};
     }
@@ -741,7 +740,7 @@ async function encodeRowGroup(schema: ParquetSchema, data: parquet_shredder.Reco
 /**
  * Encode a parquet file metadata footer
  */
-function encodeFooter(schema: ParquetSchema, rowCount: Int64, rowGroups: RowGroup[], userMetadata: string[]) {
+function encodeFooter(schema: ParquetSchema, rowCount: Int64, rowGroups: RowGroup[], userMetadata: Record<string, string>) {
   let metadata = new NewFileMetaData()
   metadata.version = PARQUET_VERSION;
   metadata.created_by = '@dsnp/parquetjs';
