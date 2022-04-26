@@ -6,7 +6,7 @@ import * as parquet_codec from './codec'
 import * as parquet_compression from './compression'
 import * as parquet_types from './types'
 import * as bloomFilterWriter from "./bloomFilterIO/bloomFilterWriter"
-import { Offset, WriterOptions, RowGroup, NewFileMetaData, NewRowGroup, ParquetCodec, ParquetField, BloomFilterStreamOption, StreamOptions, filterOptions } from './types/types'
+import { Offset, WriterOptions, RowGroup, NewFileMetaData, NewRowGroup, ParquetCodec, ParquetField, BloomFilterStreamOption, StreamOptions, filterOptions, filterCollection } from './types/types'
 import { Options } from './codec/types'
 import Long from 'long'
 import { ParquetSchema } from './schema'
