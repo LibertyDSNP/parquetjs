@@ -43,6 +43,7 @@ class ParquetCursor  {
   columnList: Array<Array<unknown>>;
   rowGroup: Array<unknown>;
   rowGroupIndex: number;
+  cursorIndex: number;
   /**
    * Create a new parquet reader from the file metadata and an envelope reader.
    * It is usually not recommended to call this constructor directly except for
@@ -56,6 +57,7 @@ class ParquetCursor  {
     this.columnList = columnList;
     this.rowGroup = [];
     this.rowGroupIndex = 0;
+    this.cursorIndex = 0;
   }
 
   /**
@@ -63,7 +65,7 @@ class ParquetCursor  {
    * of the file was reached
    */
   async next() {
-    if (this.rowGroup.length === 0) {
+    if (this.cursorIndex >= this.rowGroup.length) {
       if (this.rowGroupIndex >= this.metadata.row_groups.length) {
 
         return null;
@@ -76,9 +78,10 @@ class ParquetCursor  {
 
       this.rowGroup = parquet_shredder.materializeRecords(this.schema, rowBuffer);
       this.rowGroupIndex++;
+      this.cursorIndex = 0;
     }
 
-    return this.rowGroup.shift();
+    return this.rowGroup[this.cursorIndex++];
   }
 
   /**
@@ -87,6 +90,7 @@ class ParquetCursor  {
   rewind() {
     this.rowGroup = [];
     this.rowGroupIndex = 0;
+    this.cursorIndex = 0;
   }
 };
 
