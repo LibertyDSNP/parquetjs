@@ -100,23 +100,23 @@ class ParquetWriter {
    * rowGroupSize rows are in the buffer or close() is called
    */
   async appendRow(row: Record<string, unknown>) {
-    if (this.closed) {
+    if (this.closed || this.envelopeWriter === null) {
       throw 'writer was closed';
     }
 
     parquet_shredder.shredRecord(this.schema, row, this.rowBuffer);
 
     const options = {
-      useDataPageV2: this.envelopeWriter!.useDataPageV2,
-      bloomFilters: this.envelopeWriter!.bloomFilters
+      useDataPageV2: this.envelopeWriter.useDataPageV2,
+      bloomFilters: this.envelopeWriter.bloomFilters
     };
-    if (this.rowBuffer.pageRowCount! >= this.envelopeWriter!.pageSize) {
+    if (this.rowBuffer.pageRowCount! >= this.envelopeWriter.pageSize) {
       await encodePages(this.schema, this.rowBuffer, options);
     }
 
     if (this.rowBuffer.rowCount! >= this.rowGroupSize) {
       await encodePages(this.schema, this.rowBuffer, options);
-      await this.envelopeWriter!.writeRowGroup(this.rowBuffer);
+      await this.envelopeWriter.writeRowGroup(this.rowBuffer);
       this.rowBuffer = {};
     }
   }
@@ -134,14 +134,15 @@ class ParquetWriter {
 
     this.closed = true;
 
+  if (this.envelopeWriter) {
     if (this.rowBuffer.rowCount! > 0 || this.rowBuffer.rowCount! >= this.rowGroupSize) {
-      await encodePages(this.schema, this.rowBuffer, { useDataPageV2: this.envelopeWriter!.useDataPageV2, bloomFilters: this.envelopeWriter!.bloomFilters});
+      await encodePages(this.schema, this.rowBuffer, { useDataPageV2: this.envelopeWriter.useDataPageV2, bloomFilters: this.envelopeWriter.bloomFilters});
 
-      await this.envelopeWriter!.writeRowGroup(this.rowBuffer);
+      await this.envelopeWriter.writeRowGroup(this.rowBuffer);
       this.rowBuffer = {};
     }
 
-    if (this.envelopeWriter) {
+
       await this.envelopeWriter.writeBloomFilters();
       await this.envelopeWriter.writeIndex();
       await this.envelopeWriter.writeFooter(this.userMetadata);
