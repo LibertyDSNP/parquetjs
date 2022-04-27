@@ -100,11 +100,12 @@ export interface ParquetRecord {
     [key: string]: any;
 }
 
-export interface Offset {
-    buffer: Buffer
-    offset: number
-}
+// export interface Offset {
+//     buffer: Buffer
+//     offset: number
+// }
 
+// todo: swap with int64 from node library
 export interface ColumnMetaData {
     type: Type,
     encodings: Array<any>,
@@ -189,7 +190,7 @@ export declare class PageHeader {
     data_page_header_v2?: DataPageHeaderV2;
     offset?: number;
     headerSize?: number;
-  
+
       constructor(args?: { type: PageType; uncompressed_page_size: number; compressed_page_size: number; crc?: number; data_page_header?: DataPageHeader; index_page_header?: IndexPageHeader; dictionary_page_header?: DictionaryPageHeader; data_page_header_v2?: DataPageHeaderV2; });
   }
 
@@ -215,7 +216,7 @@ export class NewFileMetaData extends parquet_thrift.FileMetaData {
     row_groups: RowGroup[];
     constructor() {
       super()
-    } 
+    }
   }
 
 export class NewPageHeader extends parquet_thrift.PageHeader {
@@ -223,7 +224,7 @@ export class NewPageHeader extends parquet_thrift.PageHeader {
     headerSize?: number;
     constructor() {
       super()
-    } 
+    }
   }
 
   export class NewRowGroup extends parquet_thrift.RowGroup {
@@ -235,10 +236,10 @@ export class NewPageHeader extends parquet_thrift.PageHeader {
     ordinal?: number;
     constructor() {
       super()
-    } 
+    }
   }
 
-  
+
 export type WriterOptions = {
     pageIndex?: boolean;
     pageSize?: number;

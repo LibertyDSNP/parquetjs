@@ -192,7 +192,7 @@ class ParquetEnvelopeWriter {
   schema: ParquetSchema
   write: Function;
   close: Function;
-  offset: Offset  // TODO: was number, not quite sure if Offset is correct
+  offset: number  // TODO: was number, not quite sure if Offset is correct
   rowCount: Int64
   rowGroups: RowGroup[]
   pageSize: number;
@@ -206,10 +206,10 @@ class ParquetEnvelopeWriter {
   static async openStream(schema: ParquetSchema, outputStream: WriteStream, opts: WriterOptions) {
     let writeFn = parquet_util.oswrite.bind(undefined, outputStream);
     let closeFn = parquet_util.osend.bind(undefined, outputStream);
-    return new ParquetEnvelopeWriter(schema, writeFn, closeFn, new Int64(0), opts);
+    return new ParquetEnvelopeWriter(schema, writeFn, closeFn, 0, opts);
   }
 
-  constructor(schema: ParquetSchema, writeFn: Function, closeFn: Function, fileOffset: Offset, opts: StreamOptions) {
+  constructor(schema: ParquetSchema, writeFn: Function, closeFn: Function, fileOffset: number, opts: StreamOptions) {
     this.schema = schema;
     this.write = writeFn;
     this.close = closeFn;
@@ -227,7 +227,7 @@ class ParquetEnvelopeWriter {
   }
 
   writeSection(buf: Buffer) {
-    this.offset.offset += buf.length;
+    this.offset += buf.length;
     return this.write(buf);
   }
 
