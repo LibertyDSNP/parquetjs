@@ -227,7 +227,7 @@ class ParquetEnvelopeWriter {
   }
 
   writeSection(buf: Buffer) {
-    this.offset += new Offset() // buf.length;
+    this.offset.offset += buf.length;
     return this.write(buf);
   }
 
