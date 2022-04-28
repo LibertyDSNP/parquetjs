@@ -227,7 +227,7 @@ class ParquetEnvelopeWriter {
   }
 
   writeSection(buf: Buffer) {
-    this.offset.setValue(this.offset.toNumber() + buf.length)
+    this.offset.setValue(this.offset.valueOf() + buf.length)
     return this.write(buf);
   }
 
@@ -718,7 +718,7 @@ async function encodeRowGroup(schema: ParquetSchema, data: parquet_shredder.Reco
       data.pages![field.path.join(',')],
       {
         column: field,
-        baseOffset: opts.baseOffset! + body.length,
+        baseOffset: opts.baseOffset!.valueOf() + body.length,
         pageSize: opts.pageSize,
         encoding: field.encoding,
         rowCount: data.rowCount,
