@@ -106,7 +106,7 @@ class ParquetWriter {
 
     parquet_shredder.shredRecord(this.schema, row, this.rowBuffer);
 
-    const options = {
+    const options: WriterOptions = {
       useDataPageV2: this.envelopeWriter.useDataPageV2,
       bloomFilters: this.envelopeWriter.bloomFilters
     };
@@ -346,7 +346,7 @@ class ParquetTransformer extends stream.Transform {
 
     this.writer = new ParquetWriter(
         schema,
-        new ParquetEnvelopeWriter(schema, writeProxy, function() {}, 0, opts),
+        new ParquetEnvelopeWriter(schema, writeProxy, function() {}, new Int64(0), opts),
         opts);
   }
 
