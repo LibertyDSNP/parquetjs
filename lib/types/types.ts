@@ -1,9 +1,10 @@
 // Lifted from https://github.com/kbajalc/parquets
 
 import parquet_thrift from "../../gen-nodejs/parquet_types";
-import { Statistics, OffsetIndex, ColumnIndex, PageType, DataPageHeader, DataPageHeaderV2, DictionaryPageHeader, IndexPageHeader, Type } from "../../gen-nodejs/parquet_types";
+import { Statistics, OffsetIndex, ColumnIndex, PageType, DataPageHeader, DataPageHeaderV2, DictionaryPageHeader, IndexPageHeader, Type, ColumnMetaData } from "../../gen-nodejs/parquet_types";
 import SplitBlockBloomFilter from "lib/bloom/sbbf";
 import { createSBBFParams } from "lib/bloomFilterIO/bloomFilterWriter";
+import Int64 from 'node-int64'
 
 export type ParquetCodec = 'PLAIN' | 'RLE';
 export type ParquetCompression = 'UNCOMPRESSED' | 'GZIP' | 'SNAPPY' | 'LZO' | 'BROTLI' | 'LZ4';
@@ -99,43 +100,17 @@ export interface ParquetBuffer {
 export interface ParquetRecord {
     [key: string]: any;
 }
-
-// export interface Offset {
-//     buffer: Buffer
-//     offset: number
-// }
-
-// todo: swap with int64 from node library
-export interface ColumnMetaData {
-    type: Type,
-    encodings: Array<any>,
-    path_in_schema: Array<string>,
-    codec: number,
-    num_values: number,
-    total_uncompressed_size: any,
-    total_compressed_size: any,
-    key_value_metadata: any,
-    data_page_offset: Offset,
-    index_page_offset: Offset,
-    dictionary_page_offset: Offset,
-    statistics: any,
-    encoding_stats: any,
-    bloom_filter_offset: Offset
-    columnIndex?: ColumnIndex;
-    offsetIndex?: OffsetIndex;
-}
-
 export interface ColumnData {
     file_path: string,
-    file_offset: Offset,
+    file_offset: Int64,
     meta_data: ColumnMetaData
     offset_index_length?: number;
     column_index_length?: number;
     encrypted_column_metadata?: Buffer;
     offsetIndex?: OffsetIndex;
-    offset_index_offset?: number;
+    offset_index_offset?: Int64;
     columnIndex?: ColumnIndex;
-    column_index_offset?: number;
+    column_index_offset?: Int64;
 }
 
 export interface ColumnChunkData {
@@ -245,7 +220,7 @@ export type WriterOptions = {
     pageSize?: number;
     useDataPageV2?: boolean;
     bloomFilters?: createSBBFParams[];
-    baseOffset?: number;
+    baseOffset?: Int64;
     rowGroupSize?: number;
     flags?: string;
     encoding?: BufferEncoding;
