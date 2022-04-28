@@ -253,7 +253,7 @@ class ParquetEnvelopeWriter {
           pageIndex: this.pageIndex
         });
 
-    this.rowCount += records.rowCount!;
+    this.rowCount.setValue(this.rowCount.valueOf() + records.rowCount!);
     this.rowGroups.push(rgroup.metadata);
     return this.writeSection(rgroup.body);
   }
@@ -356,7 +356,7 @@ class ParquetTransformer extends stream.Transform {
         data => callback(null, data),
         err => {
           const fullErr = new Error(`Error transforming to parquet: ${err.toString()} row:${row}`);
-          fullErr.origErr = err;
+          fullErr.cause = err;
           callback(fullErr);
         }
       );
@@ -628,8 +628,8 @@ async function encodeColumnChunk(pages, opts) {
   metadata.num_values = num_values;
   metadata.data_page_offset = opts.baseOffset;
   metadata.encodings = [];
-  metadata.total_uncompressed_size = pagesBuf.length;
-  metadata.total_compressed_size = pagesBuf.length;
+  metadata.total_uncompressed_size = new Int64(pagesBuf.length);
+  metadata.total_compressed_size = new Int64(pagesBuf.length);
 
   metadata.type = parquet_thrift.Type[opts.column.primitiveType];
   metadata.codec = await parquet_thrift.CompressionCodec[opts.column.compression];
