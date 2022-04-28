@@ -127,7 +127,7 @@ class ParquetWriter {
    * method twice on the same object or add any rows after the close() method has
    * been called
    */
-  async close(callback: Function) {
+  async close(callback?: Function) {
     if (this.closed) {
       throw 'writer was closed';
     }
