@@ -437,8 +437,8 @@ async function encodePages(schema: ParquetSchema, rowBuffer: parquet_shredder.Re
         }
       });
 
-      statistics.null_count = values.dlevels.length - values.values.length;
-      statistics.distinct_count = values.distinct_values.size;
+      statistics.null_count = new Int64(values.dlevels!.length - values.values!.length);
+      statistics.distinct_count = new Int64(values.distinct_values!.size);
     }
 
     if (opts.useDataPageV2) {
