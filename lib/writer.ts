@@ -6,7 +6,7 @@ import * as parquet_codec from './codec'
 import * as parquet_compression from './compression'
 import * as parquet_types from './types'
 import * as bloomFilterWriter from "./bloomFilterIO/bloomFilterWriter"
-import { WriterOptions, RowGroup, NewFileMetaData, NewRowGroup, ParquetCodec, ParquetField, BloomFilterStreamOption, filterCollection } from './types/types'
+import { WriterOptions, RowGroup, NewFileMetaData, NewRowGroup, ParquetCodec, ParquetField, ColumnnMetaDataExt, BloomFilterStreamOption, filterCollection, Page } from './types/types'
 import { Options } from './codec/types'
 import Long from 'long'
 import { ParquetSchema } from './schema'
@@ -617,22 +617,22 @@ async function encodeDataPageV2(column: ParquetField, rowCount: number, values: 
 /**
  * Encode an array of values into a parquet column chunk
  */
-async function encodeColumnChunk(pages, opts) {
+async function encodeColumnChunk(pages: Page[], opts: {column: ParquetField, baseOffset: number, pageSize: number, encoding: ParquetCodec, rowCount: number, useDataPageV2: boolean, pageIndex: boolean}) {
   let pagesBuf = Buffer.concat(pages.map(d => d.page));
   let num_values = pages.reduce((p,d) => p + d.num_values, 0);
   let offset = opts.baseOffset;
 
   /* prepare metadata header */
-  let metadata = new parquet_thrift.ColumnMetaData();
+  let metadata: ColumnnMetaDataExt = new parquet_thrift.ColumnMetaData();
   metadata.path_in_schema = opts.column.path;
-  metadata.num_values = num_values;
-  metadata.data_page_offset = opts.baseOffset;
+  metadata.num_values = new Int64(num_values);
+  metadata.data_page_offset = new Int64(opts.baseOffset);
   metadata.encodings = [];
   metadata.total_uncompressed_size = new Int64(pagesBuf.length);
   metadata.total_compressed_size = new Int64(pagesBuf.length);
 
-  metadata.type = parquet_thrift.Type[opts.column.primitiveType];
-  metadata.codec = await parquet_thrift.CompressionCodec[opts.column.compression];
+  metadata.type = parquet_thrift.Type[opts.column.primitiveType!];
+  metadata.codec = await parquet_thrift.CompressionCodec[opts.column.compression!];
 
   /* compile statistics ColumnIndex and OffsetIndex*/
   let columnIndex = new parquet_thrift.ColumnIndex();
@@ -649,16 +649,16 @@ async function encodeColumnChunk(pages, opts) {
 
   /* loop through pages and update indices and statistics */
   for (let i = 0; i < pages.length; i++) {
-    let page = pages[i];
+    const page = pages[i];
 
     if (opts.column.statistics !== false) {
-      if (page.statistics.max_value > statistics.max_value! || i == 0) {
+      if (page.statistics.max_value! > statistics.max_value! || i == 0) {
         statistics.max_value = page.statistics.max_value;
       }
-      if (page.statistics.min_value < statistics.min_value! || i == 0) {
+      if (page.statistics.min_value! < statistics.min_value! || i == 0) {
         statistics.min_value = page.statistics.min_value;
       }
-      statistics.null_count += page.statistics.null_count;
+      statistics.null_count.setValue(statistics.null_count.valueOf() + (page.statistics.null_count?.valueOf() || 0));
       page.distinct_values.forEach((value: unknown) => distinct_values.add(value));
 
       columnIndex.max_values.push( encodeStatisticsValue(page.statistics.max_value, opts.column) );
@@ -666,10 +666,10 @@ async function encodeColumnChunk(pages, opts) {
     }
 
     let pageLocation = new parquet_thrift.PageLocation();
-    pageLocation.offset = offset;
+    pageLocation.offset.setValue(offset);
     offset += page.page.length;
     pageLocation.compressed_page_size = page.page.length;
-    pageLocation.first_row_index = page.first_row_index;
+    pageLocation.first_row_index = new Int64(page.first_row_index);
     offsetIndex.page_locations.push(pageLocation);
   }
 
@@ -678,7 +678,7 @@ async function encodeColumnChunk(pages, opts) {
   }
 
   if (opts.column.statistics !== false) {
-    statistics.distinct_count = distinct_values.size;
+    statistics.distinct_count = new Int64(distinct_values.size);
     metadata.statistics = encodeStatistics(statistics, opts.column);
     if (opts.pageIndex !== false) {
       metadata.columnIndex = columnIndex;

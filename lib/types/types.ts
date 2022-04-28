@@ -103,7 +103,7 @@ export interface ParquetRecord {
 export interface ColumnData {
     file_path: string,
     file_offset: Int64,
-    meta_data: ColumnMetaData
+    meta_data: ColumnnMetaDataExt
     offset_index_length?: number;
     column_index_length?: number;
     encrypted_column_metadata?: Buffer;
@@ -116,6 +116,12 @@ export interface ColumnData {
 export interface ColumnChunkData {
     rowGroupIndex: number,
     column: ColumnData
+}
+
+export interface ColumnnMetaDataExt extends ColumnMetaData {
+    offsetIndex?: OffsetIndex
+    columnIndex?: ColumnIndex
+
 }
 
 export declare class RowGroup {
