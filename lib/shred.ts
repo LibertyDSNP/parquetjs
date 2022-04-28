@@ -28,7 +28,7 @@ import { Page, PageData, ParquetField } from './types/types';
 
 export interface RecordBuffer {
   columnData?: Record<string, PageData>
-  rowCount?: Int64,
+  rowCount?: number,
   pageRowCount?: number,
   pages?: Record<string,Page[]>
 }
