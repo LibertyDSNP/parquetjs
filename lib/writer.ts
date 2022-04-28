@@ -6,7 +6,7 @@ import * as parquet_codec from './codec'
 import * as parquet_compression from './compression'
 import * as parquet_types from './types'
 import * as bloomFilterWriter from "./bloomFilterIO/bloomFilterWriter"
-import { WriterOptions, RowGroup, NewFileMetaData, NewRowGroup, ParquetCodec, ParquetField, BloomFilterStreamOption, StreamOptions, filterCollection } from './types/types'
+import { WriterOptions, RowGroup, NewFileMetaData, NewRowGroup, ParquetCodec, ParquetField, BloomFilterStreamOption, filterCollection } from './types/types'
 import { Options } from './codec/types'
 import Long from 'long'
 import { ParquetSchema } from './schema'
@@ -209,7 +209,7 @@ class ParquetEnvelopeWriter {
     return new ParquetEnvelopeWriter(schema, writeFn, closeFn, new Int64(0), opts);
   }
 
-  constructor(schema: ParquetSchema, writeFn: Function, closeFn: Function, fileOffset: Int64, opts: StreamOptions) {
+  constructor(schema: ParquetSchema, writeFn: Function, closeFn: Function, fileOffset: Int64, opts: WriterOptions) {
     this.schema = schema;
     this.write = writeFn;
     this.close = closeFn;
@@ -407,7 +407,7 @@ function encodeStatistics(statistics: parquet_thrift.Statistics,column: ParquetF
   return new parquet_thrift.Statistics(statistics);
 }
 
-async function encodePages(schema: ParquetSchema, rowBuffer: parquet_shredder.RecordBuffer, opts: writerOptions) {
+async function encodePages(schema: ParquetSchema, rowBuffer: parquet_shredder.RecordBuffer, opts: WriterOptions) {
   if (!rowBuffer.pageRowCount) {
     return;
   }
