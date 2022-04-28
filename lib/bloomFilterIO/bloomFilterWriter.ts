@@ -2,7 +2,8 @@ import * as parquet_util from "../util";
 import parquet_thrift from "../../gen-nodejs/parquet_types";
 import SplitBlockBloomFilter from "../bloom/sbbf";
 
-import { ColumnData, Offset, Block } from "../types/types";
+import { ColumnData, Block } from "../types/types";
+import Int64 from 'node-int64'
 
 export type createSBBFParams = {
   numFilterBytes?: number;
@@ -62,7 +63,7 @@ export const serializeFilterData = (params: serializeFilterDataParams) => {
   return Buffer.concat([serializedFilterHeaders, serializedFilterBlocks]);
 };
 
-export const setFilterOffset = (column: ColumnData, offset: Offset) => {
+export const setFilterOffset = (column: ColumnData, offset: Int64) => {
   column.meta_data.bloom_filter_offset = offset;
 };
 

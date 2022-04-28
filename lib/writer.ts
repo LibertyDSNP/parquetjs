@@ -6,7 +6,7 @@ import * as parquet_codec from './codec'
 import * as parquet_compression from './compression'
 import * as parquet_types from './types'
 import * as bloomFilterWriter from "./bloomFilterIO/bloomFilterWriter"
-import { Offset, WriterOptions, RowGroup, NewFileMetaData, NewRowGroup, ParquetCodec, ParquetField, BloomFilterStreamOption, StreamOptions, filterOptions, filterCollection } from './types/types'
+import { WriterOptions, RowGroup, NewFileMetaData, NewRowGroup, ParquetCodec, ParquetField, BloomFilterStreamOption, StreamOptions, filterCollection } from './types/types'
 import { Options } from './codec/types'
 import Long from 'long'
 import { ParquetSchema } from './schema'
@@ -192,7 +192,7 @@ class ParquetEnvelopeWriter {
   schema: ParquetSchema
   write: Function;
   close: Function;
-  offset: number  // TODO: was number, not quite sure if Offset is correct
+  offset: Int64
   rowCount: Int64
   rowGroups: RowGroup[]
   pageSize: number;
@@ -227,7 +227,7 @@ class ParquetEnvelopeWriter {
   }
 
   writeSection(buf: Buffer) {
-    this.offset += buf.length;
+    this.offset.setValue(this.offset.toNumber() + buf.length)
     return this.write(buf);
   }
 
