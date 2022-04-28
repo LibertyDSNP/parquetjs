@@ -6,7 +6,7 @@ import * as parquet_codec from './codec'
 import * as parquet_compression from './compression'
 import * as parquet_types from './types'
 import * as bloomFilterWriter from "./bloomFilterIO/bloomFilterWriter"
-import { WriterOptions, RowGroup, NewFileMetaData, NewRowGroup, ParquetCodec, ParquetField, ColumnnMetaDataExt, BloomFilterStreamOption, filterCollection, Page } from './types/types'
+import { WriterOptions, RowGroup, NewFileMetaData, NewRowGroup, ParquetCodec, ParquetField, ColumnnMetaDataExt, Page } from './types/types'
 import { Options } from './codec/types'
 import Long from 'long'
 import { ParquetSchema } from './schema'
@@ -106,7 +106,7 @@ class ParquetWriter {
 
     parquet_shredder.shredRecord(this.schema, row, this.rowBuffer);
 
-    const options: WriterOptions = {
+    const options = {
       useDataPageV2: this.envelopeWriter.useDataPageV2,
       bloomFilters: this.envelopeWriter.bloomFilters
     };
@@ -134,13 +134,13 @@ class ParquetWriter {
 
     this.closed = true;
 
-  if (this.envelopeWriter) {
-    if (this.rowBuffer.rowCount! > 0 || this.rowBuffer.rowCount! >= this.rowGroupSize) {
-      await encodePages(this.schema, this.rowBuffer, { useDataPageV2: this.envelopeWriter.useDataPageV2, bloomFilters: this.envelopeWriter.bloomFilters});
+    if (this.envelopeWriter) {
+      if (this.rowBuffer.rowCount! > 0 || this.rowBuffer.rowCount! >= this.rowGroupSize) {
+        await encodePages(this.schema, this.rowBuffer, { useDataPageV2: this.envelopeWriter.useDataPageV2, bloomFilters: this.envelopeWriter.bloomFilters});
 
-      await this.envelopeWriter.writeRowGroup(this.rowBuffer);
-      this.rowBuffer = {};
-    }
+        await this.envelopeWriter.writeRowGroup(this.rowBuffer);
+        this.rowBuffer = {};
+      }
 
 
       await this.envelopeWriter.writeBloomFilters();
@@ -407,7 +407,7 @@ function encodeStatistics(statistics: parquet_thrift.Statistics,column: ParquetF
   return new parquet_thrift.Statistics(statistics);
 }
 
-async function encodePages(schema: ParquetSchema, rowBuffer: parquet_shredder.RecordBuffer, opts: WriterOptions) {
+async function encodePages(schema: ParquetSchema, rowBuffer: parquet_shredder.RecordBuffer, opts: {bloomFilters: Record<string,SplitBlockBloomFilter>, useDataPageV2: boolean}) {// generic
   if (!rowBuffer.pageRowCount) {
     return;
   }
