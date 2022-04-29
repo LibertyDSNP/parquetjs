@@ -184,11 +184,11 @@ export class ParquetReader {
       metadata.row_groups.forEach(rowGroup => {
         rowGroup.columns.forEach(column => {
           if (column.offsetIndex) {
-            column.offsetIndex.page_locations.forEach(d => {
+            column.offsetIndex.then(offset => (offset.page_locations.forEach(d => {
               if (Array.isArray(d)) {
                 Object.setPrototypeOf(d,parquet_thrift.PageLocation.prototype);
               }
-            });
+            })));
           }
         });
       });
