@@ -179,13 +179,9 @@ export declare class PageHeader {
     getObject: (args: any) => PromiseS3
 }
 
-export class NewFileMetaData extends parquet_thrift.FileMetaData {
+export interface FileMetaDataExt extends parquet_thrift.FileMetaData {
     json?:JSON;
-    //@ts-ignore
-    row_groups: RowGroup[];
-    constructor() {
-      super()
-    }
+    row_groups: RowGroupExt[];
   }
 
 export class NewPageHeader extends parquet_thrift.PageHeader {

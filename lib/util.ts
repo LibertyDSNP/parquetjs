@@ -2,7 +2,7 @@ import { TTransportCallback } from "thrift";
 import thrift from "thrift"
 import fs, { WriteStream } from 'fs'
 import * as parquet_thrift from '../gen-nodejs/parquet_types'
-import { NewFileMetaData, WriterOptions } from './types/types'
+import { FileMetaDataExt, WriterOptions } from './types/types'
 
 /**
  * We need to patch Thrift's TFramedTransport class bc the TS type definitions
@@ -21,7 +21,7 @@ class fixedTFramedTransport extends thrift.TFramedTransport {
 
 type Enums = typeof parquet_thrift.Encoding | typeof parquet_thrift.FieldRepetitionType | typeof parquet_thrift.Type | typeof parquet_thrift.CompressionCodec | typeof parquet_thrift.PageType | typeof parquet_thrift.ConvertedType;
 
-type ThriftObject = NewFileMetaData | parquet_thrift.PageHeader | parquet_thrift.ColumnMetaData | parquet_thrift.BloomFilterHeader | parquet_thrift.OffsetIndex | parquet_thrift.ColumnIndex | NewFileMetaData;
+type ThriftObject = FileMetaDataExt | parquet_thrift.PageHeader | parquet_thrift.ColumnMetaData | parquet_thrift.BloomFilterHeader | parquet_thrift.OffsetIndex | parquet_thrift.ColumnIndex | FileMetaDataExt;
 
 /** Patch PageLocation to be three element array that has getters/setters
   * for each of the properties (offset, compressed_page_size, first_row_index)

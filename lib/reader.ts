@@ -37,7 +37,7 @@ const PARQUET_RDLVL_ENCODING = 'RLE';
  */
 class ParquetCursor  {
 
-  metadata: NewFileMetaData;
+  metadata: FileMetaDataExt;
   envelopeReader: ParquetEnvelopeReader;
   schema: parquet_schema.ParquetSchema;
   columnList: Array<Array<unknown>>;
@@ -49,7 +49,7 @@ class ParquetCursor  {
    * advanced and internal use cases. Consider using getCursor() on the
    * ParquetReader instead
    */
-  constructor( metadata: NewFileMetaData, envelopeReader: ParquetEnvelopeReader, schema: parquet_schema.ParquetSchema, columnList: Array<Array<unknown>>) {
+  constructor( metadata: FileMetaDataExt, envelopeReader: ParquetEnvelopeReader, schema: parquet_schema.ParquetSchema, columnList: Array<Array<unknown>>) {
     this.metadata = metadata;
     this.envelopeReader = envelopeReader;
     this.schema = schema;
@@ -100,7 +100,7 @@ class ParquetCursor  {
 export class ParquetReader {
 
   envelopeReader: ParquetEnvelopeReader | null;
-  metadata: NewFileMetaData | null;
+  metadata: FileMetaDataExt | null;
   schema: parquet_schema.ParquetSchema
 
   /**
@@ -160,7 +160,7 @@ export class ParquetReader {
    * and internal use cases. Consider using one of the open{File,Buffer} methods
    * instead
    */
-  constructor(metadata: NewFileMetaData, envelopeReader: ParquetEnvelopeReader, opts: BufferReaderOptions) {
+  constructor(metadata: FileMetaDataExt, envelopeReader: ParquetEnvelopeReader, opts: BufferReaderOptions) {
     opts = opts || {};
     if (metadata.version != PARQUET_VERSION) {
       throw 'invalid parquet version';
@@ -363,7 +363,7 @@ export class ParquetEnvelopeReader {
   id: number;
   fileSize: Function | number;
   default_dictionary_size: number;
-  metadata?: NewFileMetaData;
+  metadata?: FileMetaDataExt;
   schema?: parquet_schema.ParquetSchema
 
   static async openFile(filePath: string | Buffer | URL, options: BufferReaderOptions) {
@@ -447,7 +447,7 @@ export class ParquetEnvelopeReader {
     return new ParquetEnvelopeReader(readFn, closeFn, filesize, options);
   }
 
-  constructor(readFn: (offset: number, length: number, file?: string) => Promise<Buffer> , closeFn: () => unknown, fileSize: Function | number, options: BufferReaderOptions, metadata?: NewFileMetaData) {
+  constructor(readFn: (offset: number, length: number, file?: string) => Promise<Buffer> , closeFn: () => unknown, fileSize: Function | number, options: BufferReaderOptions, metadata?: FileMetaDataExt) {
     options = options || {};
     this.readFn = readFn;
     this.id = ++ParquetEnvelopeReaderIdCounter;
