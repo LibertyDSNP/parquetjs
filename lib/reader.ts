@@ -681,7 +681,7 @@ export class ParquetEnvelopeReader {
     }
 
     let metadataBuf = await this.read(metadataOffset, metadataSize);
-    let metadata = new NewFileMetaData();
+    let metadata = new parquet_thrift.FileMetaData();
     parquet_util.decodeThrift(metadata, metadataBuf);
     return metadata;
   }
