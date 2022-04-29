@@ -9,7 +9,7 @@ import * as parquet_types from './types';
 import BufferReader , { BufferReaderOptions } from './bufferReader';
 import * as bloomFilterReader from './bloomFilterIO/bloomFilterReader';
 import fetch from 'cross-fetch';
-import { ParquetCodec, Parameter, ColumnData, RowGroup, PageData, SchemaDefinition, ParquetType, FieldDefinition, ParquetField, ClientS3, ClientParameters, NewFileMetaData, NewPageHeader } from './types/types';
+import { ParquetCodec, Parameter,PageData, SchemaDefinition, ParquetType, FieldDefinition, ParquetField, ClientS3, ClientParameters, NewFileMetaData, NewPageHeader } from './types/types';
 import { Cursor, Options } from './codec/types';
 
 const {
@@ -475,17 +475,20 @@ export class ParquetEnvelopeReader {
   }
 
   // Helper function to get the column object for a particular path and row_group
-  getColumn(path: string | ColumnData, row_group: RowGroup | number | null) {
+  getColumn(path: string | parquet_thrift.ColumnChunk, row_group: parquet_thrift.RowGroup | number | string | null) {
     let column;
-    if (!isNaN(row_group as number)) {
-      row_group = this.metadata!.row_groups[row_group as number];
+    let parsedRowGroup: parquet_thrift.RowGroup | undefined;
+    if (!isNaN(Number(row_group))) {
+      parsedRowGroup = this.metadata?.row_groups[Number(row_group)];
+    } else if (row_group instanceof parquet_thrift.RowGroup) {
+      parsedRowGroup = row_group;
     }
 
     if (typeof path === 'string') {
-      if (!row_group) {
+      if (!parsedRowGroup) {
        throw `Missing RowGroup ${row_group}`;
       }
-        column = (row_group as RowGroup).columns.find(d => d.meta_data!.path_in_schema.join(',') === path);
+        column = parsedRowGroup.columns.find(d => d.meta_data!.path_in_schema.join(',') === path);
 
       if (!column) {
         throw `Column ${path} Not Found`;
