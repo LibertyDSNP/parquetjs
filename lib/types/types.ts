@@ -108,6 +108,8 @@ export interface ColumnChunkData {
 
 export interface ColumnChunkExt extends parquet_thrift.ColumnChunk{
     meta_data?: ColumnMetaDataExt
+    columnIndex?: Promise<ColumnIndex>
+    offsetIndex?: Promise<OffsetIndex>
 }
 export interface ColumnMetaDataExt extends parquet_thrift.ColumnMetaData {
     offsetIndex?: OffsetIndex
