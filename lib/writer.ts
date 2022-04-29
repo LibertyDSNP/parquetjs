@@ -6,7 +6,7 @@ import * as parquet_codec from './codec'
 import * as parquet_compression from './compression'
 import * as parquet_types from './types'
 import * as bloomFilterWriter from "./bloomFilterIO/bloomFilterWriter"
-import { WriterOptions, RowGroup, NewFileMetaData, NewRowGroup, ParquetCodec, ParquetField, ColumnnMetaDataExt, Page } from './types/types'
+import { WriterOptions, ParquetCodec, ParquetField, ColumnMetaDataExt, RowGroupExt, Page } from './types/types'
 import { Options } from './codec/types'
 import Long from 'long'
 import { ParquetSchema } from './schema'
@@ -194,7 +194,7 @@ class ParquetEnvelopeWriter {
   close: Function;
   offset: Int64
   rowCount: Int64
-  rowGroups: RowGroup[]
+  rowGroups: RowGroupExt[]
   pageSize: number;
   useDataPageV2: boolean;
   pageIndex: boolean;
@@ -703,8 +703,8 @@ async function encodeColumnChunk(pages: Page[], opts: {column: ParquetField, bas
  * Encode a list of column values into a parquet row group
  */
 async function encodeRowGroup(schema: ParquetSchema, data: parquet_shredder.RecordBuffer, opts: WriterOptions) {
-  let metadata = new NewRowGroup();
-  metadata.num_rows = data.rowCount!;
+  let metadata: RowGroupExt = new parquet_thrift .RowGroup();
+  metadata.num_rows = new Int64(data.rowCount!);
   metadata.columns = [];
   metadata.total_byte_size = new Int64(0);
 
@@ -741,8 +741,8 @@ async function encodeRowGroup(schema: ParquetSchema, data: parquet_shredder.Reco
 /**
  * Encode a parquet file metadata footer
  */
-function encodeFooter(schema: ParquetSchema, rowCount: Int64, rowGroups: RowGroup[], userMetadata: Record<string, string>) {
-  let metadata = new NewFileMetaData()
+function encodeFooter(schema: ParquetSchema, rowCount: Int64, rowGroups: RowGroupExt[], userMetadata: Record<string, string>) {
+  let metadata = new parquet_thrift.FileMetaData()
   metadata.version = PARQUET_VERSION;
   metadata.created_by = '@dsnp/parquetjs';
   metadata.num_rows = rowCount;
