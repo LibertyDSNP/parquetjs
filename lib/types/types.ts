@@ -100,34 +100,22 @@ export interface ParquetBuffer {
 export interface ParquetRecord {
     [key: string]: any;
 }
-export interface ColumnData {
-    file_path: string,
-    file_offset: Int64,
-    meta_data: ColumnnMetaDataExt
-    offset_index_length?: number;
-    column_index_length?: number;
-    encrypted_column_metadata?: Buffer;
-    offsetIndex?: OffsetIndex;
-    offset_index_offset?: Int64;
-    columnIndex?: ColumnIndex;
-    column_index_offset?: Int64;
-}
 
 export interface ColumnChunkData {
     rowGroupIndex: number,
-    column: ColumnData
+    column: parquet_thrift.ColumnChunk
 }
 
-export interface ColumnnMetaDataExt extends ColumnMetaData {
+export interface ColumnChunkExt extends parquet_thrift.ColumnChunk{
+    meta_data?: ColumnMetaDataExt
+}
+export interface ColumnMetaDataExt extends parquet_thrift.ColumnMetaData {
     offsetIndex?: OffsetIndex
     columnIndex?: ColumnIndex
-
 }
 
-export declare class RowGroup {
-    columns: ColumnData[];
-    num_rows: number;
-    ordinal?: number;
+export interface RowGroupExt extends parquet_thrift.RowGroup {
+    columns: ColumnChunkExt[];
 }
 
 export declare class KeyValue {
@@ -157,7 +145,7 @@ export interface PageData {
     pageHeader?: PageHeader;
     count?: number;
     dictionary?: Array<unknown>
-    column?: ColumnData
+    column?: parquet_thrift.ColumnChunk
 }
 
 export declare class PageHeader {
@@ -207,19 +195,6 @@ export class NewPageHeader extends parquet_thrift.PageHeader {
       super()
     }
   }
-
-  export class NewRowGroup extends parquet_thrift.RowGroup {
-    //@ts-ignore
-    columns: ColumnData[];
-    //@ts-ignore
-    num_rows: number;
-    //@ts-ignore
-    ordinal?: number;
-    constructor() {
-      super()
-    }
-  }
-
 
 export type WriterOptions = {
     pageIndex?: boolean;
