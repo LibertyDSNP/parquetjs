@@ -8,7 +8,6 @@ import * as parquet_types from './types'
 import * as bloomFilterWriter from "./bloomFilterIO/bloomFilterWriter"
 import { WriterOptions, ParquetCodec, ParquetField, ColumnMetaDataExt, RowGroupExt, Page } from './types/types'
 import { Options } from './codec/types'
-import Long from 'long'
 import { ParquetSchema } from './schema'
 import { WriteStream } from 'fs'
 import Int64 from 'node-int64'
