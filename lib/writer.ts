@@ -261,8 +261,8 @@ class ParquetEnvelopeWriter {
   writeBloomFilters() {
     this.rowGroups.forEach(group => {
       group.columns.forEach(column => {
-        const columnName = column.meta_data.path_in_schema[0];
-        if (columnName in this.bloomFilters === false) return;
+        const columnName = column.meta_data?.path_in_schema[0];
+        if (!columnName || columnName in this.bloomFilters === false) return;
 
         const serializedBloomFilterData =
           bloomFilterWriter.getSerializedBloomFilterData(this.bloomFilters[columnName]);
@@ -283,7 +283,7 @@ class ParquetEnvelopeWriter {
         let column = group.columns[i];
         if (!column) return;
 
-        if (column.meta_data.columnIndex) {
+        if (column.meta_data?.columnIndex) {
           let columnBody = parquet_util.serializeThrift(column.meta_data.columnIndex);
           delete column.meta_data.columnIndex;
           column.column_index_offset = this.offset;
@@ -291,7 +291,7 @@ class ParquetEnvelopeWriter {
           this.writeSection(columnBody);
         }
 
-        if (column.meta_data.offsetIndex) {
+        if (column.meta_data?.offsetIndex) {
           let offsetBody = parquet_util.serializeThrift(column.meta_data.offsetIndex);
           delete column.meta_data.offsetIndex;
           column.offset_index_offset = this.offset;
@@ -452,9 +452,9 @@ async function encodePages(schema: ParquetSchema, rowBuffer: parquet_shredder.Re
     } else {
       page = await encodeDataPage(
         field,
-        values.values,
-        values.rlevels,
-        values.dlevels,
+        values.values || [],
+        values.rlevels || [],
+        values.dlevels || [],
         statistics!);
     }
 
@@ -617,13 +617,13 @@ async function encodeDataPageV2(column: ParquetField, rowCount: number, values: 
 /**
  * Encode an array of values into a parquet column chunk
  */
-async function encodeColumnChunk(pages: Page[], opts: {column: ParquetField, baseOffset: number, pageSize: number, encoding: ParquetCodec, rowCount: number, useDataPageV2: boolean, pageIndex: boolean}) {
+async function encodeColumnChunk(pages: Page[], opts: {column: ParquetField, baseOffset: number, pageSize: number, rowCount: number, useDataPageV2: boolean, pageIndex: boolean}) {
   let pagesBuf = Buffer.concat(pages.map(d => d.page));
   let num_values = pages.reduce((p,d) => p + d.num_values, 0);
   let offset = opts.baseOffset;
 
   /* prepare metadata header */
-  let metadata: ColumnnMetaDataExt = new parquet_thrift.ColumnMetaData();
+  let metadata: ColumnMetaDataExt = new parquet_thrift.ColumnMetaData();
   metadata.path_in_schema = opts.column.path;
   metadata.num_values = new Int64(num_values);
   metadata.data_page_offset = new Int64(opts.baseOffset);
@@ -719,15 +719,14 @@ async function encodeRowGroup(schema: ParquetSchema, data: parquet_shredder.Reco
       {
         column: field,
         baseOffset: opts.baseOffset!.valueOf() + body.length,
-        pageSize: opts.pageSize,
-        encoding: field.encoding,
-        rowCount: data.rowCount,
-        useDataPageV2: opts.useDataPageV2,
-        pageIndex: opts.pageIndex
+        pageSize: opts.pageSize || 0,
+        rowCount: data.rowCount || 0,
+        useDataPageV2: !!opts.useDataPageV2,
+        pageIndex: !!opts.pageIndex
       });
 
     let cchunk = new parquet_thrift.ColumnChunk();
-    cchunk.file_offset = cchunkData.metadataOffset;
+    cchunk.file_offset = new Int64(cchunkData.metadataOffset);
     cchunk.meta_data = cchunkData.metadata;
     metadata.columns.push(cchunk);
     metadata.total_byte_size = new Int64(metadata.total_byte_size.valueOf() + (cchunkData.body.length));
