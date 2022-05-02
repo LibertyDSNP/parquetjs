@@ -685,12 +685,8 @@ async function encodeColumnChunk(pages: Page[], opts: {column: ParquetField, bas
   }
 
   /* list encodings */
-  let encodingsSet = {};
-  encodingsSet[PARQUET_RDLVL_ENCODING] = true;
-  encodingsSet[opts.column.encoding] = true;
-  for (let k in encodingsSet) {
-    metadata.encodings.push(parquet_thrift.Encoding[k]);
-  }
+  metadata.encodings.push(parquet_thrift.Encoding[PARQUET_RDLVL_ENCODING]);
+  metadata.encodings.push(parquet_thrift.Encoding[opts.column.encoding!]);
 
   /* concat metadata header and data pages */
   let metadataOffset = opts.baseOffset + pagesBuf.length;
