@@ -8,14 +8,7 @@ const filterColumnChunksWithBloomFilters = (
   columnChunkDataCollection: Array<ColumnChunkData>
 ) => {
   return columnChunkDataCollection.filter((columnChunk) => {
-    const {
-      column: {
-        meta_data: {
-          bloom_filter_offset: { buffer: bloomFilterOffsetBuffer },
-        },
-      },
-    } = columnChunk;
-    return bloomFilterOffsetBuffer;
+    return columnChunk.column.meta_data?.bloom_filter_offset;
   });
 };
 
@@ -38,20 +31,15 @@ const toInteger = (buffer: Buffer) => {
 export const parseBloomFilterOffsets = (
   ColumnChunkDataCollection: Array<ColumnChunkData>
 ): Array<bloomFilterOffsetData> => {
-  return ColumnChunkDataCollection.map((columnChunkData) => {
+  return ColumnChunkDataCollection.map(({rowGroupIndex,column}) => {
     const {
-      column: {
-        meta_data: {
-          bloom_filter_offset: { buffer: bloomFilterOffsetBuffer },
-          path_in_schema: pathInSchema,
-        },
-      },
-      rowGroupIndex,
-    } = columnChunkData;
+        bloom_filter_offset: bloomOffset,
+        path_in_schema: pathInSchema,
+      } = column.meta_data || {};
 
     return {
-      offsetBytes: toInteger(bloomFilterOffsetBuffer),
-      columnName: pathInSchema.join(","),
+      offsetBytes: bloomOffset!.toNumber(false),
+      columnName: pathInSchema!.join(","),
       rowGroupIndex,
     };
   });
