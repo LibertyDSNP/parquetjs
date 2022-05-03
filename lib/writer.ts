@@ -40,7 +40,7 @@ const PARQUET_RDLVL_ENCODING = 'RLE';
  * buffering/batching for performance, so close() must be called after all rows
  * are written.
  */
-class ParquetWriter {
+export class ParquetWriter {
 
   schema: ParquetSchema;
   envelopeWriter: ParquetEnvelopeWriter | null;
@@ -187,7 +187,7 @@ class ParquetWriter {
  * intended for advanced and internal users; the writeXXX methods must be
  * called in the correct order to produce a valid file.
  */
-class ParquetEnvelopeWriter {
+export class ParquetEnvelopeWriter {
   schema: ParquetSchema
   write: Function;
   close: Function;
@@ -330,7 +330,7 @@ class ParquetEnvelopeWriter {
 /**
  * Create a parquet transform stream
  */
-class ParquetTransformer extends stream.Transform {
+export class ParquetTransformer extends stream.Transform {
 
   writer: ParquetWriter;
 
