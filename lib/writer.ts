@@ -355,7 +355,7 @@ class ParquetTransformer extends stream.Transform {
         data => callback(null, data),
         err => {
           const fullErr = new Error(`Error transforming to parquet: ${err.toString()} row:${row}`);
-          fullErr.cause = err;
+          fullErr.message = err;
           callback(fullErr);
         }
       );
