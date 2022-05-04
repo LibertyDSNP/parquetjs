@@ -32,8 +32,7 @@ describe("bloomFilterReader", () => {
     beforeEach(() => {
       const metaData: ColumnMetaDataExt = emptyMetaData()
         metaData.path_in_schema = ["name"]
-        metaData.bloom_filter_offset = new Int64(
-          Buffer.from("000000000874", "hex"), 0)
+        metaData.bloom_filter_offset = new Int64(Buffer.from("000000000874", "hex"), 0)
 
       const columnData: ColumnChunkExt = {
         meta_data: metaData,

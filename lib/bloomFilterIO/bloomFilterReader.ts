@@ -38,7 +38,7 @@ export const parseBloomFilterOffsets = (
       } = column.meta_data || {};
 
     return {
-      offsetBytes: bloomOffset!.toNumber(false),
+      offsetBytes: toInteger(bloomOffset!.buffer),
       columnName: pathInSchema!.join(","),
       rowGroupIndex,
     };
