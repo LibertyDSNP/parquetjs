@@ -665,7 +665,7 @@ async function encodeColumnChunk(pages: Page[], opts: {column: ParquetField, bas
     }
 
     let pageLocation = new parquet_thrift.PageLocation();
-    pageLocation.offset.setValue(offset);
+    pageLocation.offset = new Int64(offset);
     offset += page.page.length;
     pageLocation.compressed_page_size = page.page.length;
     pageLocation.first_row_index = new Int64(page.first_row_index);
