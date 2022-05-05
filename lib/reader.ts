@@ -184,7 +184,7 @@ export class ParquetReader {
       metadata.row_groups.forEach(rowGroup => {
         rowGroup.columns.forEach(column => {
           if (column.offsetIndex) {
-            column.offsetIndex.then(offset => (offset.page_locations.forEach(d => {
+            Promise.resolve(column.offsetIndex).then(offset => (offset.page_locations.forEach(d => {
               if (Array.isArray(d)) {
                 Object.setPrototypeOf(d,parquet_thrift.PageLocation.prototype);
               }
@@ -512,7 +512,7 @@ export class ParquetEnvelopeReader {
             )
   }
 
-  readOffsetIndex(path: string | ColumnChunkExt, row_group: RowGroupExt | number | null, opts: Options) {
+  readOffsetIndex(path: string | ColumnChunkExt, row_group: RowGroupExt | number | null, opts: Options): Promise<parquet_thrift.OffsetIndex> {
     let column = this.getColumn(path, row_group);
     if (column.offsetIndex) {
       return Promise.resolve(column.offsetIndex);
@@ -524,19 +524,15 @@ export class ParquetEnvelopeReader {
       let offset_index = new parquet_thrift.OffsetIndex();
       parquet_util.decodeThrift(offset_index, data);
       Object.defineProperty(offset_index,'column', {value: column, enumerable: false});
-      if (opts && opts.cache) {
-        column.offsetIndex = Promise.resolve(offset_index);
-      }
       return offset_index;
     });
-
-    if (opts && opts.cache) {
+    if (opts?.cache) {
       column.offsetIndex = data;
     }
     return data;
   }
 
-  readColumnIndex(path: string | ColumnChunkExt, row_group: RowGroupExt | number, opts: Options) {
+  readColumnIndex(path: string | ColumnChunkExt, row_group: RowGroupExt | number, opts: Options): Promise<parquet_thrift.ColumnIndex> {
     let column = this.getColumn(path, row_group);
     if (column.columnIndex) {
       return Promise.resolve(column.columnIndex);
@@ -557,15 +553,10 @@ export class ParquetEnvelopeReader {
       if (column_index.min_values) {
         column_index.min_values = column_index.min_values.map(min_value => decodeStatisticsValue(min_value, field));
       }
-
-      if (opts && opts.cache) {
-        column.columnIndex = Promise.resolve(column_index);
-      }
-
       return column_index;
     });
 
-    if (opts && opts.cache) {
+    if (opts?.cache) {
       column.columnIndex = data;
     }
     return data;
