@@ -23,7 +23,7 @@ describe('metadata-cache', function() {
         } catch(e) {}
       }
     }
-    const metaDataTxt = reader.exportMetadata();
+    const metaDataTxt = await reader.exportMetadata();
     metadata = JSON.parse(metaDataTxt);
   });
 
