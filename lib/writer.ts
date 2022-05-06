@@ -716,8 +716,8 @@ async function encodeRowGroup(schema: ParquetSchema, data: parquet_shredder.Reco
         baseOffset: opts.baseOffset!.valueOf() + body.length,
         pageSize: opts.pageSize || 0,
         rowCount: data.rowCount || 0,
-        useDataPageV2: !!opts.useDataPageV2,
-        pageIndex: !!opts.pageIndex
+        useDataPageV2: opts.useDataPageV2 ?? true,
+        pageIndex: opts.pageIndex ?? true
       });
 
     let cchunk = new parquet_thrift.ColumnChunk();
