@@ -296,7 +296,7 @@ export class ParquetReader {
     return md;
   }
 
-  exportMetadata(indent: string | number | undefined) {
+  async exportMetadata(indent: string | number | undefined) {
     function replacer(_key: unknown, value: parquet_thrift.PageLocation | bigint | {[string:string]: any}) {
       if (value instanceof parquet_thrift.PageLocation) {
         return [value.offset, value.compressed_page_size, value.first_row_index];
@@ -331,6 +331,20 @@ export class ParquetReader {
       }
     }
     const metadata = Object.assign({}, this.metadata, {json: true});
+
+    for (let i = 0; i < metadata.row_groups.length; i++) {
+      const rowGroup = metadata.row_groups[i];
+      for (let j = 0; j < rowGroup.columns.length; j++) {
+        const column = rowGroup.columns[j];
+          if (column.offsetIndex instanceof Promise) {
+            column.offsetIndex = await column.offsetIndex;
+          }
+          if (column.columnIndex instanceof Promise) {
+            column.columnIndex = await column.columnIndex;
+          }
+      }
+    }
+
     return JSON.stringify(metadata,replacer,indent);
   }
 
@@ -540,9 +554,9 @@ export class ParquetEnvelopeReader {
       return Promise.reject(new Error('Column Index Missing'));
     }
 
-    const data = this.read(+column.column_index_offset, (column.column_index_length as number)).then((data: Buffer) => {
+    const data = this.read(+column.column_index_offset, (column.column_index_length as number)).then((buf: Buffer) => {
       let column_index = new parquet_thrift.ColumnIndex();
-      parquet_util.decodeThrift(column_index, data);
+      parquet_util.decodeThrift(column_index, buf);
       Object.defineProperty(column_index, 'column', { value: column });
 
       // decode the statistics values
