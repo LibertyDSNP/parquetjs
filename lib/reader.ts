@@ -573,7 +573,7 @@ export class ParquetEnvelopeReader {
       column.meta_data.data_page_offset = page.offset;
       column.meta_data.total_compressed_size =  new Int64(page.compressed_page_size);
     } else {
-      const offsetIndex = await column.offsetIndex || await this.readOffsetIndex(column, null, opts);
+      const offsetIndex = await this.readOffsetIndex(column, null, opts);
       column.meta_data.data_page_offset = offsetIndex.page_locations[page as number].offset;
       column.meta_data.total_compressed_size =  new Int64(offsetIndex.page_locations[page as number].compressed_page_size);
     }
