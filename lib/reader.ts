@@ -803,7 +803,11 @@ async function decodePages(buffer: Buffer, opts: Options) {
       continue;
     }
 
-    if (opts.dictionary) {
+    // It's possible to have a column chunk where some pages should use
+    // the dictionary (PLAIN_DICTIONARY for example) and others should
+    // not (PLAIN for example).
+
+    if (opts.dictionary && pageData.useDictionary) {
       pageData.values = pageData.values!.map(d => opts.dictionary![d]);
     }
 
@@ -936,7 +940,8 @@ async function decodeDataPage(cursor: Cursor, header: parquet_thrift.PageHeader,
     dlevels: dLevels,
     rlevels: rLevels,
     values: values,
-    count: valueCount
+    count: valueCount,
+    useDictionary: valueEncoding === 'PLAIN_DICTIONARY' || valueEncoding === 'RLE_DICTIONARY'
   };
 }
 
@@ -1013,7 +1018,8 @@ async function decodeDataPageV2(cursor: Cursor, header: parquet_thrift.PageHeade
     dlevels: dLevels,
     rlevels: rLevels,
     values: values,
-    count: valueCount
+    count: valueCount,
+    useDictionary: valueEncoding === 'PLAIN_DICTIONARY' || valueEncoding === 'RLE_DICTIONARY'
   };
 }
 

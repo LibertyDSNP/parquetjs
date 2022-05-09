@@ -1,3 +1,7 @@
+// For questions about RLE encoding, see the spec:
+//
+// https://github.com/apache/parquet-format/blob/master/Encodings.md
+
 import varint from 'varint'
 import {Cursor, Options} from './types'
 
@@ -21,10 +25,13 @@ function encodeRunBitpacked(values: Array<number>, opts: Options) {
 
 function encodeRunRepeated(value: number, count: number, opts: Options) {
   let buf = Buffer.alloc(Math.ceil(opts.bitWidth / 8));
+  let remainingValue = value
 
+  // This is encoded LSB to MSB, so we pick off the least
+  // significant byte and shift to get the next one.
   for (let i = 0; i < buf.length; ++i) {
-    buf.writeUInt8(value & 0xff, i);
-    value >> 8;
+    buf.writeUInt8(remainingValue & 0xff, i);
+    remainingValue = remainingValue >> 8;
   }
 
   return Buffer.concat([
@@ -118,10 +125,14 @@ function decodeRunBitpacked(cursor : Cursor, count: number, opts: Options) {
 }
 
 function decodeRunRepeated(cursor: Cursor, count: number, opts: Options) {
+  var bytesNeededForFixedBitWidth = Math.ceil(opts.bitWidth / 8);
   let value = 0;
-  for (let i = 0; i < Math.ceil(opts.bitWidth / 8); ++i) {
-    value << 8;
-    value += cursor.buffer[cursor.offset];
+
+  for (let i = 0; i < bytesNeededForFixedBitWidth; ++i) {
+    const byte = cursor.buffer[cursor.offset]
+    // Bytes are stored LSB to MSB, so we need to shift
+    // each new byte appropriately.
+    value += byte << (i * 8);
     cursor.offset += 1;
   }
 

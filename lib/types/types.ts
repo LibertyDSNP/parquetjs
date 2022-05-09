@@ -148,6 +148,7 @@ export interface PageData {
     count?: number;
     dictionary?: Array<unknown>
     column?: parquet_thrift.ColumnChunk
+    useDictionary?: boolean
 }
 
 export declare class PageHeader {

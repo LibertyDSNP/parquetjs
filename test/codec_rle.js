@@ -66,29 +66,29 @@ describe('ParquetCodec::RLE', function() {
   it('should encode repeated values', function() {
     let buf = parquet_codec_rle.encodeValues(
         'INT32',
-        [42, 42, 42, 42, 42, 42, 42, 42],
+        [1234567, 1234567, 1234567, 1234567, 1234567, 1234567, 1234567, 1234567],
         {
           disableEnvelope: true,
-          bitWidth: 6
+          bitWidth: 21
         });
 
-    assert.deepEqual(buf, Buffer.from([0x10, 0x2a]));
+    assert.deepEqual(buf, Buffer.from([0x10, 0x87, 0xD6, 0x12]));
   });
 
   it('should decode repeated values', function() {
     let vals = parquet_codec_rle.decodeValues(
         'INT32',
         {
-          buffer: Buffer.from([0x10, 0x2a]),
+          buffer: Buffer.from([0x10, 0x87, 0xD6, 0x12]),
           offset: 0,
         },
         8,
         {
           disableEnvelope: true,
-          bitWidth: 3
+          bitWidth: 21
         });
 
-    assert.deepEqual(vals, [42, 42, 42, 42, 42, 42, 42, 42]);
+        assert.deepEqual(vals, [1234567, 1234567, 1234567, 1234567, 1234567, 1234567, 1234567, 1234567]);
   });
 
   it('should encode mixed runs', function() {
