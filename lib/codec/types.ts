@@ -1,6 +1,6 @@
-import { PrimitiveType } from "lib/types/types";
-import { ParquetCodec, OriginalType, ParquetField } from "lib/types/types";
-import { Statistics } from "gen-nodejs/parquet_types";
+import { PrimitiveType } from "../types/types";
+import { ParquetCodec, OriginalType, ParquetField } from "../types/types";
+import { Statistics } from "../../gen-nodejs/parquet_types";
 
 export interface Options {
     typeLength: number,
@@ -19,7 +19,7 @@ export interface Options {
     dLevelMax?: number,
     type?: string,
 }
-  
+
 export interface Cursor {
     buffer: Buffer,
     offset: number,

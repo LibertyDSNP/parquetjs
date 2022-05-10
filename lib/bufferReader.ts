@@ -1,4 +1,4 @@
-import { Statistics } from "gen-nodejs/parquet_types"
+import { Statistics } from "../gen-nodejs/parquet_types"
 import { ParquetEnvelopeReader } from "./reader"
 import { FileMetaDataExt } from "./types/types"
 

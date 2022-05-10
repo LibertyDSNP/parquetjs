@@ -2,8 +2,8 @@
 
 import parquet_thrift from "../../gen-nodejs/parquet_types";
 import { Statistics, OffsetIndex, ColumnIndex, PageType, DataPageHeader, DataPageHeaderV2, DictionaryPageHeader, IndexPageHeader, Type, ColumnMetaData } from "../../gen-nodejs/parquet_types";
-import SplitBlockBloomFilter from "lib/bloom/sbbf";
-import { createSBBFParams } from "lib/bloomFilterIO/bloomFilterWriter";
+import SplitBlockBloomFilter from "../bloom/sbbf";
+import { createSBBFParams } from "../bloomFilterIO/bloomFilterWriter";
 import Int64 from 'node-int64'
 
 export type ParquetCodec = 'PLAIN' | 'RLE';
