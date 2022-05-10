@@ -285,7 +285,7 @@ export class ParquetEnvelopeWriter {
         if (column.meta_data?.columnIndex) {
           let columnBody = parquet_util.serializeThrift(column.meta_data.columnIndex);
           delete column.meta_data.columnIndex;
-          column.column_index_offset = this.offset;
+          column.column_index_offset = parquet_util.cloneInteger(this.offset);
           column.column_index_length = columnBody.length;
           this.writeSection(columnBody);
         }
@@ -293,7 +293,7 @@ export class ParquetEnvelopeWriter {
         if (column.meta_data?.offsetIndex) {
           let offsetBody = parquet_util.serializeThrift(column.meta_data.offsetIndex);
           delete column.meta_data.offsetIndex;
-          column.offset_index_offset = this.offset;
+          column.offset_index_offset = parquet_util.cloneInteger(this.offset);
           column.offset_index_length = offsetBody.length;
           this.writeSection(offsetBody);
         }

@@ -584,11 +584,11 @@ export class ParquetEnvelopeReader {
       if (isNaN(Number(page.offset)) || isNaN(page.compressed_page_size)) {
         throw Error('page offset and/or size missing');
       }
-      column.meta_data.data_page_offset = page.offset;
+      column.meta_data.data_page_offset = parquet_util.cloneInteger(page.offset);
       column.meta_data.total_compressed_size =  new Int64(page.compressed_page_size);
     } else {
       const offsetIndex = await this.readOffsetIndex(column, null, opts);
-      column.meta_data.data_page_offset = offsetIndex.page_locations[page as number].offset;
+      column.meta_data.data_page_offset = parquet_util.cloneInteger(offsetIndex.page_locations[page as number].offset);
       column.meta_data.total_compressed_size =  new Int64(offsetIndex.page_locations[page as number].compressed_page_size);
     }
     const chunk = await this.readColumnChunk(this.schema!, column);

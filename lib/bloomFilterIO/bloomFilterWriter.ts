@@ -64,7 +64,7 @@ export const serializeFilterData = (params: serializeFilterDataParams) => {
 };
 
 export const setFilterOffset = (column: parquet_thrift.ColumnChunk, offset: Int64) => {
-  column.meta_data!.bloom_filter_offset = offset;
+  column.meta_data!.bloom_filter_offset = parquet_util.cloneInteger(offset);
 };
 
 export const getSerializedBloomFilterData = (

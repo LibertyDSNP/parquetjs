@@ -3,6 +3,7 @@ import thrift from "thrift"
 import fs, { WriteStream } from 'fs'
 import * as parquet_thrift from '../gen-nodejs/parquet_types'
 import { FileMetaDataExt, WriterOptions } from './types/types'
+import { Int64 } from "thrift";
 
 /**
  * We need to patch Thrift's TFramedTransport class bc the TS type definitions
@@ -204,3 +205,7 @@ export const fieldIndexOf = function(arr: Array<Array<unknown>>, elem: Array<unk
 
   return -1;
 }
+
+export const cloneInteger = (int: Int64) => {
+   return new Int64(int.valueOf());
+};
