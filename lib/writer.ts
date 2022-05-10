@@ -785,9 +785,3 @@ function encodeFooter(schema: ParquetSchema, rowCount: Int64, rowGroups: RowGrou
   footerEncoded.write(PARQUET_MAGIC, metadataEncoded.length + 4);
   return footerEncoded;
 }
-
-module.exports = {
-  ParquetEnvelopeWriter,
-  ParquetWriter,
-  ParquetTransformer
-};

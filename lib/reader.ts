@@ -1092,8 +1092,3 @@ function decodeSchema(schemaElements: Array<parquet_thrift.SchemaElement>) {
   });
   return schema;
 }
-
-module.exports = {
-  ParquetEnvelopeReader,
-  ParquetReader,
-};
