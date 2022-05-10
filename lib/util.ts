@@ -2,7 +2,7 @@ import { TTransportCallback } from "thrift";
 import thrift from "thrift"
 import fs, { WriteStream } from 'fs'
 import * as parquet_thrift from '../gen-nodejs/parquet_types'
-import { FileMetaDataExt, WriterOptions } from './types/types'
+import { FileMetaDataExt, WriterOptions } from './declare'
 import { Int64 } from "thrift";
 
 /**

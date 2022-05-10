@@ -1,7 +1,7 @@
 import parquet_thrift from "../../gen-nodejs/parquet_types";
 import Long from 'long';
 import XxHasher from "./xxhasher"
-import {Block} from "../types/types";
+import {Block} from "../declare";
 
 /**
  * @class SplitBlockBloomFilter

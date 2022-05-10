@@ -2,7 +2,7 @@ import * as parquet_util from "../util";
 import parquet_thrift from "../../gen-nodejs/parquet_types";
 import SplitBlockBloomFilter from "../bloom/sbbf";
 
-import { Block } from "../types/types";
+import { Block } from "../declare";
 import Int64 from 'node-int64'
 
 export type createSBBFParams = {
