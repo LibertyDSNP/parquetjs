@@ -1,4 +1,4 @@
-// Lifted from https://github.com/kbajalc/parquets
+// Thanks to https://github.com/kbajalc/parquets
 
 import parquet_thrift from "../../gen-nodejs/parquet_types";
 import { Statistics, OffsetIndex, ColumnIndex, PageType, DataPageHeader, DataPageHeaderV2, DictionaryPageHeader, IndexPageHeader, Type, ColumnMetaData } from "../../gen-nodejs/parquet_types";
@@ -27,8 +27,8 @@ export type OriginalType =
     | 'UTF8' // 0
     | 'MAP' // 1
     // | 'MAP_KEY_VALUE' // 2
-     | 'LIST' // 3
-    // | 'ENUM' // 4
+    | 'LIST' // 3
+    | 'ENUM' // 4
     // | 'DECIMAL' // 5
     | 'DATE' // 6
     | 'TIME_MILLIS' // 7

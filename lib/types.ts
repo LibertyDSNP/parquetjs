@@ -1,14 +1,16 @@
 'use strict';
+// Thanks to https://github.com/kbajalc/parquets for some of the code.
 import * as BSON from "bson"
-import { PrimitiveType, OriginalType } from "./types/types"
-interface PARQUET_LOGICAL_TYPES {
-    [key:string]: {
-        primitiveType: PrimitiveType,
-        toPrimitive: Function,
-        fromPrimitive?: Function,
-        originalType?: OriginalType,
-        typeLength?: number
-    }
+import { PrimitiveType, OriginalType, ParquetType } from "./types/types"
+
+type ParquetTypeData = {
+  [Property in ParquetType]: {
+    primitiveType?: PrimitiveType,
+    toPrimitive: Function,
+    fromPrimitive?: Function,
+    originalType?: OriginalType,
+    typeLength?: number
+  }
 }
 
 interface INTERVAL {
@@ -17,7 +19,7 @@ interface INTERVAL {
   milliseconds: number
 }
 
-export const PARQUET_LOGICAL_TYPES: PARQUET_LOGICAL_TYPES = {
+export const PARQUET_LOGICAL_TYPES: ParquetTypeData = {
   'BOOLEAN': {
     primitiveType: 'BOOLEAN',
     toPrimitive: toPrimitive_BOOLEAN,
@@ -149,15 +151,32 @@ export const PARQUET_LOGICAL_TYPES: PARQUET_LOGICAL_TYPES = {
     typeLength: 12,
     toPrimitive: toPrimitive_INTERVAL,
     fromPrimitive: fromPrimitive_INTERVAL
+  },
+  MAP: {
+      originalType: 'MAP',
+      toPrimitive: toPrimitive_MAP,
+  },
+  LIST: {
+      originalType: 'LIST',
+      toPrimitive: toPrimitive_LIST,
   }
 };
+
+/**
+ * Test if something is a valid Parquet Type
+ * @param type the string of the type
+ * @returns if type is a valid Parquet Type
+ */
+function isParquetType(type: string | undefined): type is ParquetType {
+  return type !== undefined && (type in PARQUET_LOGICAL_TYPES);
+}
 
 /**
  * Convert a value from it's native representation to the internal/underlying
  * primitive type
  */
 export function toPrimitive(type: string | undefined, value: unknown) {
-  if (type === undefined || !(type in PARQUET_LOGICAL_TYPES)) {
+  if (!isParquetType(type)) {
     throw 'invalid type: ' + type || "undefined";
   }
 
@@ -169,10 +188,10 @@ export function toPrimitive(type: string | undefined, value: unknown) {
  * the native representation
  */
 export function fromPrimitive(type: string | undefined, value: unknown) {
-  if (type === undefined || !(type in PARQUET_LOGICAL_TYPES)) {
+  if (!isParquetType(type)) {
     throw 'invalid type: ' + type || "undefined";
   }
-  
+
   const typeFromPrimitive = PARQUET_LOGICAL_TYPES[type].fromPrimitive
   if (typeFromPrimitive !== undefined) {
     return typeFromPrimitive(value)
@@ -282,11 +301,14 @@ function toPrimitive_UINT32(value: number | bigint | string) {
   }
 }
 
+const MIN_64 = BigInt('0x8000000000000000') * -1n;
+const MAX_64 = BigInt('0x7fffffffffffffff');
+
 function toPrimitive_INT64(value: number | bigint | string) {
   try {
     let v = value;
     if (typeof v === 'string') v = BigInt(value);
-    checkValidValue(-0x8000000000000000, 0x7fffffffffffffff, v);
+    checkValidValue(MIN_64, MAX_64, v);
 
     return v;
   } catch {
@@ -294,11 +316,13 @@ function toPrimitive_INT64(value: number | bigint | string) {
   }
 }
 
+const MAX_U64 = BigInt('0xffffffffffffffff');
+
 function toPrimitive_UINT64(value: number | bigint | string) {
   try {
     let v = value;
     if (typeof v === 'string') v = BigInt(value);
-    checkValidValue(0, 0xffffffffffffffff, v);
+    checkValidValue(0, MAX_U64, v);
 
     return v;
   } catch {
@@ -306,16 +330,27 @@ function toPrimitive_UINT64(value: number | bigint | string) {
   }
 }
 
+const MIN_96 = BigInt('0x800000000000000000000000') * -1n;
+const MAX_96 = BigInt('0x7fffffffffffffffffffffff');
+
 function toPrimitive_INT96(value: number | bigint | string) {
   try {
     let v = value;
     if (typeof v === 'string') v = BigInt(value);
-    checkValidValue(-0x800000000000000000000000, 0x7fffffffffffffffffffffff, v);
+    checkValidValue(MIN_96, MAX_96, v);
 
     return v;
   } catch {
       throw 'invalid value for INT96: ' + value;
   }
+}
+
+function toPrimitive_MAP(value: any) {
+  return value;
+}
+
+function toPrimitive_LIST(value: any) {
+  return value;
 }
 
 function toPrimitive_BYTE_ARRAY(value: Array<number>) {
@@ -350,7 +385,7 @@ function toPrimitive_TIME_MILLIS(value: string | number) {
   let v = value
   if (typeof value === `string`) {
     v = parseInt(value, 10);
-  } 
+  }
   if (v < 0 || v > 0xffffffffffffffff || typeof v !== 'number') {
     throw 'invalid value for TIME_MILLIS: ' + value;
   }
@@ -379,14 +414,14 @@ function toPrimitive_DATE(value: string | Date | number) {
   let v = value
   if (typeof value === 'string') {
     v = parseInt(value, 10);
-  } 
+  }
 
   if (v < 0 || typeof v !== 'number') {
     throw 'invalid value for DATE: ' + value;
   }
 
   return v;
-  
+
 }
 
 function fromPrimitive_DATE(value: number ) {
@@ -412,7 +447,7 @@ function toPrimitive_TIMESTAMP_MILLIS(value: string | Date | number) {
   }
 
   return v;
-  
+
 }
 
 function fromPrimitive_TIMESTAMP_MILLIS(value: number | string | bigint) {
@@ -461,7 +496,7 @@ function fromPrimitive_INTERVAL(value: string) {
   return { months: months, days: days, milliseconds: millis };
 }
 
-function checkValidValue(lowerRange: number, upperRange: number, v: number | bigint) {
+function checkValidValue(lowerRange: number | bigint, upperRange: number | bigint, v: number | bigint) {
   if (v < lowerRange || v > upperRange) {
     throw "invalid value"
   }
