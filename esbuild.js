@@ -4,7 +4,7 @@ const {compressionBrowserPlugin, wasmPlugin} = require("./esbuild-plugins");
 // esbuild has TypeScript support by default
 const baseConfig = {
     bundle: true,
-    entryPoints: ['parquet.js'],
+    entryPoints: ['parquet.ts'],
     define: {
         "process.env.NODE_DEBUG": false,
         "process.env.NODE_ENV": "\"production\"",
@@ -34,7 +34,7 @@ const targets = [
     }
 ]
 Promise.all(targets.map(esbuild.build))
-    .then(results => {        
+    .then(results => {
         if (results.reduce((m,r)=>m && !r.warnings.length, true)) {
             console.log("built with no errors or warnings")
         }
