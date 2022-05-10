@@ -59,7 +59,7 @@ export interface FieldDefinition {
     optional?: boolean;
     repeated?: boolean;
     fields?: SchemaDefinition;
-    statistics?: Statistics
+    statistics?: Statistics | false;
     parent?: ParentField
     num_children?: NumChildrenField
 }
@@ -67,7 +67,7 @@ export interface FieldDefinition {
 export interface ParquetField {
     name: string;
     path: string[];
-    statistics?: Statistics
+    statistics?: Statistics | false;
     primitiveType?: PrimitiveType;
     originalType?: OriginalType;
     repetitionType: RepetitionType;
