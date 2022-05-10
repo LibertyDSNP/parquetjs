@@ -1,4 +1,4 @@
-import Long = require('long')
+import Long from 'long';
 import {expect} from "chai"
 import * as sinon from "sinon"
 import {Done} from "mocha"
@@ -288,7 +288,7 @@ describe("Split Block Bloom Filters", () => {
                     if (e instanceof Error) {
                         gotError = true
                         expect(e.message).to.match(/unsupported type:/)
-                    } 
+                    }
                 }
                 expect(gotError).to.eq(true)
             })
