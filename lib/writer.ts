@@ -9,7 +9,6 @@ import * as bloomFilterWriter from "./bloomFilterIO/bloomFilterWriter"
 import { WriterOptions, ParquetCodec, ParquetField, ColumnMetaDataExt, RowGroupExt, Page } from './declare'
 import { Options } from './codec/types'
 import { ParquetSchema } from './schema'
-import { WriteStream } from 'fs'
 import Int64 from 'node-int64'
 import SplitBlockBloomFilter from './bloom/sbbf'
 
@@ -62,7 +61,7 @@ export class ParquetWriter {
    * Convenience method to create a new buffered parquet writer that writes to
    * the specified stream
    */
-  static async openStream(schema: ParquetSchema, outputStream: WriteStream, opts?: WriterOptions) {
+  static async openStream(schema: ParquetSchema, outputStream: parquet_util.WriteStreamMinimal, opts?: WriterOptions) {
     if (!opts) {
       opts = {};
     }
@@ -202,7 +201,7 @@ export class ParquetEnvelopeWriter {
   /**
    * Create a new parquet envelope writer that writes to the specified stream
    */
-  static async openStream(schema: ParquetSchema, outputStream: WriteStream, opts: WriterOptions) {
+  static async openStream(schema: ParquetSchema, outputStream: parquet_util.WriteStreamMinimal, opts: WriterOptions) {
     let writeFn = parquet_util.oswrite.bind(undefined, outputStream);
     let closeFn = parquet_util.osend.bind(undefined, outputStream);
     return new ParquetEnvelopeWriter(schema, writeFn, closeFn, new Int64(0), opts);

@@ -4,6 +4,10 @@ import fs, { WriteStream } from 'fs'
 import * as parquet_thrift from '../gen-nodejs/parquet_types'
 import { FileMetaDataExt, WriterOptions } from './declare'
 import { Int64 } from "thrift";
+import { type } from "os";
+
+// Use this so users only need to implement the minimal amount of the WriteStream interface
+export type WriteStreamMinimal = Pick<WriteStream, "write" | "end">;
 
 /**
  * We need to patch Thrift's TFramedTransport class bc the TS type definitions
@@ -146,7 +150,7 @@ export const fclose = function(fd: number) {
   });
 }
 
-export const oswrite = function(os: WriteStream, buf: Buffer) {
+export const oswrite = function(os: WriteStreamMinimal, buf: Buffer) {
   return new Promise((resolve, reject) => {
     os.write(buf, (err: Error | undefined | null) => {
       if (err) {
@@ -158,7 +162,7 @@ export const oswrite = function(os: WriteStream, buf: Buffer) {
   });
 }
 
-export const osend = function(os: WriteStream) {
+export const osend = function(os: WriteStreamMinimal) {
   return new Promise((resolve, reject) => {
     os.end((err: Error) => {
       if (err) {
