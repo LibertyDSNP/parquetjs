@@ -1,7 +1,7 @@
 import {expect} from "chai"
 import { Int64 } from "thrift";
 import { parseBloomFilterOffsets } from '../lib/bloomFilterIO/bloomFilterReader';
-import {ColumnChunkData, ColumnChunkExt, ColumnMetaDataExt} from "../lib/types/types.js";
+import {ColumnChunkData, ColumnChunkExt, ColumnMetaDataExt} from "../lib/declare";
 
 const emptyOffset = () => new Int64(Buffer.from(""), 0);
 

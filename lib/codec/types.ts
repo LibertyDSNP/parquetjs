@@ -1,5 +1,5 @@
-import { PrimitiveType } from "../types/types";
-import { ParquetCodec, OriginalType, ParquetField } from "../types/types";
+import { PrimitiveType } from "../declare";
+import { ParquetCodec, OriginalType, ParquetField } from "../declare";
 import { Statistics } from "../../gen-nodejs/parquet_types";
 
 export interface Options {

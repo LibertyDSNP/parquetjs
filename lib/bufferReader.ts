@@ -1,6 +1,6 @@
 import { Statistics } from "../gen-nodejs/parquet_types"
 import { ParquetEnvelopeReader } from "./reader"
-import { FileMetaDataExt } from "./types/types"
+import { FileMetaDataExt } from "./declare"
 
 export interface BufferReaderOptions {
   maxSpan?: number,

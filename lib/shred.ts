@@ -1,6 +1,6 @@
 import * as parquet_types from './types'
 import { ParquetSchema } from './schema'
-import { Page, PageData, ParquetField } from './types/types';
+import { Page, PageData, ParquetField } from './declare';
 
 /**
  * 'Shred' a record into a list of <value, repetition_level, definition_level>

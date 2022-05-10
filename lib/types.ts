@@ -1,7 +1,7 @@
 'use strict';
 // Thanks to https://github.com/kbajalc/parquets for some of the code.
 import * as BSON from "bson"
-import { PrimitiveType, OriginalType, ParquetType } from "./types/types"
+import { PrimitiveType, OriginalType, ParquetType } from "./declare"
 
 type ParquetTypeData = {
   [Property in ParquetType]: {

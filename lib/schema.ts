@@ -1,7 +1,7 @@
 import * as parquet_codec from './codec';
 import * as parquet_compression from './compression'
 import * as parquet_types from './types'
-import { SchemaDefinition, ParquetField, RepetitionType } from './types/types'
+import { SchemaDefinition, ParquetField, RepetitionType } from './declare'
 
 const PARQUET_COLUMN_KEY_SEPARATOR = '.';
 
@@ -106,7 +106,7 @@ function buildFields(schema: SchemaDefinition, rLevelParentMax?: number, dLevelP
     }
 
     /* nested field */
-    
+
     if (opts.fields) {
       fieldList[name] = {
         name: name,
@@ -123,7 +123,7 @@ function buildFields(schema: SchemaDefinition, rLevelParentMax?: number, dLevelP
               dLevelMax,
               path.concat(name))
       };
-      
+
       if (opts.type == 'LIST' || opts.type == 'MAP') fieldList[name].originalType = opts.type;
 
       continue;
