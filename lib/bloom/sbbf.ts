@@ -1,5 +1,5 @@
 import parquet_thrift from "../../gen-nodejs/parquet_types";
-import Long = require('long')
+import Long from 'long';
 import XxHasher from "./xxhasher"
 import {Block} from "../types/types";
 

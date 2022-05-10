@@ -1,5 +1,5 @@
 // Lifted from https://github.com/kbajalc/parquets
-import BSON = require('bson');
+import BSON from 'bson';
 import { OriginalType, ParquetType, PrimitiveType } from './types';
 
 export interface ParquetTypeKit {
