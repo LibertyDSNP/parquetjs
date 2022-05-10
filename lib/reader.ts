@@ -111,12 +111,12 @@ export class ParquetReader {
    * Open the parquet file pointed to by the specified path and return a new
    * parquet reader
    */
-  static async openFile(filePath: string | Buffer | URL, options: BufferReaderOptions) {
+  static async openFile(filePath: string | Buffer | URL, options?: BufferReaderOptions) {
     let envelopeReader = await ParquetEnvelopeReader.openFile(filePath, options);
     return this.openEnvelopeReader(envelopeReader, options);
   }
 
-  static async openBuffer(buffer: Buffer, options: BufferReaderOptions) {
+  static async openBuffer(buffer: Buffer, options?: BufferReaderOptions) {
     let envelopeReader = await ParquetEnvelopeReader.openBuffer(buffer, options);
     return this.openEnvelopeReader(envelopeReader, options);
   }
@@ -126,7 +126,7 @@ export class ParquetReader {
    * The params have to include `Bucket` and `Key` to the file requested
    * This function returns a new parquet reader
    */
-  static async openS3(client: ClientS3, params: ClientParameters, options: BufferReaderOptions) {
+  static async openS3(client: ClientS3, params: ClientParameters, options?: BufferReaderOptions) {
     let envelopeReader = await ParquetEnvelopeReader.openS3(client, params, options);
     return this.openEnvelopeReader(envelopeReader, options);
   }
@@ -137,13 +137,13 @@ export class ParquetReader {
    * a `url` property.
    * This function returns a new parquet reader
    */
-  static async openUrl(params: Parameter, options: BufferReaderOptions) {
+  static async openUrl(params: Parameter, options?: BufferReaderOptions) {
     let envelopeReader = await ParquetEnvelopeReader.openUrl(params, options);
     return this.openEnvelopeReader(envelopeReader, options);
   }
 
-  static async openEnvelopeReader(envelopeReader: ParquetEnvelopeReader, opts: BufferReaderOptions) {
-    if (opts && opts.metadata) {
+  static async openEnvelopeReader(envelopeReader: ParquetEnvelopeReader, opts?: BufferReaderOptions) {
+    if (opts?.metadata) {
       return new ParquetReader(opts.metadata, envelopeReader, opts);
     }
     try {
@@ -164,7 +164,7 @@ export class ParquetReader {
    * and internal use cases. Consider using one of the open{File,Buffer} methods
    * instead
    */
-  constructor(metadata: FileMetaDataExt, envelopeReader: ParquetEnvelopeReader, opts: BufferReaderOptions) {
+  constructor(metadata: FileMetaDataExt, envelopeReader: ParquetEnvelopeReader, opts?: BufferReaderOptions) {
     opts = opts || {};
     if (metadata.version != PARQUET_VERSION) {
       throw 'invalid parquet version';
@@ -384,7 +384,7 @@ export class ParquetEnvelopeReader {
   metadata?: FileMetaDataExt;
   schema?: parquet_schema.ParquetSchema
 
-  static async openFile(filePath: string | Buffer | URL, options: BufferReaderOptions) {
+  static async openFile(filePath: string | Buffer | URL, options?: BufferReaderOptions) {
     let fileStat = await parquet_util.fstat(filePath);
     let fileDescriptor = await parquet_util.fopen(filePath);
 
@@ -401,7 +401,7 @@ export class ParquetEnvelopeReader {
     return new ParquetEnvelopeReader(readFn, closeFn, fileStat.size, options);
   }
 
-  static async openBuffer(buffer: Buffer, options: BufferReaderOptions) {
+  static async openBuffer(buffer: Buffer, options?: BufferReaderOptions) {
     let readFn = (offset: number, length: number, file?: string) => {
       if (file) {
         return Promise.reject('external references are not supported');
@@ -414,7 +414,7 @@ export class ParquetEnvelopeReader {
     return new ParquetEnvelopeReader(readFn, closeFn, buffer.length, options);
   }
 
-  static async openS3(client: ClientS3, params: ClientParameters, options: BufferReaderOptions) {
+  static async openS3(client: ClientS3, params: ClientParameters, options?: BufferReaderOptions) {
     let fileStat = async () => client.headObject(params).promise().then((d: {ContentLength: number}) => d.ContentLength);
 
     let readFn = async (offset: number, length: number, file?: string) => {
@@ -432,7 +432,7 @@ export class ParquetEnvelopeReader {
     return new ParquetEnvelopeReader(readFn, closeFn, fileStat, options);
   }
 
-  static async openUrl(params: Parameter, options: BufferReaderOptions) {
+  static async openUrl(params: Parameter, options?: BufferReaderOptions) {
      if (typeof params === 'string')
       params = {url: params};
     if (!params.url)
@@ -465,7 +465,7 @@ export class ParquetEnvelopeReader {
     return new ParquetEnvelopeReader(readFn, closeFn, filesize, options);
   }
 
-  constructor(readFn: (offset: number, length: number, file?: string) => Promise<Buffer> , closeFn: () => unknown, fileSize: Function | number, options: BufferReaderOptions, metadata?: FileMetaDataExt) {
+  constructor(readFn: (offset: number, length: number, file?: string) => Promise<Buffer> , closeFn: () => unknown, fileSize: Function | number, options?: BufferReaderOptions, metadata?: FileMetaDataExt) {
     options = options || {};
     this.readFn = readFn;
     this.id = ++ParquetEnvelopeReaderIdCounter;
