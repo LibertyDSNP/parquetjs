@@ -266,7 +266,7 @@ export class ParquetReader {
 
   async getBloomFiltersFor(columnNames: string[]) {
     const bloomFilterData = await getBloomFiltersFor(columnNames, this.envelopeReader!);
-    return bloomFilterData.reduce((acc: Record<string, Array<unknown>>, value) => {
+    return bloomFilterData.reduce((acc: Record<string, typeof bloomFilterData>, value) => {
       if (acc[value.columnName]) acc[value.columnName].push(value)
       else acc[value.columnName] = [value]
       return acc;
