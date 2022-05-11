@@ -137,7 +137,7 @@ export class ParquetReader {
    * a `url` property.
    * This function returns a new parquet reader
    */
-  static async openUrl(params: Parameter, options?: BufferReaderOptions) {
+  static async openUrl(params: Parameter | URL | string, options?: BufferReaderOptions) {
     let envelopeReader = await ParquetEnvelopeReader.openUrl(params, options);
     return this.openEnvelopeReader(envelopeReader, options);
   }
@@ -432,9 +432,12 @@ export class ParquetEnvelopeReader {
     return new ParquetEnvelopeReader(readFn, closeFn, fileStat, options);
   }
 
-  static async openUrl(params: Parameter, options?: BufferReaderOptions) {
-     if (typeof params === 'string')
-      params = {url: params};
+  static async openUrl(url: Parameter | URL | string, options?: BufferReaderOptions) {
+    let params: Parameter;
+    if (typeof url === 'string') params = { url };
+    else if(url instanceof URL) params = { url: url.toString() }
+    else params = url;
+
     if (!params.url)
       throw new Error('URL missing');
 
