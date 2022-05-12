@@ -476,7 +476,6 @@ function toPrimitive_TIMESTAMP_MICROS(value: Date | string | number | bigint) {
 }
 
 function fromPrimitive_TIMESTAMP_MICROS(value: number | bigint) {
-    if (value === undefined) return new Date(NaN);
     if (typeof value === 'bigint') return new Date(Number(value / 1000n));
     return new Date(value / 1000);
   }
