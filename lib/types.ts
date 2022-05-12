@@ -386,7 +386,8 @@ function toPrimitive_TIME_MILLIS(value: string | number) {
   if (typeof value === `string`) {
     v = parseInt(value, 10);
   }
-  if (v < 0 || v > 0xffffffffffffffff || typeof v !== 'number') {
+  // Year 2255 bug. Should eventually switch to bigint
+  if (v < 0 || v > (Number.MAX_SAFE_INTEGER - 1) || typeof v !== 'number') {
     throw 'invalid value for TIME_MILLIS: ' + value;
   }
 
