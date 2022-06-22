@@ -27,22 +27,52 @@ _parquet.js requires node.js >= 14.16.0_
   $ npm install @dsnp/parquetjs
 ```
 
-### NodeJS 
-To use with nodejs: 
+### NodeJS
+To use with nodejs:
 ```javascript
 import parquetjs from "@dsnp/parquetjs"
 ```
 
-### Browser
-To use in a browser, in your bundler, depending on your needs, write the appropriate plugin or resolver to point to:
+### Browser with Bundler
+To use in a browser with a bundler, depending on your needs, write the appropriate plugin or resolver to point to either the Common JS or ES Module version:
 ```javascript
-"node_modules/@dsnp/parquetjs/browser/parquetjs"
+// Common JS
+"node_modules/@dsnp/parquetjs/dist/browser/parquetjs.cjs"
+// ES Modules
+"node_modules/@dsnp/parquetjs/dist/browser/parquetjs.esm"
 ```
 or:
-
 ```javascript
-import parquetjs from "@dsnp/parquetjs/browser/parquetjs"
+// Common JS
+import parquetjs from "@dsnp/parquetjs/dist/browser/parquetjs.cjs"
+// ES Modules
+import parquetjs from "@dsnp/parquetjs/dist/browser/parquetjs.esm"
 ```
+
+### Browser Direct: ES Modules
+To use directly in the browser without a bundler using ES Modules:
+
+1. Build the package: `npm install && npm run build:browser`
+2. Copy to `dist/browser/parquetjs.esm.js` the server
+3. Use it in your html or other ES Modules:
+    ```html
+    <script type="module">
+      import parquetjs from '../parquet.esm.js';
+      // Use parquetjs
+    </script>
+    ```
+
+### Browser Direct: Plain Ol' JavaScript
+To use directly in the browser without a bundler or ES Modules:
+
+1. Build the package: `npm install && npm run build:browser`
+2. Copy to `dist/browser/parquetjs.js` the server
+2. Use the global `parquetjs` variable to access parquetjs functions
+   ```html
+   <script>
+    // console.log(parquetjs)
+    </script>
+    ```
 
 ## Usage: Writing files
 
@@ -74,7 +104,7 @@ compression.
 
 Once we have a schema, we can create a `ParquetWriter` object. The writer will
 take input rows as JSON objects, convert them to the Parquet format and store
-them on disk. 
+them on disk.
 
 ``` js
 // create new ParquetWriter that writes to 'fruits.parquet`
@@ -88,7 +118,7 @@ await writer.appendRow({name: 'oranges', quantity: 10, price: 2.5, date: new Dat
 Once we are finished adding rows to the file, we have to tell the writer object
 to flush the metadata to disk and close the file by calling the `close()` method:
 
-### Adding bloom filters 
+### Adding bloom filters
 
 Bloom filters can be added to multiple columns as demonstrated below:
 
@@ -207,7 +237,7 @@ let reader = await parquet.ParquetReader.openUrl(request,'https://domain/fruits.
 ### Reading data from S3
 
 Parquet files can be read from an S3 object without having to download the whole file.
-You will have to supply the aws-sdk client as first argument and the bucket/key information 
+You will have to supply the aws-sdk client as first argument and the bucket/key information
 as second argument to the function `parquetReader.openS3`.
 
 ``` js
@@ -291,7 +321,7 @@ with a nested field, omit the `type` in the column definition and add a `fields`
 list instead:
 
 Consider this example, which allows us to store a more advanced "fruits" table
-where each row contains a name, a list of colours and a list of "stock" objects. 
+where each row contains a name, a list of colours and a list of "stock" objects.
 
 ``` js
 // advanced fruits table
