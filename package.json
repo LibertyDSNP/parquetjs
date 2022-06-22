@@ -62,6 +62,7 @@
     "type": "tsc --noEmit",
     "lint": "echo 'Linting, it is on the TODO list...'",
     "test": "mocha -r ts-node/register 'test/**/*.{js,ts}'",
+    "test:only": "mocha -r ts-node/register",
     "clean": "rm -Rf ./dist",
     "prepublishOnly": "npm run clean && npm run build:node && npm run build:types && npm run build:browser",
     "thrift": "thrift -out gen-nodejs --gen js:ts parquet.thrift && thrift -out gen-nodejs --gen js:node parquet.thrift",
