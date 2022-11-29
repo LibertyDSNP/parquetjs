@@ -85,7 +85,7 @@ class ParquetCursor  {
   }
 
   /**
-   * Rewind the cursor the the beginning of the file
+   * Rewind the cursor to the beginning of the file
    */
   rewind() {
     this.rowGroup = [];
