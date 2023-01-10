@@ -147,7 +147,7 @@ function buildFields(schema: SchemaDefinition, rLevelParentMax?: number, dLevelP
     }
 
     if (!(opts.encoding in parquet_codec)) {
-      throw 'unsupported parquet encoding: ' + opts.encoding;
+      fieldErrors.push(`unsupported parquet encoding: ${opts.encoding}, for Column: ${nameWithPath}`);
     }
 
     if (!opts.compression) {
@@ -155,7 +155,7 @@ function buildFields(schema: SchemaDefinition, rLevelParentMax?: number, dLevelP
     }
 
     if (!(opts.compression in parquet_compression.PARQUET_COMPRESSION_METHODS)) {
-      throw 'unsupported compression method: ' + opts.compression;
+      fieldErrors.push(`unsupported compression method: ${opts.compression}, for Column: ${nameWithPath}`);
     }
 
     /* add to schema */
