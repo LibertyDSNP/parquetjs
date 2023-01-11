@@ -81,6 +81,7 @@ function buildFields(schema: SchemaDefinition, rLevelParentMax?: number, dLevelP
   }
 
   let fieldList: Record<string, ParquetField> = {};
+  let fieldErrors: Array<string> = [];
   for (let name in schema) {
     const opts = schema[name];
 
@@ -118,10 +119,10 @@ function buildFields(schema: SchemaDefinition, rLevelParentMax?: number, dLevelP
         statistics: opts.statistics,
         fieldCount: Object.keys(opts.fields).length,
         fields: buildFields(
-              opts.fields,
-              rLevelMax,
-              dLevelMax,
-              path.concat(name))
+            opts.fields,
+            rLevelMax,
+            dLevelMax,
+            path.concat(name))
       };
 
       if (opts.type == 'LIST' || opts.type == 'MAP') fieldList[name].originalType = opts.type;
@@ -129,9 +130,15 @@ function buildFields(schema: SchemaDefinition, rLevelParentMax?: number, dLevelP
       continue;
     }
 
+    let nameWithPath = (`${name}` || 'missing name')
+    if (path && path.length > 0) {
+      nameWithPath = `${path}.${nameWithPath}`
+    }
+
     const typeDef = opts.type ? parquet_types.PARQUET_LOGICAL_TYPES[opts.type] : undefined;
     if (!typeDef) {
-      throw 'invalid parquet type: ' + (opts.type || "missing type");
+      fieldErrors.push(`invalid parquet type: ${(opts.type || "missing type")}, for Column: ${nameWithPath}`);
+      continue;
     }
 
     /* field encoding */
@@ -140,7 +147,7 @@ function buildFields(schema: SchemaDefinition, rLevelParentMax?: number, dLevelP
     }
 
     if (!(opts.encoding in parquet_codec)) {
-      throw 'unsupported parquet encoding: ' + opts.encoding;
+      fieldErrors.push(`unsupported parquet encoding: ${opts.encoding}, for Column: ${nameWithPath}`);
     }
 
     if (!opts.compression) {
@@ -148,7 +155,7 @@ function buildFields(schema: SchemaDefinition, rLevelParentMax?: number, dLevelP
     }
 
     if (!(opts.compression in parquet_compression.PARQUET_COMPRESSION_METHODS)) {
-      throw 'unsupported compression method: ' + opts.compression;
+      fieldErrors.push(`unsupported compression method: ${opts.compression}, for Column: ${nameWithPath}`);
     }
 
     /* add to schema */
@@ -165,6 +172,10 @@ function buildFields(schema: SchemaDefinition, rLevelParentMax?: number, dLevelP
       rLevelMax: rLevelMax,
       dLevelMax: dLevelMax
     };
+  }
+
+  if (fieldErrors.length > 0) {
+    throw fieldErrors.reduce((accumulator, currentVal) => accumulator + '\n' + currentVal);
   }
 
   return fieldList;

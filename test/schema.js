@@ -467,4 +467,44 @@ describe('ParquetSchema', function() {
     }
   });
 
+  it('should indicate which column had an invalid type in a simple flat schema', function() {
+    assert.throws(() => {
+      new parquet.ParquetSchema({
+        quantity: {type: 'UNKNOWN'},
+      })
+    }, 'invalid parquet type: UNKNOWN, for Column: quantity');
+  });
+
+  it('should indicate each column which has an invalid type in a simple flat schema', function() {
+    assert.throws(() => {
+      new parquet.ParquetSchema({
+        quantity: {type: 'UNKNOWN'},
+        value: {type: 'UNKNOWN'},
+      })
+    }, 'invalid parquet type: UNKNOWN, for Column: quantity\ninvalid parquet type: UNKNOWN, for Column: value');
+  });
+
+  it('should indicate each column which has an invalid type in a nested schema', function() {
+    assert.throws(() => {
+      new parquet.ParquetSchema({
+        name: { type: 'UTF8' },
+        stock: {
+          fields: {
+            quantity: { type: 'UNKNOWN' },
+            warehouse: { type: 'UNKNOWN' },
+          }
+        },
+        price: { type: 'UNKNOWN' },
+      })
+    }, 'invalid parquet type: UNKNOWN, for Column: stock.quantity\ninvalid parquet type: UNKNOWN, for Column: stock.warehouse');
+  });
+
+  it('should indicate which column had an invalid type in a simple flat schema - encoding', function() {
+    assert.throws(() => {
+      new parquet.ParquetSchema({
+        quantity: {type: 'UNKNOWN', compression: 'PLAIN'},
+      })
+    }, 'invalid parquet type: UNKNOWN, for Column: quantity');
+  });
+
 });
