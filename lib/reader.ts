@@ -938,7 +938,11 @@ async function decodeDataPage(cursor: Cursor, header: parquet_thrift.PageHeader,
       {
         typeLength: opts.column!.typeLength!,
         bitWidth: opts.column!.typeLength!,
-        disableEnvelope: opts.column!.disableEnvelope
+        disableEnvelope: opts.column!.disableEnvelope,
+        originalType: opts.column!.originalType,
+        precision: opts.column!.precision,
+        scale: opts.column!.scale,
+        name: opts.column!.name
       });
 
   cursor.offset = cursorEnd;
@@ -1084,7 +1088,9 @@ function decodeSchema(schemaElements: Array<parquet_thrift.SchemaElement>) {
         type: logicalType as ParquetType,
         typeLength: schemaElement.type_length,
         optional: optional,
-        repeated: repeated
+        repeated: repeated,
+        scale: schemaElement.scale,
+        precision: schemaElement.precision
       };
     }
 
