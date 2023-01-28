@@ -29,7 +29,7 @@ export type OriginalType =
     // | 'MAP_KEY_VALUE' // 2
     | 'LIST' // 3
     | 'ENUM' // 4
-    // | 'DECIMAL' // 5
+    | 'DECIMAL' // 5
     | 'DATE' // 6
     | 'TIME_MILLIS' // 7
     | 'TIME_MICROS' // 8
@@ -62,6 +62,8 @@ export interface FieldDefinition {
     statistics?: Statistics | false;
     parent?: ParentField
     num_children?: NumChildrenField
+    precision?: number
+    scale?: number
 }
 
 export interface ParquetField {
@@ -74,6 +76,8 @@ export interface ParquetField {
     typeLength?: number;
     encoding?: ParquetCodec;
     compression?: ParquetCompression;
+    precision?: number;
+    scale?: number;
     rLevelMax: number;
     dLevelMax: number;
     isNested?: boolean;
