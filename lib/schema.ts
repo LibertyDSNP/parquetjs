@@ -168,6 +168,8 @@ function buildFields(schema: SchemaDefinition, rLevelParentMax?: number, dLevelP
       encoding: opts.encoding,
       statistics: opts.statistics,
       compression: opts.compression,
+      precision: opts.precision,
+      scale: opts.scale,
       typeLength: opts.typeLength || typeDef.typeLength,
       rLevelMax: rLevelMax,
       dLevelMax: dLevelMax
