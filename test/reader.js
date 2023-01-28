@@ -107,5 +107,25 @@ describe("ParquetReader", () => {
 
       assert.equal(counter, 40000);
     })
-  })
+  });
+
+    describe("#handleDecimal", () => {
+        it("loads parquet with columns configured as DECIMAL", async () => {
+            const reader = await parquet.ParquetReader.openFile(
+                path.join(__dirname,'test-files','valid-decimal-columns.parquet')
+            );
+
+            const data = []
+            for await(const record of reader) {
+                data.push(record)
+            }
+
+            assert.equal(data.length, 4);
+            assert.equal(data[0].over_9_digits, 118.0297106);
+            assert.equal(data[1].under_9_digits, 18.7106);
+            // handling null values
+            assert.equal(data[2].over_9_digits, undefined);
+            assert.equal(data[2].under_9_digits, undefined);
+        })
+    });
 });

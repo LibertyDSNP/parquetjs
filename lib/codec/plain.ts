@@ -35,12 +35,21 @@ function encodeValues_INT32(values: Array<number>) {
   return buf;
 }
 
-function decodeValues_INT32(cursor: Cursor, count: number) {
+function decodeValues_INT32(cursor: Cursor, count: number, opts: Options) {
   let values = [];
-
-  for (let i = 0; i < count; ++i) {
-    values.push(cursor.buffer.readInt32LE(cursor.offset));
-    cursor.offset += 4;
+  const name = opts.name || opts.column?.name || undefined;
+  try {
+    if (opts.originalType === 'DECIMAL') {
+      values = decodeValues_DECIMAL(cursor, count, opts);
+    } else {
+      for (let i = 0; i < count; ++i) {
+        values.push(cursor.buffer.readInt32LE(cursor.offset));
+        cursor.offset += 4;
+      }
+    }
+  } catch (e) {
+    console.log(`Error thrown for column: ${name}`);
+    throw e;
   }
 
   return values;
@@ -55,12 +64,59 @@ function encodeValues_INT64(values: Array<number>) {
   return buf;
 }
 
-function decodeValues_INT64(cursor: Cursor, count: number) {
+function decodeValues_INT64(cursor: Cursor, count: number, opts: Options) {
+  let values = [];
+  const name = opts.name || opts.column?.name || undefined;
+  try {
+    if (opts.originalType === 'DECIMAL' || opts.column?.originalType === 'DECIMAL') {
+      let columnOptions: any = opts.column?.originalType ? opts.column : opts;
+      values = decodeValues_DECIMAL(cursor, count, columnOptions);
+    } else {
+      for (let i = 0; i < count; ++i) {
+        values.push(cursor.buffer.readBigInt64LE(cursor.offset));
+        cursor.offset += 8;
+      }
+    }
+  } catch (e) {
+    console.log(`Error thrown for column: ${name}`);
+    throw e;
+  }
+
+  return values;
+}
+
+function decodeValues_DECIMAL(cursor: Cursor, count: number, opts: Options) {
+  let {
+    scale,
+    precision
+  } = opts;
+
+  const name = opts.name || undefined
+  if (!scale) {
+    throw `missing option: scale (required for DECIMAL) for column: ${name}`;
+  }
+  if (!precision) {
+    throw `missing option: precision (required for DECIMAL) for column: ${name}`;
+  }
+
   let values = [];
 
+  // by default we prepare the offset and bufferFunction to work with 32bit integers
+  let offset = 4;
+  let bufferFunction: any = (offset: number) => cursor.buffer.readInt32LE(offset);
+  if (precision > 9) {
+    // if the precision is over 9 digits, then we are dealing with a 64bit integer
+    offset = 8;
+    bufferFunction = (offset: number) => cursor.buffer.readBigInt64LE(offset);
+  }
   for (let i = 0; i < count; ++i) {
-    values.push(cursor.buffer.readBigInt64LE(cursor.offset));
-    cursor.offset += 8;
+    const bufferSize = cursor.size || 0
+    if (bufferSize === 0 || cursor.offset < bufferSize) {
+      const fullValue = bufferFunction(cursor.offset);
+      const valueWithDecimalApplied = Number(fullValue) / Math.pow(10, scale);
+      values.push(valueWithDecimalApplied);
+      cursor.offset += offset;
+    }
   }
 
   return values;
@@ -266,10 +322,10 @@ export const decodeValues = function (
       return decodeValues_BOOLEAN(cursor, count);
 
     case "INT32":
-      return decodeValues_INT32(cursor, count);
+      return decodeValues_INT32(cursor, count, opts);
 
     case "INT64":
-      return decodeValues_INT64(cursor, count);
+      return decodeValues_INT64(cursor, count, opts);
 
     case "INT96":
       return decodeValues_INT96(cursor, count);
