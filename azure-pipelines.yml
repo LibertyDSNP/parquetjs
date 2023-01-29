@@ -17,7 +17,7 @@ variables:
     value: prism/prism
 
   - name: defaultBranch
-    value: master
+    value: main
 
   - name: npm_config_cache
     value: $(Pipeline.Workspace)/.npm
