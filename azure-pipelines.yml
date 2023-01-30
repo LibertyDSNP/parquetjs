@@ -58,6 +58,7 @@ steps:
     parameters:
       version: $(baseVersion)
       defaultBranch: $(defaultBranch)
+      template: '{{versionMajor}}.{{versionMinor}}.{{versionPatch}}{{versionPrerelease}}.{{gitShortHash}}'
 
   - bash: npm --no-git-tag-version version $(Build.BuildNumber)
     displayName: Set Version
