@@ -69,9 +69,6 @@ steps:
   - bash: npm run build
     displayName: Build Module
 
-  - bash: npm run pretest:ci
-    displayName: Lint
-
   - bash: npm run test:ci
     displayName: Tests
 
