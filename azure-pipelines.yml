@@ -53,7 +53,6 @@ steps:
 
   - template: Version/get.yaml@templates
     parameters:
-      version: $(baseVersion)
       defaultBranch: $(defaultBranch)
       template: '{{versionMajor}}.{{versionMinor}}.{{versionPatch}}{{versionPrerelease}}.{{gitShortHash}}'
 
