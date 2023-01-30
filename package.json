@@ -3,7 +3,7 @@
   "description": "fully asynchronous, pure JavaScript implementation of the Parquet file format",
   "main": "dist/parquet.js",
   "types": "dist/parquet.d.ts",
-  "version": "0.0.0",
+  "version": "1.0.0-dev",
   "homepage": "https://github.com/LibertyDSNP/parquetjs",
   "license": "MIT",
   "keywords": [
@@ -43,7 +43,9 @@
     "core-js": "^3.22.5",
     "esbuild": "^0.14.47",
     "mocha": "10.0.0",
+    "mocha-junit-reporter": "^2.2.0",
     "msw": "^0.39.2",
+    "nyc": "^15.1.0",
     "object-stream": "0.0.1",
     "process": "^0.11.10",
     "regenerator-runtime": "^0.13.9",
@@ -63,7 +65,9 @@
     "lint": "echo 'Linting, it is on the TODO list...'",
     "test": "mocha -r ts-node/register 'test/**/*.{js,ts}'",
     "test:only": "mocha -r ts-node/register",
+    "test:ci": "nyc --reporter=cobertura mocha -r ts-node/register 'test/**/*.{js,ts}' --reporter mocha-junit-reporter",
     "clean": "rm -Rf ./dist",
+    "version": "node -pe \"require('./package.json').version\"",
     "prepublishOnly": "npm run clean && npm run build:node && npm run build:types && npm run build:browser",
     "thrift": "thrift -out gen-nodejs --gen js:ts parquet.thrift && thrift -out gen-nodejs --gen js:node parquet.thrift",
     "serve": "node esbuild-serve.js"
