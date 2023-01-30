@@ -133,6 +133,11 @@ export const PARQUET_LOGICAL_TYPES: ParquetTypeData = {
     originalType: 'INT_64',
     toPrimitive: toPrimitive_INT64
   },
+  'DECIMAL': {
+    primitiveType: 'INT64',
+    originalType: 'DECIMAL',
+    toPrimitive: toPrimitive_INT64
+  },
   'JSON': {
     primitiveType: 'BYTE_ARRAY',
     originalType: 'JSON',

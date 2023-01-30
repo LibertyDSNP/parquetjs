@@ -157,7 +157,9 @@ describe('ParquetSchema', function() {
                     "encoding": "PLAIN",
                     "compression": "UNCOMPRESSED",
                     "rLevelMax": 0,
-                    "dLevelMax": 0
+                    "dLevelMax": 0,
+                    "precision": null,
+                    "scale": null
                   }
                 }
               },
@@ -191,7 +193,9 @@ describe('ParquetSchema', function() {
                     "encoding": "PLAIN",
                     "compression": "UNCOMPRESSED",
                     "rLevelMax": 0,
-                    "dLevelMax": 0
+                    "dLevelMax": 0,
+                    "precision": null,
+                    "scale": null
                   },
                   "g": {
                     "name": "g",
@@ -209,7 +213,9 @@ describe('ParquetSchema', function() {
                     "encoding": "PLAIN",
                     "compression": "UNCOMPRESSED",
                     "rLevelMax": 0,
-                    "dLevelMax": 0
+                    "dLevelMax": 0,
+                    "precision": null,
+                    "scale": null
                   }
                 }
               }
@@ -229,7 +235,9 @@ describe('ParquetSchema', function() {
             "encoding": "PLAIN",
             "compression": "UNCOMPRESSED",
             "rLevelMax": 0,
-            "dLevelMax": 0
+            "dLevelMax": 0,
+            "precision": null,
+            "scale": null
           }
         }
       }

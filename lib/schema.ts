@@ -1,7 +1,7 @@
 import * as parquet_codec from './codec';
 import * as parquet_compression from './compression'
 import * as parquet_types from './types'
-import { SchemaDefinition, ParquetField, RepetitionType } from './declare'
+import { SchemaDefinition, ParquetField, RepetitionType, FieldDefinition } from './declare'
 
 const PARQUET_COLUMN_KEY_SEPARATOR = '.';
 
@@ -158,6 +158,10 @@ function buildFields(schema: SchemaDefinition, rLevelParentMax?: number, dLevelP
       fieldErrors.push(`unsupported compression method: ${opts.compression}, for Column: ${nameWithPath}`);
     }
 
+    if (typeDef.originalType === 'DECIMAL') {
+      fieldErrors = fieldErrors.concat(errorsForDecimalOpts(typeDef.originalType, opts, nameWithPath));
+    }
+
     /* add to schema */
     fieldList[name] = {
       name: name,
@@ -168,6 +172,8 @@ function buildFields(schema: SchemaDefinition, rLevelParentMax?: number, dLevelP
       encoding: opts.encoding,
       statistics: opts.statistics,
       compression: opts.compression,
+      precision: opts.precision,
+      scale: opts.scale,
       typeLength: opts.typeLength || typeDef.typeLength,
       rLevelMax: rLevelMax,
       dLevelMax: dLevelMax
@@ -198,4 +204,24 @@ function listFields(fields: Record<string, ParquetField>) {
 
 function isDefined<T>(val: T | undefined): val is T {
   return val !== undefined;
+}
+
+function errorsForDecimalOpts(type: string, opts: FieldDefinition, columnName: string): string[] {
+  const fieldErrors = []
+  if(!opts.precision) {
+    fieldErrors.push(
+        `invalid schema for type: ${type}, for Column: ${columnName}, precision is required`
+    );
+  }
+  else if (opts.precision > 18) {
+    fieldErrors.push(
+        `invalid precision for type: ${type}, for Column: ${columnName}, can not handle precision over 18`
+    );
+  }
+  if (!opts.scale) {
+    fieldErrors.push(
+        `invalid schema for type: ${type}, for Column: ${columnName}, scale is required`
+    );
+  }
+  return fieldErrors
 }

@@ -18,6 +18,9 @@ export interface Options {
     rLevelMax?: number,
     dLevelMax?: number,
     type?: string,
+    name?: string,
+    precision?: number,
+    scale?: number
 }
 
 export interface Cursor {

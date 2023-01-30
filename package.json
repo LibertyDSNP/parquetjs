@@ -1,9 +1,9 @@
 {
-  "name": "@dsnp/parquetjs",
+  "name": "@enverus/parquetjs",
   "description": "fully asynchronous, pure JavaScript implementation of the Parquet file format",
   "main": "dist/parquet.js",
   "types": "dist/parquet.d.ts",
-  "version": "1.0.0-dev",
+  "version": "1.1.0-dev",
   "homepage": "https://github.com/LibertyDSNP/parquetjs",
   "license": "MIT",
   "keywords": [

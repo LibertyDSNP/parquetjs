@@ -507,4 +507,28 @@ describe('ParquetSchema', function() {
     }, 'invalid parquet type: UNKNOWN, for Column: quantity');
   });
 
+  it('should throw error given decimal with no precision', function() {
+    assert.throws(() => {
+      new parquet.ParquetSchema({
+        test_decimal_col: {type: 'DECIMAL', scale: 4},
+      })
+    }, 'invalid schema for type: DECIMAL, for Column: test_decimal_col, precision is required');
+  });
+
+  it('should throw error given decimal with no precision', function() {
+    assert.throws(() => {
+      new parquet.ParquetSchema({
+        test_decimal_col: {type: 'DECIMAL', precision: 4},
+      })
+    }, 'invalid schema for type: DECIMAL, for Column: test_decimal_col, scale is required');
+  });
+
+  it('should throw error given decimal with over 18 precision', function() {
+    assert.throws(() => {
+      new parquet.ParquetSchema({
+        decimal_column: {type: 'DECIMAL', precision: 19, scale: 5},
+      })
+    }, 'invalid precision for type: DECIMAL, for Column: decimal_column, can not handle precision over 18');
+  });
+
 });
