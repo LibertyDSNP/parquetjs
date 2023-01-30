@@ -51,9 +51,6 @@ steps:
     inputs:
       workingFile: .npmrc
 
-  - bash: echo "##vso[task.setvariable variable=baseVersion]$(npm run version -s)"
-    displayName: Get Base Version
-
   - template: Version/get.yaml@templates
     parameters:
       version: $(baseVersion)
