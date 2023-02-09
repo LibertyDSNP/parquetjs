@@ -1,5 +1,6 @@
 import zlib from 'zlib'
 import snappy from 'snappyjs'
+import { ZstdInit } from '@oneidentity/zstd-js';
 import { compress as brotliCompress, decompress as brotliDecompress } from 'wasm-brotli'
 
 type d_identity = (value: ArrayBuffer | Buffer | Uint8Array ) => ArrayBuffer | Buffer | Uint8Array
@@ -30,6 +31,10 @@ export const PARQUET_COMPRESSION_METHODS: PARQUET_COMPRESSION_METHODS = {
   'BROTLI': {
     deflate: deflate_brotli,
     inflate: inflate_brotli
+  },
+  'ZSTD': {
+    deflate: deflate_zstd,
+    inflate: inflate_zstd
   }
 };
 
@@ -88,6 +93,30 @@ function inflate_gzip(value: Buffer | ArrayBuffer | string) {
 
 function inflate_snappy(value: ArrayBuffer | Buffer | Uint8Array) {
   return snappy.uncompress(value);
+}
+
+async function deflate_zstd(value: Buffer | Uint8Array): Promise<typeof value> {
+  if (value instanceof Uint8Array && value.constructor === Uint8Array) {
+    return (await ZstdInit()).ZstdSimple.compress(value);
+  } else {
+    return Buffer.from(
+      (await ZstdInit()).ZstdSimple.compress(
+        new Uint8Array(value.buffer, value.byteOffset, value.byteLength / Uint8Array.BYTES_PER_ELEMENT)
+      )
+    );
+  }
+}
+
+async function inflate_zstd(value: Buffer | Uint8Array): Promise<typeof value> {
+  if (value instanceof Uint8Array && value.constructor === Uint8Array) {
+    return (await ZstdInit()).ZstdSimple.decompress(value);
+  } else {
+    return Buffer.from(
+      (await ZstdInit()).ZstdSimple.decompress(
+        new Uint8Array(value.buffer, value.byteOffset, value.byteLength / Uint8Array.BYTES_PER_ELEMENT)
+      )
+    );
+  }
 }
 
 async function inflate_brotli(value: Uint8Array) {

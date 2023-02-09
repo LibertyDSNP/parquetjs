@@ -15,6 +15,7 @@
     "url": "git://github.com/LibertyDSNP/parquetjs.git"
   },
   "dependencies": {
+    "@oneidentity/zstd-js": "^1.0.3",
     "@types/long": "^4.0.2",
     "@types/node-int64": "^0.4.29",
     "@types/thrift": "^0.10.11",
