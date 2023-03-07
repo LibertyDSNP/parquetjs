@@ -483,6 +483,16 @@ describe('Parquet', function() {
       return await writeTestFile(opts).then(readTestFile);
     });
 
+    it('write a test file with ZSTD compression', function() {
+      const opts = { useDataPageV2: true, compression: 'ZSTD' };
+      return writeTestFile(opts);
+    });
+
+    it('write a test file with ZSTD compression and then read it back', function() {
+      const opts = { useDataPageV2: true, compression: 'ZSTD' };
+      return writeTestFile(opts).then(readTestFile);
+    });
+
     it('write a Uint8Array field and then read it back', async function() {
       const opts = { useDataPageV2: true, compression: 'UNCOMPRESSED' };
       const schema = new parquet.ParquetSchema({
