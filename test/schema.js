@@ -472,7 +472,7 @@ describe('ParquetSchema', function() {
       new parquet.ParquetSchema({
         quantity: {type: 'UNKNOWN'},
       })
-    }, 'invalid parquet type: UNKNOWN, for Column: quantity');
+    }, 'Invalid parquet type: UNKNOWN, for Column: quantity');
   });
 
   it('should indicate each column which has an invalid type in a simple flat schema', function() {
@@ -481,7 +481,16 @@ describe('ParquetSchema', function() {
         quantity: {type: 'UNKNOWN'},
         value: {type: 'UNKNOWN'},
       })
-    }, 'invalid parquet type: UNKNOWN, for Column: quantity\ninvalid parquet type: UNKNOWN, for Column: value');
+    }, 'Invalid parquet type: UNKNOWN, for Column: quantity\nInvalid parquet type: UNKNOWN, for Column: value');
+  });
+
+  it('should indicate each column which has an invalid type when one is correct in a simple flat schema', function() {
+    assert.throws(() => {
+      new parquet.ParquetSchema({
+        quantity: {type: 'INT32'},
+        value: {type: 'UNKNOWN'},
+      })
+    }, 'Invalid parquet type: UNKNOWN, for Column: value');
   });
 
   it('should indicate each column which has an invalid type in a nested schema', function() {
@@ -496,15 +505,23 @@ describe('ParquetSchema', function() {
         },
         price: { type: 'UNKNOWN' },
       })
-    }, 'invalid parquet type: UNKNOWN, for Column: stock.quantity\ninvalid parquet type: UNKNOWN, for Column: stock.warehouse');
+    }, 'Invalid parquet type: UNKNOWN, for Column: stock.quantity\nInvalid parquet type: UNKNOWN, for Column: stock.warehouse');
   });
 
-  it('should indicate which column had an invalid type in a simple flat schema - encoding', function() {
+  it('should indicate which column had an invalid encoding in a simple flat schema', function() {
     assert.throws(() => {
       new parquet.ParquetSchema({
-        quantity: {type: 'UNKNOWN', compression: 'PLAIN'},
+        quantity: {type: 'INT32', encoding: 'UNKNOWN'},
       })
-    }, 'invalid parquet type: UNKNOWN, for Column: quantity');
+    }, 'Unsupported parquet encoding: UNKNOWN, for Column: quantity');
+  });
+
+  it('should indicate which column had an invalid compression type in a simple flat schema', function() {
+    assert.throws(() => {
+      new parquet.ParquetSchema({
+        quantity: {type: 'INT32', compression: 'UNKNOWN'},
+      })
+    }, 'Unsupported compression method: UNKNOWN, for Column: quantity');
   });
 
   it('should throw error given decimal with no precision', function() {

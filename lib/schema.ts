@@ -137,7 +137,7 @@ function buildFields(schema: SchemaDefinition, rLevelParentMax?: number, dLevelP
 
     const typeDef = opts.type ? parquet_types.PARQUET_LOGICAL_TYPES[opts.type] : undefined;
     if (!typeDef) {
-      fieldErrors.push(`invalid parquet type: ${(opts.type || "missing type")}, for Column: ${nameWithPath}`);
+      fieldErrors.push(`Invalid parquet type: ${(opts.type || "missing type")}, for Column: ${nameWithPath}`);
       continue;
     }
 
@@ -147,7 +147,7 @@ function buildFields(schema: SchemaDefinition, rLevelParentMax?: number, dLevelP
     }
 
     if (!(opts.encoding in parquet_codec)) {
-      fieldErrors.push(`unsupported parquet encoding: ${opts.encoding}, for Column: ${nameWithPath}`);
+      fieldErrors.push(`Unsupported parquet encoding: ${opts.encoding}, for Column: ${nameWithPath}`);
     }
 
     if (!opts.compression) {
@@ -155,7 +155,7 @@ function buildFields(schema: SchemaDefinition, rLevelParentMax?: number, dLevelP
     }
 
     if (!(opts.compression in parquet_compression.PARQUET_COMPRESSION_METHODS)) {
-      fieldErrors.push(`unsupported compression method: ${opts.compression}, for Column: ${nameWithPath}`);
+      fieldErrors.push(`Unsupported compression method: ${opts.compression}, for Column: ${nameWithPath}`);
     }
 
     if (typeDef.originalType === 'DECIMAL') {
