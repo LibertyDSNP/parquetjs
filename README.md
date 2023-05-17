@@ -87,6 +87,8 @@ Parquet files have a strict schema, similar to tables in a SQL database. So,
 in order to produce a Parquet file we first need to declare a new schema. Here
 is a simple example that shows how to instantiate a `ParquetSchema` object:
 
+### Native Schema Definition
+
 ``` js
 // declare a schema for the `fruits` table
 var schema = new parquet.ParquetSchema({
@@ -97,6 +99,34 @@ var schema = new parquet.ParquetSchema({
   in_stock: { type: 'BOOLEAN' }
 });
 ```
+
+### JSON Schema
+
+``` js
+// declare a schema for the `fruits` JSON Schema
+var schema = new parquet.ParquetSchema.fromJsonSchema({
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "quantity": {
+      "type": "integer"
+    },
+    "price": {
+      "type": "number"
+    },
+    "date": {
+      "type": "string"
+    },
+    "in_stock": {
+      "type": "boolean"
+    }
+  },
+  "required": ["name", "quantity", "price", "date", "in_stock"]
+});
+```
+
 
 Note that the Parquet schema supports nesting, so you can store complex, arbitrarily
 nested records into a single row (more on that later) while still maintaining good
