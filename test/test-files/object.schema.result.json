@@ -1,0 +1,341 @@
+{
+  "schema": {
+    "person": {
+      "optional": false,
+      "fields": {
+        "name": {
+          "optional": false,
+          "type": "UTF8",
+          "encoding": "PLAIN",
+          "compression": "UNCOMPRESSED"
+        },
+        "age": {
+          "optional": false,
+          "type": "INT64",
+          "encoding": "PLAIN",
+          "compression": "UNCOMPRESSED"
+        }
+      }
+    },
+    "people": {
+      "type": "LIST",
+      "repeated": true,
+      "optional": false,
+      "fields": {
+        "list": {
+          "fields": {
+            "name": {
+              "optional": false,
+              "type": "UTF8",
+              "encoding": "PLAIN",
+              "compression": "UNCOMPRESSED"
+            },
+            "age": {
+              "optional": false,
+              "type": "INT64",
+              "encoding": "PLAIN",
+              "compression": "UNCOMPRESSED"
+            }
+          }
+        }
+      }
+    }
+  },
+  "fields": {
+    "person": {
+      "name": "person",
+      "path": [
+        "person"
+      ],
+      "repetitionType": "REQUIRED",
+      "rLevelMax": 0,
+      "dLevelMax": 0,
+      "isNested": true,
+      "fieldCount": 2,
+      "fields": {
+        "name": {
+          "name": "name",
+          "primitiveType": "BYTE_ARRAY",
+          "originalType": "UTF8",
+          "path": [
+            "person",
+            "name"
+          ],
+          "repetitionType": "REQUIRED",
+          "encoding": "PLAIN",
+          "compression": "UNCOMPRESSED",
+          "rLevelMax": 0,
+          "dLevelMax": 0
+        },
+        "age": {
+          "name": "age",
+          "primitiveType": "INT64",
+          "path": [
+            "person",
+            "age"
+          ],
+          "repetitionType": "REQUIRED",
+          "encoding": "PLAIN",
+          "compression": "UNCOMPRESSED",
+          "rLevelMax": 0,
+          "dLevelMax": 0
+        }
+      }
+    },
+    "people": {
+      "name": "people",
+      "path": [
+        "people"
+      ],
+      "repetitionType": "REPEATED",
+      "rLevelMax": 1,
+      "dLevelMax": 1,
+      "isNested": true,
+      "fieldCount": 1,
+      "fields": {
+        "list": {
+          "name": "list",
+          "path": [
+            "people",
+            "list"
+          ],
+          "repetitionType": "REQUIRED",
+          "rLevelMax": 1,
+          "dLevelMax": 1,
+          "isNested": true,
+          "fieldCount": 2,
+          "fields": {
+            "name": {
+              "name": "name",
+              "primitiveType": "BYTE_ARRAY",
+              "originalType": "UTF8",
+              "path": [
+                "people",
+                "list",
+                "name"
+              ],
+              "repetitionType": "REQUIRED",
+              "encoding": "PLAIN",
+              "compression": "UNCOMPRESSED",
+              "rLevelMax": 1,
+              "dLevelMax": 1
+            },
+            "age": {
+              "name": "age",
+              "primitiveType": "INT64",
+              "path": [
+                "people",
+                "list",
+                "age"
+              ],
+              "repetitionType": "REQUIRED",
+              "encoding": "PLAIN",
+              "compression": "UNCOMPRESSED",
+              "rLevelMax": 1,
+              "dLevelMax": 1
+            }
+          }
+        }
+      },
+      "originalType": "LIST"
+    }
+  },
+  "fieldList": [
+    {
+      "name": "person",
+      "path": [
+        "person"
+      ],
+      "repetitionType": "REQUIRED",
+      "rLevelMax": 0,
+      "dLevelMax": 0,
+      "isNested": true,
+      "fieldCount": 2,
+      "fields": {
+        "name": {
+          "name": "name",
+          "primitiveType": "BYTE_ARRAY",
+          "originalType": "UTF8",
+          "path": [
+            "person",
+            "name"
+          ],
+          "repetitionType": "REQUIRED",
+          "encoding": "PLAIN",
+          "compression": "UNCOMPRESSED",
+          "rLevelMax": 0,
+          "dLevelMax": 0
+        },
+        "age": {
+          "name": "age",
+          "primitiveType": "INT64",
+          "path": [
+            "person",
+            "age"
+          ],
+          "repetitionType": "REQUIRED",
+          "encoding": "PLAIN",
+          "compression": "UNCOMPRESSED",
+          "rLevelMax": 0,
+          "dLevelMax": 0
+        }
+      }
+    },
+    {
+      "name": "name",
+      "primitiveType": "BYTE_ARRAY",
+      "originalType": "UTF8",
+      "path": [
+        "person",
+        "name"
+      ],
+      "repetitionType": "REQUIRED",
+      "encoding": "PLAIN",
+      "compression": "UNCOMPRESSED",
+      "rLevelMax": 0,
+      "dLevelMax": 0
+    },
+    {
+      "name": "age",
+      "primitiveType": "INT64",
+      "path": [
+        "person",
+        "age"
+      ],
+      "repetitionType": "REQUIRED",
+      "encoding": "PLAIN",
+      "compression": "UNCOMPRESSED",
+      "rLevelMax": 0,
+      "dLevelMax": 0
+    },
+    {
+      "name": "people",
+      "path": [
+        "people"
+      ],
+      "repetitionType": "REPEATED",
+      "rLevelMax": 1,
+      "dLevelMax": 1,
+      "isNested": true,
+      "fieldCount": 1,
+      "fields": {
+        "list": {
+          "name": "list",
+          "path": [
+            "people",
+            "list"
+          ],
+          "repetitionType": "REQUIRED",
+          "rLevelMax": 1,
+          "dLevelMax": 1,
+          "isNested": true,
+          "fieldCount": 2,
+          "fields": {
+            "name": {
+              "name": "name",
+              "primitiveType": "BYTE_ARRAY",
+              "originalType": "UTF8",
+              "path": [
+                "people",
+                "list",
+                "name"
+              ],
+              "repetitionType": "REQUIRED",
+              "encoding": "PLAIN",
+              "compression": "UNCOMPRESSED",
+              "rLevelMax": 1,
+              "dLevelMax": 1
+            },
+            "age": {
+              "name": "age",
+              "primitiveType": "INT64",
+              "path": [
+                "people",
+                "list",
+                "age"
+              ],
+              "repetitionType": "REQUIRED",
+              "encoding": "PLAIN",
+              "compression": "UNCOMPRESSED",
+              "rLevelMax": 1,
+              "dLevelMax": 1
+            }
+          }
+        }
+      },
+      "originalType": "LIST"
+    },
+    {
+      "name": "list",
+      "path": [
+        "people",
+        "list"
+      ],
+      "repetitionType": "REQUIRED",
+      "rLevelMax": 1,
+      "dLevelMax": 1,
+      "isNested": true,
+      "fieldCount": 2,
+      "fields": {
+        "name": {
+          "name": "name",
+          "primitiveType": "BYTE_ARRAY",
+          "originalType": "UTF8",
+          "path": [
+            "people",
+            "list",
+            "name"
+          ],
+          "repetitionType": "REQUIRED",
+          "encoding": "PLAIN",
+          "compression": "UNCOMPRESSED",
+          "rLevelMax": 1,
+          "dLevelMax": 1
+        },
+        "age": {
+          "name": "age",
+          "primitiveType": "INT64",
+          "path": [
+            "people",
+            "list",
+            "age"
+          ],
+          "repetitionType": "REQUIRED",
+          "encoding": "PLAIN",
+          "compression": "UNCOMPRESSED",
+          "rLevelMax": 1,
+          "dLevelMax": 1
+        }
+      }
+    },
+    {
+      "name": "name",
+      "primitiveType": "BYTE_ARRAY",
+      "originalType": "UTF8",
+      "path": [
+        "people",
+        "list",
+        "name"
+      ],
+      "repetitionType": "REQUIRED",
+      "encoding": "PLAIN",
+      "compression": "UNCOMPRESSED",
+      "rLevelMax": 1,
+      "dLevelMax": 1
+    },
+    {
+      "name": "age",
+      "primitiveType": "INT64",
+      "path": [
+        "people",
+        "list",
+        "age"
+      ],
+      "repetitionType": "REQUIRED",
+      "encoding": "PLAIN",
+      "compression": "UNCOMPRESSED",
+      "rLevelMax": 1,
+      "dLevelMax": 1
+    }
+  ]
+}

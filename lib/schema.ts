@@ -2,8 +2,11 @@ import * as parquet_codec from './codec';
 import * as parquet_compression from './compression'
 import * as parquet_types from './types'
 import { SchemaDefinition, ParquetField, RepetitionType, FieldDefinition } from './declare'
+import { JSONSchema4 } from 'json-schema'
+import { fromJsonSchema } from './jsonSchema';
 
 const PARQUET_COLUMN_KEY_SEPARATOR = '.';
+
 
 /**
  * A parquet file schema
@@ -12,6 +15,14 @@ export class ParquetSchema {
   schema: SchemaDefinition
   fields: Record<string, ParquetField>
   fieldList: Array<ParquetField>
+
+  /**
+   * Create a new schema from JSON Schema (json-schema.org)
+   */
+  static fromJsonSchema(jsonSchema: JSONSchema4) {
+    const schema: SchemaDefinition = fromJsonSchema(jsonSchema);
+    return new ParquetSchema(schema);
+  }
 
   /**
    * Create a new schema from a JSON schema definition
