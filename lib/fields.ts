@@ -40,11 +40,15 @@ export function createStructField(fields: SchemaDefinition, optional = true): Fi
 export function createStructListField(fields: SchemaDefinition, optional = true): FieldDefinition {
     return {
         type: 'LIST',
-        repeated: true,
         optional,
         fields: {
             list: {
-                fields,
+                repeated: true,
+                fields: {
+                    element: {
+                        fields,
+                    },
+                }
             },
         },
     }
@@ -53,10 +57,10 @@ export function createStructListField(fields: SchemaDefinition, optional = true)
 export function createListField(type: ParquetType, optionalElement = false, optionalListField = true, elementOptions: FieldDefinition = {}): FieldDefinition {
     return {
         type: 'LIST',
-        repeated: true,
         optional: optionalListField,
         fields: {
             list: {
+                repeated: true,
                 fields: {
                     element: {
                         ...elementOptions,

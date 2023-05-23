@@ -62,17 +62,14 @@ const fromJsonSchemaArray = (fieldValue: SupportedJSONSchema4, optionalFieldList
         throw new UnsupportedJsonSchemaError("Array field with no values found.");
     }
 
-    // It is not possible in JSON schema to have entries that are optional, but `optionalFieldList` the entire list can be.
-    const optionalEntry = false;
-
     switch (fieldValue.items.type) {
         case 'string':
-            return fields.createListField('UTF8', optionalEntry, optionalFieldList);
+            return fields.createListField('UTF8', optionalFieldList);
         case 'integer':
         case 'number':
-            return fields.createListField('INT64', optionalEntry, optionalFieldList);
+            return fields.createListField('INT64', optionalFieldList);
         case 'boolean':
-            return fields.createListField('BOOLEAN', optionalEntry, optionalFieldList);
+            return fields.createListField('BOOLEAN', optionalFieldList);
         case 'object':
             return fields.createStructListField(fromJsonSchema(fieldValue.items), optionalFieldList);
         default:

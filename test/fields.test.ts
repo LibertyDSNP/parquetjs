@@ -205,10 +205,10 @@ describe("Field Builders: Structs and Struct List", function () {
         assert.equal(c.primitiveType, undefined);
         assert.equal(c.originalType, 'LIST');
         assert.deepEqual(c.path, ['name']);
-        assert.equal(c.repetitionType, 'REPEATED');
+        assert.equal(c.repetitionType, 'OPTIONAL');
         assert.equal(c.encoding, undefined);
         assert.equal(c.compression, undefined);
-        assert.equal(c.rLevelMax, 1);
+        assert.equal(c.rLevelMax, 0);
         assert.equal(c.dLevelMax, 1);
         assert.equal(!!c.isNested, true);
         assert.equal(c.fieldCount, 1);
@@ -226,10 +226,10 @@ describe("Field Builders: Lists", function () {
         assert.equal(c.primitiveType, undefined);
         assert.equal(c.originalType, 'LIST');
         assert.deepEqual(c.path, ['name']);
-        assert.equal(c.repetitionType, 'REPEATED');
+        assert.equal(c.repetitionType, 'OPTIONAL');
         assert.equal(c.encoding, undefined);
         assert.equal(c.compression, undefined);
-        assert.equal(c.rLevelMax, 1);
+        assert.equal(c.rLevelMax, 0);
         assert.equal(c.dLevelMax, 1);
         assert.equal(!!c.isNested, true);
         assert.equal(c.fieldCount, 1);
