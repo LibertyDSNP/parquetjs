@@ -100,6 +100,18 @@ var schema = new parquet.ParquetSchema({
 });
 ```
 
+### Helper Functions
+
+```js
+var schema = new parquet.ParquetSchema({
+  name: parquet.ParquetFieldBuilder.createStringField(),
+  quantity: parquet.ParquetFieldBuilder.createIntField(64),
+  price: parquet.ParquetFieldBuilder.createDoubleField(),
+  date: parquet.ParquetFieldBuilder.createTimestampField(),
+  in_stock: parquet.ParquetFieldBuilder.createBooleanField()
+});
+```
+
 ### JSON Schema
 
 ``` js
