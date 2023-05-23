@@ -9,10 +9,11 @@ import objectNestedSchema from './test-files/object-nested.schema.json';
 
 import { ParquetSchema } from '../parquet';
 
+const update = false;
 // Super Simple snapshot testing
 const checkSnapshot = (actual: any, snapshot: string, update = false) => {
   if (update) {
-    fs.writeFileSync(path.resolve("test", snapshot), JSON.stringify(JSON.parse(JSON.stringify(actual)), null, 4));
+    fs.writeFileSync(path.resolve("test", snapshot), JSON.stringify(JSON.parse(JSON.stringify(actual)), null, 2)+ "\n");
     expect(`Updated the contents of "${snapshot}"`).to.equal("");
   } else {
     const expected = require(snapshot);

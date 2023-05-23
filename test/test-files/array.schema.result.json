@@ -1,207 +1,55 @@
 {
   "schema": {
     "numberArray": {
-      "type": "LIST",
-      "repeated": true,
       "optional": false,
-      "fields": {
-        "list": {
-          "fields": {
-            "element": {
-              "type": "INT64",
-              "optional": false,
-              "encoding": "PLAIN",
-              "compression": "UNCOMPRESSED"
-            }
-          }
-        }
-      }
+      "repeated": true,
+      "type": "INT64",
+      "encoding": "PLAIN",
+      "compression": "UNCOMPRESSED"
     },
     "stringArray": {
-      "type": "LIST",
-      "repeated": true,
       "optional": false,
-      "fields": {
-        "list": {
-          "fields": {
-            "element": {
-              "type": "UTF8",
-              "optional": false,
-              "encoding": "PLAIN",
-              "compression": "UNCOMPRESSED"
-            }
-          }
-        }
-      }
+      "repeated": true,
+      "type": "UTF8",
+      "encoding": "PLAIN",
+      "compression": "UNCOMPRESSED"
     }
   },
   "fields": {
     "numberArray": {
       "name": "numberArray",
+      "primitiveType": "INT64",
       "path": [
         "numberArray"
       ],
       "repetitionType": "REPEATED",
+      "encoding": "PLAIN",
+      "compression": "UNCOMPRESSED",
       "rLevelMax": 1,
-      "dLevelMax": 1,
-      "isNested": true,
-      "fieldCount": 1,
-      "fields": {
-        "list": {
-          "name": "list",
-          "path": [
-            "numberArray",
-            "list"
-          ],
-          "repetitionType": "REQUIRED",
-          "rLevelMax": 1,
-          "dLevelMax": 1,
-          "isNested": true,
-          "fieldCount": 1,
-          "fields": {
-            "element": {
-              "name": "element",
-              "primitiveType": "INT64",
-              "path": [
-                "numberArray",
-                "list",
-                "element"
-              ],
-              "repetitionType": "REQUIRED",
-              "encoding": "PLAIN",
-              "compression": "UNCOMPRESSED",
-              "rLevelMax": 1,
-              "dLevelMax": 1
-            }
-          }
-        }
-      },
-      "originalType": "LIST"
+      "dLevelMax": 1
     },
     "stringArray": {
       "name": "stringArray",
+      "primitiveType": "BYTE_ARRAY",
+      "originalType": "UTF8",
       "path": [
         "stringArray"
       ],
       "repetitionType": "REPEATED",
+      "encoding": "PLAIN",
+      "compression": "UNCOMPRESSED",
       "rLevelMax": 1,
-      "dLevelMax": 1,
-      "isNested": true,
-      "fieldCount": 1,
-      "fields": {
-        "list": {
-          "name": "list",
-          "path": [
-            "stringArray",
-            "list"
-          ],
-          "repetitionType": "REQUIRED",
-          "rLevelMax": 1,
-          "dLevelMax": 1,
-          "isNested": true,
-          "fieldCount": 1,
-          "fields": {
-            "element": {
-              "name": "element",
-              "primitiveType": "BYTE_ARRAY",
-              "originalType": "UTF8",
-              "path": [
-                "stringArray",
-                "list",
-                "element"
-              ],
-              "repetitionType": "REQUIRED",
-              "encoding": "PLAIN",
-              "compression": "UNCOMPRESSED",
-              "rLevelMax": 1,
-              "dLevelMax": 1
-            }
-          }
-        }
-      },
-      "originalType": "LIST"
+      "dLevelMax": 1
     }
   },
   "fieldList": [
     {
       "name": "numberArray",
+      "primitiveType": "INT64",
       "path": [
         "numberArray"
       ],
       "repetitionType": "REPEATED",
-      "rLevelMax": 1,
-      "dLevelMax": 1,
-      "isNested": true,
-      "fieldCount": 1,
-      "fields": {
-        "list": {
-          "name": "list",
-          "path": [
-            "numberArray",
-            "list"
-          ],
-          "repetitionType": "REQUIRED",
-          "rLevelMax": 1,
-          "dLevelMax": 1,
-          "isNested": true,
-          "fieldCount": 1,
-          "fields": {
-            "element": {
-              "name": "element",
-              "primitiveType": "INT64",
-              "path": [
-                "numberArray",
-                "list",
-                "element"
-              ],
-              "repetitionType": "REQUIRED",
-              "encoding": "PLAIN",
-              "compression": "UNCOMPRESSED",
-              "rLevelMax": 1,
-              "dLevelMax": 1
-            }
-          }
-        }
-      },
-      "originalType": "LIST"
-    },
-    {
-      "name": "list",
-      "path": [
-        "numberArray",
-        "list"
-      ],
-      "repetitionType": "REQUIRED",
-      "rLevelMax": 1,
-      "dLevelMax": 1,
-      "isNested": true,
-      "fieldCount": 1,
-      "fields": {
-        "element": {
-          "name": "element",
-          "primitiveType": "INT64",
-          "path": [
-            "numberArray",
-            "list",
-            "element"
-          ],
-          "repetitionType": "REQUIRED",
-          "encoding": "PLAIN",
-          "compression": "UNCOMPRESSED",
-          "rLevelMax": 1,
-          "dLevelMax": 1
-        }
-      }
-    },
-    {
-      "name": "element",
-      "primitiveType": "INT64",
-      "path": [
-        "numberArray",
-        "list",
-        "element"
-      ],
-      "repetitionType": "REQUIRED",
       "encoding": "PLAIN",
       "compression": "UNCOMPRESSED",
       "rLevelMax": 1,
@@ -209,86 +57,12 @@
     },
     {
       "name": "stringArray",
+      "primitiveType": "BYTE_ARRAY",
+      "originalType": "UTF8",
       "path": [
         "stringArray"
       ],
       "repetitionType": "REPEATED",
-      "rLevelMax": 1,
-      "dLevelMax": 1,
-      "isNested": true,
-      "fieldCount": 1,
-      "fields": {
-        "list": {
-          "name": "list",
-          "path": [
-            "stringArray",
-            "list"
-          ],
-          "repetitionType": "REQUIRED",
-          "rLevelMax": 1,
-          "dLevelMax": 1,
-          "isNested": true,
-          "fieldCount": 1,
-          "fields": {
-            "element": {
-              "name": "element",
-              "primitiveType": "BYTE_ARRAY",
-              "originalType": "UTF8",
-              "path": [
-                "stringArray",
-                "list",
-                "element"
-              ],
-              "repetitionType": "REQUIRED",
-              "encoding": "PLAIN",
-              "compression": "UNCOMPRESSED",
-              "rLevelMax": 1,
-              "dLevelMax": 1
-            }
-          }
-        }
-      },
-      "originalType": "LIST"
-    },
-    {
-      "name": "list",
-      "path": [
-        "stringArray",
-        "list"
-      ],
-      "repetitionType": "REQUIRED",
-      "rLevelMax": 1,
-      "dLevelMax": 1,
-      "isNested": true,
-      "fieldCount": 1,
-      "fields": {
-        "element": {
-          "name": "element",
-          "primitiveType": "BYTE_ARRAY",
-          "originalType": "UTF8",
-          "path": [
-            "stringArray",
-            "list",
-            "element"
-          ],
-          "repetitionType": "REQUIRED",
-          "encoding": "PLAIN",
-          "compression": "UNCOMPRESSED",
-          "rLevelMax": 1,
-          "dLevelMax": 1
-        }
-      }
-    },
-    {
-      "name": "element",
-      "primitiveType": "BYTE_ARRAY",
-      "originalType": "UTF8",
-      "path": [
-        "stringArray",
-        "list",
-        "element"
-      ],
-      "repetitionType": "REQUIRED",
       "encoding": "PLAIN",
       "compression": "UNCOMPRESSED",
       "rLevelMax": 1,
