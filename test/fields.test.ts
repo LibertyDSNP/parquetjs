@@ -230,9 +230,10 @@ describe("Field Builders: Lists", function () {
         assert.equal(!!c.isNested, true);
         assert.equal(c.fieldCount, 1);
     });
+
     it("list field and elements can be required", function () {
         const schema = new ParquetSchema({
-            group_name: fields.createListField("UTF8", false, false),
+            group_name: fields.createListField("UTF8", false, { optional: false }),
         });
         const groupNameMeta = schema.fields.group_name;
         assert.equal(groupNameMeta.repetitionType, 'REQUIRED');
@@ -246,7 +247,6 @@ describe("Field Builders: Lists", function () {
         assert.equal(groupNameElementsMeta.name, "element")
         assert.equal(groupNameElementsMeta.repetitionType, "REQUIRED");
         assert.equal(groupNameElementsMeta.primitiveType, "BYTE_ARRAY");
-
-    })
+    });
 
 });

@@ -20,8 +20,8 @@
           "repeated": true,
           "fields": {
             "element": {
-              "type": "UTF8",
               "optional": true,
+              "type": "UTF8",
               "encoding": "PLAIN",
               "compression": "UNCOMPRESSED"
             }
@@ -98,8 +98,8 @@
                       "repeated": true,
                       "fields": {
                         "element": {
-                          "type": "UTF8",
                           "optional": true,
+                          "type": "UTF8",
                           "encoding": "PLAIN",
                           "compression": "UNCOMPRESSED"
                         }

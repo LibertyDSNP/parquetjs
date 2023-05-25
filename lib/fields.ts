@@ -54,18 +54,18 @@ export function createStructListField(fields: SchemaDefinition, optional = true)
     }
 }
 
-export function createListField(type: ParquetType, optionalElement = false, optionalListField = true, elementOptions: FieldDefinition = {}): FieldDefinition {
+export function createListField(type: ParquetType, optional = true, elementOptions: FieldDefinition = { optional: true }): FieldDefinition {
     return {
         type: 'LIST',
-        optional: optionalListField,
+        optional,
         fields: {
             list: {
                 repeated: true,
                 fields: {
                     element: {
+                        optional: true,
                         ...elementOptions,
                         type,
-                        optional: optionalElement,
                     },
                 },
             },
