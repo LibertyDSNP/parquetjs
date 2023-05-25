@@ -32,6 +32,7 @@
   "devDependencies": {
     "@types/bson": "^4.2.0",
     "@types/chai": "^4.3.5",
+    "@types/json-schema": "^7.0.11",
     "@types/mocha": "^10.0.1",
     "@types/node": "^16.18.32",
     "@types/sinon": "^10.0.15",
