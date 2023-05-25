@@ -147,10 +147,6 @@ describe("Field Builders: Primitive Types", function () {
         assert.equal(!!c.isNested, false);
         assert.equal(c.fieldCount, undefined);
     });
-
-    it("Can use simple list field type", function () {
-
-    });
 });
 
 describe("Field Builders: Primitive Type options", function () {
