@@ -166,7 +166,7 @@ describe("toPrimitive INT* should throw when given invalid value", () => {
     });
 
     describe("toPrimitive ", () => {
-        const date = new Date(Date.parse('2022-12-01:00:00:01'));
+        const date = new Date(Date.parse('2022-12-01:00:00:01 GMT'));
 
         ['TIME_MILLIS', 'TIME_MICROS', 'DATE', 'TIMESTAMP_MILLIS', 'TIMESTAMP_MICROS'].forEach(typeName => {
             it(`for type ${typeName} happy path`, () => {
@@ -185,17 +185,17 @@ describe("toPrimitive INT* should throw when given invalid value", () => {
             })
         });
         it('DATE conversion works for DATE type', () => {
-            assert.equal( 19327.33334490741, toPrimitive('DATE', date));
+            assert.equal(toPrimitive('DATE', date), 19327.000011574073);
         });
         it('TIMESTAMP_MICROS works for a Date type and bigint', () => {
-            assert.equal( toPrimitive('TIMESTAMP_MICROS', date), 1669881601000000n);
+            assert.equal( toPrimitive('TIMESTAMP_MICROS', date), 1669852801000000n);
             assert.equal( toPrimitive('TIMESTAMP_MICROS', "9999999999999999999999"), 9999999999999999999999n);
             assert.equal( toPrimitive('TIMESTAMP_MICROS', 98989898n), 98989898n);
 
         } )
         it("TIME_MICROS works for a bigint", () => {
             const timestampBigint = 1932733334490741n;
-            assert.equal( 1932733334490741, toPrimitive('TIME_MICROS', timestampBigint));
+            assert.equal( toPrimitive('TIME_MICROS', timestampBigint), 1932733334490741);
             assert.equal( toPrimitive('TIME_MICROS', "9999999999999999999999"), 9999999999999999999999n);
             assert.equal( toPrimitive('TIME_MICROS', 9999999999999999999999n), 9999999999999999999999n);
         })
