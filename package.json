@@ -79,7 +79,7 @@
     "zlib": "browserify-zlib"
   },
   "engines": {
-    "node": ">=14.16.0"
+    "node": ">=16.15.1"
   },
   "files": [
     "dist/**/*",

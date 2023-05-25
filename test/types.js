@@ -3,7 +3,7 @@ const  { toPrimitive, fromPrimitive } = require("../lib/types")
 const chai = require('chai');
 const assert = chai.assert;
 
-describe("toPrimitive INT* should give the correct values back", () => {
+describe("toPrimitive* should give the correct values back", () => {
     it('toPrimitive(INT_8, 127n)', () => {
         assert.equal(toPrimitive('INT_8',127n), 127n)
     }),
@@ -162,6 +162,42 @@ describe("toPrimitive INT* should throw when given invalid value", () => {
         }),
         it('toPrimitive(UINT_96, "asd12@!$1") is given gibberish and should throw', () => {
             assert.throws(() => toPrimitive('INT_96', "asd12@!$1"))
+        })
+    });
+
+    describe.only("toPrimitive ", () => {
+        const date = new Date(Date.parse('2022-12-01:00:00:01'));
+
+        ['TIME_MILLIS', 'TIME_MICROS', 'DATE', 'TIMESTAMP_MILLIS', 'TIMESTAMP_MICROS'].forEach(typeName => {
+            it(`for type ${typeName} happy path`, () => {
+                assert.equal(1234, toPrimitive(typeName, 1234));
+                assert.equal(1234, toPrimitive(typeName, "1234"));
+            });
+            it(`for type ${typeName} fails with negative values`, () => {
+                assert.throws(() => toPrimitive(typeName, "-1"), `${typeName} value is out of bounds: -1`);
+                assert.throws(() => toPrimitive(typeName, -1), `${typeName} value is out of bounds: -1`);
+            });
+        });
+        ['DATE', 'TIMESTAMP_MILLIS', 'TIME_MILLIS'].forEach(typeName => {
+            it(`${typeName} throws when number too large`, () => {
+                assert.throws(() => toPrimitive(typeName, 9999999999999999999999), `${typeName} value is out of bounds: 1e+22`);
+                assert.throws(() => toPrimitive(typeName, "9999999999999999999999"), `${typeName} value is out of bounds: 1e+22`);
+            })
+        });
+        it('DATE conversion works for DATE type', () => {
+            assert.equal( 19327.33334490741, toPrimitive('DATE', date));
+        });
+        it('TIMESTAMP_MICROS works for a Date type and bigint', () => {
+            assert.equal( toPrimitive('TIMESTAMP_MICROS', date), 1669881601000000n);
+            assert.equal( toPrimitive('TIMESTAMP_MICROS', "9999999999999999999999"), 9999999999999999999999n);
+            assert.equal( toPrimitive('TIMESTAMP_MICROS', 98989898n), 98989898n);
+
+        } )
+        it("TIME_MICROS works for a bigint", () => {
+            const timestampBigint = 1932733334490741n;
+            assert.equal( 1932733334490741, toPrimitive('TIME_MICROS', timestampBigint));
+            assert.equal( toPrimitive('TIME_MICROS', "9999999999999999999999"), 9999999999999999999999n);
+            assert.equal( toPrimitive('TIME_MICROS', 9999999999999999999999n), 9999999999999999999999n);
         })
     })
 })

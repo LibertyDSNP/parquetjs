@@ -386,42 +386,38 @@ function fromPrimitive_BSON(value: Buffer) {
   return BSON.deserialize(value);
 }
 
-function toPrimitive_TIME_MILLIS(value: string | number) {
-  if (typeof value === `string`) {
-    return parseInt(value, 10);
+function toNumberInternal(typeName: string, value: string | number): number {
+  let numberValue = 0;
+  switch (typeof value) {
+    case "string":
+      numberValue = parseInt(value, 10);
+      break;
+    case "number":
+      numberValue = value;
+      break;
+    default:
+      throw `${typeName} has an invalid type: ${typeof value}`;
   }
-  let v = value as number;
   // Year 2255 bug. Should eventually switch to bigint
-  if (v < 0 || v > (Number.MAX_SAFE_INTEGER - 1) || typeof v !== 'number') {
-    throw 'invalid value for TIME_MILLIS: ' + value;
+  if (numberValue < 0 || numberValue >= Number.MAX_SAFE_INTEGER) {
+    throw `${typeName} value is out of bounds: ${numberValue}`;
   }
-  return v;
+  return numberValue
+}
+
+function toPrimitive_TIME_MILLIS(value: string | number) {
+  return toNumberInternal("TIME_MILLIS", value);
 }
 
 function toPrimitive_TIME_MICROS(value: string | number | bigint) {
   const v = BigInt(value);
   if (v < 0n ) {
-    throw 'invalid value for TIME_MICROS: ' + value;
+    throw 'TIME_MICROS value is out of bounds: ' + value;
   }
-
   return v;
 }
 
 const kMillisPerDay = 86400000;
-
-function toNumberInternal(typeName: string, value: string | number): number {
-  switch (typeof value) {
-    case "string":
-      return parseInt(value, 10);
-    case "number":
-      if ((value as number) < 0 ) {
-        throw `${typeName} cannot be negative: ${value}`;
-      }
-      return value
-    default:
-      throw `${typeName} has an invalid type: ${typeof value}`;
-  }
-}
 
 function toPrimitive_DATE(value: string | Date | number) {
   /* convert from date */
@@ -459,12 +455,12 @@ function toPrimitive_TIMESTAMP_MICROS(value: Date | string | number | bigint) {
     // Will throw if NaN
     const v = BigInt(value);
     if (v < 0n) {
-      throw 'Cannot be less than zero';
+      throw 'out of bounds';
     }
 
     return v;
   } catch (e) {
-    throw 'invalid value for TIMESTAMP_MICROS: ' + value;
+    throw 'TIMESTAMP_MICROS value is out of bounds: ' + value;
   }
 }
 
