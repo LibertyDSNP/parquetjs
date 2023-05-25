@@ -55,7 +55,7 @@ const isJsonSchemaRequired = (jsonSchema: SupportedJSONSchema4) => (field: strin
 }
 
 /**
- * Converts the Array field type into
+ * Converts the Array field type into the correct Field Definition
  */
 const fromJsonSchemaArray = (fieldValue: SupportedJSONSchema4, optionalFieldList: boolean): FieldDefinition => {
     if (!fieldValue.items || !fieldValue.items.type) {
