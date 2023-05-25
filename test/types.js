@@ -165,7 +165,7 @@ describe("toPrimitive INT* should throw when given invalid value", () => {
         })
     });
 
-    describe.only("toPrimitive ", () => {
+    describe("toPrimitive ", () => {
         const date = new Date(Date.parse('2022-12-01:00:00:01'));
 
         ['TIME_MILLIS', 'TIME_MICROS', 'DATE', 'TIMESTAMP_MILLIS', 'TIMESTAMP_MICROS'].forEach(typeName => {
