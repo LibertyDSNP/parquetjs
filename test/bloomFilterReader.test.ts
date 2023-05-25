@@ -1,7 +1,9 @@
-import {expect} from "chai"
+import chai, {expect} from "chai"
 import { Int64 } from "thrift";
 import { parseBloomFilterOffsets } from '../lib/bloomFilterIO/bloomFilterReader';
 import {ColumnChunkData, ColumnChunkExt, ColumnMetaDataExt} from "../lib/declare";
+import XxHasher from "../lib/bloom/xxhasher";
+const assert = chai.assert;
 
 const emptyOffset = () => new Int64(Buffer.from(""), 0);
 
@@ -60,6 +62,12 @@ describe("bloomFilterReader", () => {
 
       expect(result).to.deep.equal(expected);
     });
+  })
+  describe("XXHasher", async () => {
+    it("outputs hex-encoded strings", async () => {
+      const hasher = await (new XxHasher());
+      assert.equal("ee7276ee58e4421c", await hasher.hash64("15"));
+    })
   })
 });
 
