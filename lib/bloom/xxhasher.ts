@@ -17,7 +17,7 @@ export default class XxHasher {
     private static h64 = xxhash().then(x => x.h64)
 
     private async hashit(value: string): Promise<string> {
-        return (await XxHasher.h64)(value)
+        return (await XxHasher.h64)(value).toString(16)
     }
 
     /**

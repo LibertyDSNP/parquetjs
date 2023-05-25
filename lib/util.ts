@@ -174,7 +174,7 @@ export const osend = function(os: WriteStreamMinimal) {
   });
 }
 
-export const osopen = function(path: string | Buffer | URL, opts?: string | WriterOptions): Promise<WriteStream> {
+export const osopen = function(path: string | Buffer | URL, opts?: WriterOptions): Promise<WriteStream> {
   return new Promise((resolve, reject) => {
     let outputStream = fs.createWriteStream(path, opts);
 

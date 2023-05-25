@@ -387,15 +387,14 @@ function fromPrimitive_BSON(value: Buffer) {
 }
 
 function toPrimitive_TIME_MILLIS(value: string | number) {
-  let v = value
   if (typeof value === `string`) {
-    v = parseInt(value, 10);
+    return parseInt(value, 10);
   }
+  let v = value as number;
   // Year 2255 bug. Should eventually switch to bigint
   if (v < 0 || v > (Number.MAX_SAFE_INTEGER - 1) || typeof v !== 'number') {
     throw 'invalid value for TIME_MILLIS: ' + value;
   }
-
   return v;
 }
 
@@ -410,24 +409,26 @@ function toPrimitive_TIME_MICROS(value: string | number | bigint) {
 
 const kMillisPerDay = 86400000;
 
+function toNumberInternal(typeName: string, value: string | number): number {
+  switch (typeof value) {
+    case "string":
+      return parseInt(value, 10);
+    case "number":
+      if ((value as number) < 0 ) {
+        throw `${typeName} cannot be negative: ${value}`;
+      }
+      return value
+    default:
+      throw `${typeName} has an invalid type: ${typeof value}`;
+  }
+}
+
 function toPrimitive_DATE(value: string | Date | number) {
   /* convert from date */
   if (value instanceof Date) {
     return value.getTime() / kMillisPerDay;
   }
-
-/* convert from integer */
-  let v = value
-  if (typeof value === 'string') {
-    v = parseInt(value, 10);
-  }
-
-  if (v < 0 || typeof v !== 'number') {
-    throw 'invalid value for DATE: ' + value;
-  }
-
-  return v;
-
+  return toNumberInternal("DATE", value )
 }
 
 function fromPrimitive_DATE(value: number ) {
@@ -440,20 +441,7 @@ function toPrimitive_TIMESTAMP_MILLIS(value: string | Date | number) {
   if (value instanceof Date) {
     return value.getTime();
   }
-
-  /* convert from integer */
-
-  let v = value
-   if (typeof value === 'string' ) {
-    v = parseInt(value, 10);
-   }
-
-  if (v < 0 || typeof v !== 'number') {
-    throw 'invalid value for TIMESTAMP_MILLIS: ' + value;
-  }
-
-  return v;
-
+  return toNumberInternal("TIMESTAMP_MILLIS", value);
 }
 
 function fromPrimitive_TIMESTAMP_MILLIS(value: number | string | bigint) {
