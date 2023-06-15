@@ -9,8 +9,8 @@ type d_brotli = (value: Uint8Array ) => Promise<Buffer>
 
 interface PARQUET_COMPRESSION_METHODS {
   [key:string]: {
-      deflate: Function
-      inflate: Function
+    deflate: (value: any) => Buffer | Promise<Buffer>
+    inflate: (value: any) => Buffer | Promise<Buffer>
   }
 }
 // LZO compression is disabled. See: https://github.com/LibertyDSNP/parquetjs/issues/18
@@ -36,7 +36,7 @@ export const PARQUET_COMPRESSION_METHODS: PARQUET_COMPRESSION_METHODS = {
 /**
  * Deflate a value using compression method `method`
  */
-export async function deflate(method: string, value: unknown): Promise<ArrayBuffer | Buffer | Uint8Array> {
+export async function deflate(method: string, value: unknown): Promise<Buffer> {
   if (!(method in PARQUET_COMPRESSION_METHODS)) {
     throw 'invalid compression method: ' + method;
   }
@@ -45,7 +45,11 @@ export async function deflate(method: string, value: unknown): Promise<ArrayBuff
 }
 
 function deflate_identity(value: ArrayBuffer | Buffer | Uint8Array) {
-  return value;
+  if (Buffer.isBuffer(value)) {
+    return value;
+  } else {
+    return Buffer.from(value);
+  }
 }
 
 function deflate_gzip(value: ArrayBuffer | Buffer | string) {
@@ -53,7 +57,12 @@ function deflate_gzip(value: ArrayBuffer | Buffer | string) {
 }
 
 function deflate_snappy(value: ArrayBuffer | Buffer | Uint8Array) {
-  return snappy.compress(value);
+  const compressedValue = snappy.compress(value);
+  if (Buffer.isBuffer(compressedValue)) {
+    return compressedValue;
+  } else {
+    return Buffer.from(compressedValue);
+  }
 }
 
 async function deflate_brotli(value: Uint8Array) {
@@ -70,7 +79,7 @@ async function deflate_brotli(value: Uint8Array) {
 /**
  * Inflate a value using compression method `method`
  */
-export async function inflate(method: string, value: unknown): Promise<ArrayBuffer | Buffer | Uint8Array> {
+export async function inflate(method: string, value: unknown): Promise<Buffer> {
   if (!(method in PARQUET_COMPRESSION_METHODS)) {
     throw 'invalid compression method: ' + method;
   }
@@ -78,16 +87,25 @@ export async function inflate(method: string, value: unknown): Promise<ArrayBuff
   return await PARQUET_COMPRESSION_METHODS[method].inflate(value);
 }
 
-function inflate_identity(value: ArrayBuffer | Buffer | Uint8Array) {
-  return value;
+async function inflate_identity(value: ArrayBuffer | Buffer | Uint8Array): Promise<Buffer> {
+  if (Buffer.isBuffer(value)) {
+    return value;
+  } else {
+    return Buffer.from(value);
+  }
 }
 
-function inflate_gzip(value: Buffer | ArrayBuffer | string) {
+async function inflate_gzip(value: Buffer | ArrayBuffer | string) {
   return zlib.gunzipSync(value);
 }
 
 function inflate_snappy(value: ArrayBuffer | Buffer | Uint8Array) {
-  return snappy.uncompress(value);
+  const uncompressedContent = snappy.uncompress(value);
+  if (Buffer.isBuffer(uncompressedContent)) {
+    return uncompressedContent;
+  } else {
+    return Buffer.from(uncompressedContent);
+  }
 }
 
 async function inflate_brotli(value: Uint8Array) {
