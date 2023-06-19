@@ -100,11 +100,11 @@ async function inflate_gzip(value: Buffer | ArrayBuffer | string) {
 }
 
 function inflate_snappy(value: ArrayBuffer | Buffer | Uint8Array) {
-  const uncompressedContent = snappy.uncompress(value);
-  if (Buffer.isBuffer(uncompressedContent)) {
-    return uncompressedContent;
+  const uncompressedValue = snappy.uncompress(value);
+  if (Buffer.isBuffer(uncompressedValue)) {
+    return uncompressedValue;
   } else {
-    return Buffer.from(uncompressedContent);
+    return Buffer.from(uncompressedValue);
   }
 }
 

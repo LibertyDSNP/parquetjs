@@ -16,6 +16,21 @@ const baseConfig = {
     plugins: [compressionBrowserPlugin, wasmPlugin],
     target: "es2020"  // default
 };
+// configuration for generating test code in browser
+const testConfig = {
+    bundle: true,
+    entryPoints: ['test/browser/main.ts'],
+    define: {
+        "process.env.NODE_DEBUG": false,
+        "process.env.NODE_ENV": "\"production\"",
+        global: "window"
+    },
+    inject: ['./esbuild-shims.js'],
+    minify: false,
+    platform: 'browser',  // default
+    plugins: [compressionBrowserPlugin, wasmPlugin],
+    target: "es2020"  // default
+}
 const targets = [
     {
         ...baseConfig,
@@ -31,6 +46,11 @@ const targets = [
         ...baseConfig,
         format: "cjs",
         outfile: path.resolve(__dirname, "dist","browser","parquet.cjs.js"),
+    },
+    // Browser test code below
+    {
+        ...testConfig,
+        outfile: path.resolve(__dirname, "test","browser","main.js"),
     }
 ]
 Promise.all(targets.map(esbuild.build))
