@@ -45,11 +45,7 @@ export async function deflate(method: string, value: unknown): Promise<Buffer> {
 }
 
 function deflate_identity(value: ArrayBuffer | Buffer | Uint8Array) {
-  if (Buffer.isBuffer(value)) {
-    return value;
-  } else {
-    return Buffer.from(value);
-  }
+  return buffer_from_result(value);
 }
 
 function deflate_gzip(value: ArrayBuffer | Buffer | string) {
@@ -58,11 +54,7 @@ function deflate_gzip(value: ArrayBuffer | Buffer | string) {
 
 function deflate_snappy(value: ArrayBuffer | Buffer | Uint8Array) {
   const compressedValue = snappy.compress(value);
-  if (Buffer.isBuffer(compressedValue)) {
-    return compressedValue;
-  } else {
-    return Buffer.from(compressedValue);
-  }
+  return buffer_from_result(compressedValue);
 }
 
 async function deflate_brotli(value: Uint8Array) {
@@ -88,11 +80,7 @@ export async function inflate(method: string, value: unknown): Promise<Buffer> {
 }
 
 async function inflate_identity(value: ArrayBuffer | Buffer | Uint8Array): Promise<Buffer> {
-  if (Buffer.isBuffer(value)) {
-    return value;
-  } else {
-    return Buffer.from(value);
-  }
+  return buffer_from_result(value);
 }
 
 async function inflate_gzip(value: Buffer | ArrayBuffer | string) {
@@ -101,11 +89,7 @@ async function inflate_gzip(value: Buffer | ArrayBuffer | string) {
 
 function inflate_snappy(value: ArrayBuffer | Buffer | Uint8Array) {
   const uncompressedValue = snappy.uncompress(value);
-  if (Buffer.isBuffer(uncompressedValue)) {
-    return uncompressedValue;
-  } else {
-    return Buffer.from(uncompressedValue);
-  }
+  return buffer_from_result(uncompressedValue);
 }
 
 async function inflate_brotli(value: Uint8Array) {
@@ -113,4 +97,10 @@ async function inflate_brotli(value: Uint8Array) {
   return Buffer.from(uncompressedContent);
 }
 
-
+function buffer_from_result(result: ArrayBuffer | Buffer | Uint8Array): Buffer {
+  if (Buffer.isBuffer(result)) {
+    return result;
+  } else {
+    return Buffer.from(result);
+  }
+}
