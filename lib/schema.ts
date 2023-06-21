@@ -170,6 +170,8 @@ function buildFields(schema: SchemaDefinition, rLevelParentMax?: number, dLevelP
     }
 
     if (typeDef.originalType === 'DECIMAL') {
+      // Default scale to 0 per https://github.com/apache/parquet-format/blob/master/LogicalTypes.md#decimal
+      if (typeof opts.scale === "undefined") opts.scale = 0;
       fieldErrors = fieldErrors.concat(errorsForDecimalOpts(typeDef.originalType, opts, nameWithPath));
     }
 
@@ -219,19 +221,35 @@ function isDefined<T>(val: T | undefined): val is T {
 
 function errorsForDecimalOpts(type: string, opts: FieldDefinition, columnName: string): string[] {
   const fieldErrors = []
-  if(!opts.precision) {
+  if(opts.precision === undefined || opts.precision < 1) {
     fieldErrors.push(
-        `invalid schema for type: ${type}, for Column: ${columnName}, precision is required`
+      `invalid schema for type: ${type}, for Column: ${columnName}, precision is required and must be be greater than 0`
+    );
+  }
+  else if (!Number.isInteger(opts.precision)) {
+    fieldErrors.push(
+      `invalid schema for type: ${type}, for Column: ${columnName}, precision must be an integer`
     );
   }
   else if (opts.precision > 18) {
     fieldErrors.push(
-        `invalid precision for type: ${type}, for Column: ${columnName}, can not handle precision over 18`
+      `invalid schema for type: ${type}, for Column: ${columnName}, can not handle precision over 18`
     );
   }
-  if (!opts.scale) {
+  if (typeof opts.scale === "undefined" || opts.scale < 0) {
     fieldErrors.push(
-        `invalid schema for type: ${type}, for Column: ${columnName}, scale is required`
+      `invalid schema for type: ${type}, for Column: ${columnName}, scale is required to be 0 or greater`
+    );
+  }
+  else if (!Number.isInteger(opts.scale)) {
+    fieldErrors.push(
+      `invalid schema for type: ${type}, for Column: ${columnName}, scale must be an integer`
+    );
+  }
+  // Default precision to 18 if it is undefined as that is a different error
+  else if (opts.scale > (opts.precision || 18)) {
+    fieldErrors.push(
+      `invalid schema or precision for type: ${type}, for Column: ${columnName}, precision must be greater than or equal to scale`
     );
   }
   return fieldErrors

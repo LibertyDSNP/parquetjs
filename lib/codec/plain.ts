@@ -86,15 +86,11 @@ function decodeValues_INT64(cursor: Cursor, count: number, opts: Options) {
 }
 
 function decodeValues_DECIMAL(cursor: Cursor, count: number, opts: Options) {
-  let {
-    scale,
-    precision
-  } = opts;
+  const precision = opts.precision;
+  // Default scale to 0 per spec
+  const scale = opts.scale || 0;
 
   const name = opts.name || undefined
-  if (!scale) {
-    throw `missing option: scale (required for DECIMAL) for column: ${name}`;
-  }
   if (!precision) {
     throw `missing option: precision (required for DECIMAL) for column: ${name}`;
   }

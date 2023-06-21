@@ -529,15 +529,23 @@ describe('ParquetSchema', function() {
       new parquet.ParquetSchema({
         test_decimal_col: {type: 'DECIMAL', scale: 4},
       })
-    }, 'invalid schema for type: DECIMAL, for Column: test_decimal_col, precision is required');
+    }, 'invalid schema for type: DECIMAL, for Column: test_decimal_col, precision is required and must be be greater than 0');
   });
 
-  it('should throw error given decimal with no scale', function() {
-    assert.throws(() => {
+  it('should NOT throw error given decimal with no scale', function() {
+    assert.doesNotThrow(() => {
       new parquet.ParquetSchema({
         test_decimal_col: {type: 'DECIMAL', precision: 4},
       })
-    }, 'invalid schema for type: DECIMAL, for Column: test_decimal_col, scale is required');
+    });
+  });
+
+  it('should throw error given decimal with negative precision', function() {
+    assert.throws(() => {
+      new parquet.ParquetSchema({
+        decimal_column: {type: 'DECIMAL', precision: -1, scale: 0},
+      })
+    }, 'invalid schema for type: DECIMAL, for Column: decimal_column, precision is required and must be be greater than 0');
   });
 
   it('should throw error given decimal with over 18 precision', function() {
@@ -545,7 +553,39 @@ describe('ParquetSchema', function() {
       new parquet.ParquetSchema({
         decimal_column: {type: 'DECIMAL', precision: 19, scale: 5},
       })
-    }, 'invalid precision for type: DECIMAL, for Column: decimal_column, can not handle precision over 18');
+    }, 'invalid schema for type: DECIMAL, for Column: decimal_column, can not handle precision over 18');
+  });
+
+  it('should throw error given decimal with a non-integer precision', function() {
+    assert.throws(() => {
+      new parquet.ParquetSchema({
+        decimal_column: {type: 'DECIMAL', precision: 6.1, scale: 5},
+      })
+    }, 'invalid schema for type: DECIMAL, for Column: decimal_column, precision must be an integer');
+  });
+
+  it('should throw error given decimal with a non-integer scale', function() {
+    assert.throws(() => {
+      new parquet.ParquetSchema({
+        decimal_column: {type: 'DECIMAL', precision: 6, scale: 5.1},
+      })
+    }, 'invalid schema for type: DECIMAL, for Column: decimal_column, scale must be an integer');
+  });
+
+  it('should throw error given decimal with negative scale', function() {
+    assert.throws(() => {
+      new parquet.ParquetSchema({
+        decimal_column: {type: 'DECIMAL', precision: 6, scale: -1},
+      })
+    }, 'invalid schema for type: DECIMAL, for Column: decimal_column, scale is required to be 0 or greater');
+  });
+
+  it('should throw error given decimal with scale > precision', function() {
+    assert.throws(() => {
+      new parquet.ParquetSchema({
+        decimal_column: {type: 'DECIMAL', precision: 5, scale: 6},
+      })
+    }, 'invalid schema or precision for type: DECIMAL, for Column: decimal_column, precision must be greater than or equal to scale');
   });
 
 });
