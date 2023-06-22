@@ -22,9 +22,9 @@ const {
 const PARQUET_MAGIC = 'PAR1';
 
 /**
- * Parquet File Format Version
+ * Supported Parquet File Format Version for reading
  */
-const PARQUET_VERSION = 1;
+const PARQUET_VERSIONS = [1, 2];
 
 /**
  * Internal type used for repetition/definition levels
@@ -166,7 +166,7 @@ export class ParquetReader {
    */
   constructor(metadata: FileMetaDataExt, envelopeReader: ParquetEnvelopeReader, opts?: BufferReaderOptions) {
     opts = opts || {};
-    if (metadata.version != PARQUET_VERSION) {
+    if (!PARQUET_VERSIONS.includes(metadata.version)) {
       throw 'invalid parquet version';
     }
 
