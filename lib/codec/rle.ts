@@ -3,9 +3,9 @@
 // https://github.com/apache/parquet-format/blob/master/Encodings.md
 
 import varint from 'varint'
-import {Cursor, Options} from './types'
+import { Cursor } from './types'
 
-function encodeRunBitpacked(values: Array<number>, opts: Options) {
+function encodeRunBitpacked(values: Array<number>, opts: { bitWidth: number }) {
   for (let i = 0; i < values.length % 8; i++) {
     values.push(0);
   }
@@ -23,7 +23,7 @@ function encodeRunBitpacked(values: Array<number>, opts: Options) {
   ]);
 }
 
-function encodeRunRepeated(value: number, count: number, opts: Options) {
+function encodeRunRepeated(value: number, count: number, opts: { bitWidth: number }) {
   let buf = Buffer.alloc(Math.ceil(opts.bitWidth / 8));
   let remainingValue = value
 
@@ -48,7 +48,7 @@ function unknownToParsedInt(value: string | number) {
   }
 }
 
-export const encodeValues = function(type: string, values: Array<number>, opts: Options) {
+export const encodeValues = function(type: string, values: Array<number>, opts: { bitWidth: number, disableEnvelope?: boolean }) {
   if (!('bitWidth' in opts)) {
     throw 'bitWidth is required';
   }
@@ -108,7 +108,7 @@ export const encodeValues = function(type: string, values: Array<number>, opts: 
   return envelope;
 };
 
-function decodeRunBitpacked(cursor : Cursor, count: number, opts: Options) {
+function decodeRunBitpacked(cursor : Cursor, count: number, opts: { bitWidth: number }) {
   if (count % 8 !== 0) {
     throw 'must be a multiple of 8';
   }
@@ -124,7 +124,7 @@ function decodeRunBitpacked(cursor : Cursor, count: number, opts: Options) {
   return values;
 }
 
-function decodeRunRepeated(cursor: Cursor, count: number, opts: Options) {
+function decodeRunRepeated(cursor: Cursor, count: number, opts: { bitWidth: number }) {
   var bytesNeededForFixedBitWidth = Math.ceil(opts.bitWidth / 8);
   let value = 0;
 
@@ -139,7 +139,7 @@ function decodeRunRepeated(cursor: Cursor, count: number, opts: Options) {
   return new Array(count).fill(value);
 }
 
-export const decodeValues = function(_: string, cursor: Cursor, count: number, opts: Options) {
+export const decodeValues = function(_: string, cursor: Cursor, count: number, opts: { bitWidth: number, disableEnvelope?: boolean }) {
   if (!('bitWidth' in opts)) {
     throw 'bitWidth is required';
   }
