@@ -545,8 +545,8 @@ async function encodeDataPageV2(column: ParquetField, rowCount: number, values: 
       column.primitiveType!,
       column.encoding!,
       values, {
-        typeLength: column.typeLength,
-        bitWidth: column.typeLength
+        bitWidth: column.typeLength,
+        ...column,
       });
 
   let valuesBufCompressed = await parquet_compression.deflate(

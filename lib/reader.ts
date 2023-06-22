@@ -1021,8 +1021,8 @@ async function decodeDataPageV2(cursor: Cursor, header: parquet_thrift.PageHeade
       valuesBufCursor,
       valueCountNonNull,
       {
-        typeLength: opts.column!.typeLength!,
-        bitWidth: opts.column!.typeLength!
+        bitWidth: opts.column!.typeLength!,
+        ...opts.column!
       });
 
   return {

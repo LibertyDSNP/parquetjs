@@ -578,24 +578,46 @@ describe('Parquet', function() {
   });
 
   describe('Decimal schema', function() {
+    const schema = new parquet.ParquetSchema({
+      zero_column: { type: 'DECIMAL', precision: 10, scale: 0 },
+      no_scale_column: { type: 'DECIMAL', precision: 10 },
+      scale_64_column: { type: 'DECIMAL', precision: 10, scale: 2 },
+      scale_32_column: { type: 'DECIMAL', precision: 8, scale: 2 },
+    });
 
-    it('write a test with decimals file and read it back', async function() {
-      const file = "decimal-test.parquet";
+    const rowData = {
+      zero_column: 1,
+      no_scale_column: 2,
+      scale_64_column: 3.345678901234567,
+      scale_32_column: 3.3,
+    };
+
+    it('write a test file with decimals in v1 data page and read it back', async function() {
+      const file = "decimal-test-v1.parquet";
       const opts = { useDataPageV2: false };
-      const schema = new parquet.ParquetSchema({
-        zero_column: { type: 'DECIMAL', precision: 10, scale: 0 },
-        no_scale_column: { type: 'DECIMAL', precision: 10 },
-        scale_64_column: { type: 'DECIMAL', precision: 10, scale: 2 },
-        scale_32_column: { type: 'DECIMAL', precision: 8, scale: 2 },
-      });
       const writer = await parquet.ParquetWriter.openFile(schema, file, opts);
 
-      await writer.appendRow({
+      await writer.appendRow(rowData);
+      await writer.close();
+
+      const reader = await parquet.ParquetReader.openFile(file);
+
+      const cursor = reader.getCursor();
+      const row = await cursor.next();
+      assert.deepEqual(row, {
         zero_column: 1,
         no_scale_column: 2,
-        scale_64_column: 3.345678901234567,
+        scale_64_column: 3.34, // Scale 2
         scale_32_column: 3.3,
-      });
+      })
+    });
+
+    it('write a test file with decimals in v2 data page and read it back', async function() {
+      const file = "decimal-test-v2.parquet";
+      const opts = { useDataPageV2: true };
+      const writer = await parquet.ParquetWriter.openFile(schema, file, opts);
+
+      await writer.appendRow(rowData);
       await writer.close();
 
       const reader = await parquet.ParquetReader.openFile(file);
