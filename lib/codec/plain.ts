@@ -26,10 +26,16 @@ function decodeValues_BOOLEAN(cursor: Cursor, count: number) {
   return values;
 }
 
-function encodeValues_INT32(values: Array<number>) {
+function encodeValues_INT32(values: Array<number>, opts: Options) {
+  const isDecimal = opts?.originalType === 'DECIMAL' || opts?.column?.originalType === 'DECIMAL';
+  const scale = opts?.scale || 0;
   let buf = Buffer.alloc(4 * values.length);
   for (let i = 0; i < values.length; i++) {
-    buf.writeInt32LE(values[i], i * 4);
+    if (isDecimal) {
+      buf.writeInt32LE(values[i] *  Math.pow(10, scale), i * 4);
+    } else {
+      buf.writeInt32LE(values[i], i * 4);
+    }
   }
 
   return buf;
@@ -55,10 +61,16 @@ function decodeValues_INT32(cursor: Cursor, count: number, opts: Options) {
   return values;
 }
 
-function encodeValues_INT64(values: Array<number>) {
+function encodeValues_INT64(values: Array<number>, opts: Options) {
+  const isDecimal = opts?.originalType === 'DECIMAL' || opts?.column?.originalType === 'DECIMAL';
+  const scale = opts?.scale || 0;
   let buf = Buffer.alloc(8 * values.length);
   for (let i = 0; i < values.length; i++) {
-    buf.writeBigInt64LE(BigInt(values[i]), i * 8);
+    if (isDecimal) {
+      buf.writeBigInt64LE(BigInt(Math.floor(values[i] *  Math.pow(10, scale))), i * 8);
+    } else {
+      buf.writeBigInt64LE(BigInt(values[i]), i * 8);
+    }
   }
 
   return buf;
@@ -279,10 +291,10 @@ export const encodeValues = function (
       return encodeValues_BOOLEAN(values as Array<boolean>);
 
     case "INT32":
-      return encodeValues_INT32(values as Array<number>);
+      return encodeValues_INT32(values as Array<number>, opts);
 
     case "INT64":
-      return encodeValues_INT64(values as Array<number>);
+      return encodeValues_INT64(values as Array<number>, opts);
 
     case "INT96":
       return encodeValues_INT96(values as Array<number>);

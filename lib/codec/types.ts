@@ -5,7 +5,7 @@ import { Statistics } from "../../gen-nodejs/parquet_types";
 export interface Options {
     typeLength: number,
     bitWidth: number,
-    disableEnvelope: boolean
+    disableEnvelope?: boolean
     primitiveType?: PrimitiveType;
     originalType?: OriginalType;
     encoding?: ParquetCodec;

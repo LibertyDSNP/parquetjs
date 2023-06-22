@@ -1,5 +1,5 @@
 import stream from 'stream'
-import parquet_thrift from '../gen-nodejs/parquet_types'
+import parquet_thrift, { ConvertedType } from '../gen-nodejs/parquet_types'
 import * as parquet_shredder from './shred'
 import * as parquet_util from './util'
 import * as parquet_codec from './codec'
@@ -487,8 +487,8 @@ async function encodeDataPage(column: ParquetField, values: number[], rlevels: n
       column.primitiveType!,
       column.encoding!,
       values, {
-        typeLength: column.typeLength,
-        bitWidth: column.typeLength
+        bitWidth: column.typeLength,
+        ...column
       });
 
   /* encode repetition and definition levels */
@@ -770,6 +770,14 @@ function encodeFooter(schema: ParquetSchema, rowCount: Int64, rowGroups: RowGrou
 
     if (field.originalType) {
       schemaElem.converted_type = parquet_thrift.ConvertedType[field.originalType];
+    }
+
+    // Support Decimal
+    switch(schemaElem.converted_type) {
+      case (ConvertedType.DECIMAL):
+        schemaElem.precision = field.precision;
+        schemaElem.scale = field.scale || 0;
+        break;
     }
 
     schemaElem.type_length = field.typeLength;
