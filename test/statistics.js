@@ -150,34 +150,50 @@ describe('statistics', async function() {
     const name = await reader.envelopeReader.readColumnIndex('name', row);
     assert.deepEqual(name.min_values, ['apples','banana']);
     assert.deepEqual(name.max_values, ['oranges','banana']);
+    assert.deepEqual(name.null_pages, [false, false]);
+    assert.deepEqual(name.boundary_order, 0);
 
     const quantity = await reader.envelopeReader.readColumnIndex('quantity', row);
     assert.deepEqual(quantity.min_values, [10n, undefined]);
     assert.deepEqual(quantity.max_values, [20n, undefined]);
+    assert.deepEqual(quantity.null_pages, [false, false]);
+    assert.deepEqual(quantity.boundary_order, 0);
 
     const price = await reader.envelopeReader.readColumnIndex('price', row);
     assert.deepEqual(price.min_values, [2.6, 3.2]);
     assert.deepEqual(price.max_values, [4.2, 3.2]);
+    assert.deepEqual(price.null_pages, [false, false]);
+    assert.deepEqual(price.boundary_order, 0)
 
     const day = await reader.envelopeReader.readColumnIndex('day', row);
     assert.deepEqual(day.min_values, [ new Date('2008-11-26'), new Date('2017-11-26') ]);
     assert.deepEqual(day.max_values, [ new Date('2018-03-03'), new Date('2017-11-26') ]);
+    assert.deepEqual(day.null_pages, [false, false]);
+    assert.deepEqual(day.boundary_order, 0)
 
     const finger = await reader.envelopeReader.readColumnIndex('finger', row);
     assert.deepEqual(finger.min_values, [ Buffer.from('ABCDE'), Buffer.from('FNORD') ]);
     assert.deepEqual(finger.max_values, [ Buffer.from('XCVBN'), Buffer.from('FNORD')]);
+    assert.deepEqual(finger.null_pages, [false, false]);
+    assert.deepEqual(finger.boundary_order, 0)
 
     const stockQuantity = await reader.envelopeReader.readColumnIndex('stock,quantity', row);
     assert.deepEqual(stockQuantity.min_values, [ 10n, undefined ]);
     assert.deepEqual(stockQuantity.max_values, [ 50n, undefined ]);
+    assert.deepEqual(stockQuantity.null_pages, [false, false]);
+    assert.deepEqual(stockQuantity.boundary_order, 0)
 
     const stockWarehouse = await reader.envelopeReader.readColumnIndex('stock,warehouse', row);
     assert.deepEqual(stockWarehouse.min_values, [ 'A', undefined ]);
     assert.deepEqual(stockWarehouse.max_values, [ 'x', undefined ]);
+    assert.deepEqual(stockWarehouse.null_pages, [false, false]);
+    assert.deepEqual(stockWarehouse.boundary_order, 0)
 
     const colour = await reader.envelopeReader.readColumnIndex('colour', row);
     assert.deepEqual(colour.min_values, [ 'brown', 'yellow' ]);
     assert.deepEqual(colour.max_values, [ 'yellow', 'yellow' ]);
+    assert.deepEqual(colour.null_pages, [false, false]);
+    assert.deepEqual(colour.boundary_order, 0)
 
     const inter = await reader.envelopeReader.readColumnIndex('inter', row).catch(e => e);
     assert.equal(inter.message,'Column Index Missing');
