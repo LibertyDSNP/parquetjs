@@ -634,8 +634,11 @@ async function encodeColumnChunk(pages: Page[], opts: {column: ParquetField, bas
 
   /* compile statistics ColumnIndex and OffsetIndex*/
   let columnIndex = new parquet_thrift.ColumnIndex();
+  columnIndex.null_pages = [];
   columnIndex.max_values = [];
   columnIndex.min_values = [];
+  // Default to unordered
+  columnIndex.boundary_order = 0;
   let offsetIndex = new parquet_thrift.OffsetIndex();
   offsetIndex.page_locations = [];
 
@@ -659,6 +662,8 @@ async function encodeColumnChunk(pages: Page[], opts: {column: ParquetField, bas
       statistics.null_count.setValue(statistics.null_count.valueOf() + (page.statistics.null_count?.valueOf() || 0));
       page.distinct_values.forEach((value: unknown) => distinct_values.add(value));
 
+      // If the number of values and the count of nulls are the same, this is a null page
+      columnIndex.null_pages.push( page.num_values === statistics.null_count.valueOf() );
       columnIndex.max_values.push( encodeStatisticsValue(page.statistics.max_value, opts.column) );
       columnIndex.min_values.push( encodeStatisticsValue(page.statistics.min_value, opts.column) );
     }
