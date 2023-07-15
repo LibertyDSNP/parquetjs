@@ -129,7 +129,8 @@ var schema = new parquet.ParquetSchema.fromJsonSchema({
       "type": "number"
     },
     "date": {
-      "type": "string"
+      "type": "string",
+      "format": "date-time"
     },
     "in_stock": {
       "type": "boolean"
