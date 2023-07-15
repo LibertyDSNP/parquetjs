@@ -29,9 +29,26 @@
         }
       }
     },
+    "timestamp_array_field": {
+      "type": "LIST",
+      "optional": true,
+      "fields": {
+        "list": {
+          "repeated": true,
+          "fields": {
+            "element": {
+              "optional": true,
+              "type": "TIMESTAMP_MILLIS",
+              "encoding": "PLAIN",
+              "compression": "UNCOMPRESSED"
+            }
+          }
+        }
+      }
+    },
     "timestamp_field": {
       "optional": true,
-      "type": "UTF8",
+      "type": "TIMESTAMP_MILLIS",
       "encoding": "PLAIN",
       "compression": "UNCOMPRESSED"
     },
@@ -183,10 +200,53 @@
       },
       "originalType": "LIST"
     },
+    "timestamp_array_field": {
+      "name": "timestamp_array_field",
+      "path": [
+        "timestamp_array_field"
+      ],
+      "repetitionType": "OPTIONAL",
+      "rLevelMax": 0,
+      "dLevelMax": 1,
+      "isNested": true,
+      "fieldCount": 1,
+      "fields": {
+        "list": {
+          "name": "list",
+          "path": [
+            "timestamp_array_field",
+            "list"
+          ],
+          "repetitionType": "REPEATED",
+          "rLevelMax": 1,
+          "dLevelMax": 2,
+          "isNested": true,
+          "fieldCount": 1,
+          "fields": {
+            "element": {
+              "name": "element",
+              "primitiveType": "INT64",
+              "originalType": "TIMESTAMP_MILLIS",
+              "path": [
+                "timestamp_array_field",
+                "list",
+                "element"
+              ],
+              "repetitionType": "OPTIONAL",
+              "encoding": "PLAIN",
+              "compression": "UNCOMPRESSED",
+              "rLevelMax": 1,
+              "dLevelMax": 3
+            }
+          }
+        }
+      },
+      "originalType": "LIST"
+    },
     "timestamp_field": {
       "name": "timestamp_field",
-      "primitiveType": "BYTE_ARRAY",
-      "originalType": "UTF8",
+      "primitiveType": "INT64",
+      "originalType": "TIMESTAMP_MILLIS",
       "path": [
         "timestamp_field"
       ],
@@ -529,9 +589,96 @@
       "dLevelMax": 3
     },
     {
+      "name": "timestamp_array_field",
+      "path": [
+        "timestamp_array_field"
+      ],
+      "repetitionType": "OPTIONAL",
+      "rLevelMax": 0,
+      "dLevelMax": 1,
+      "isNested": true,
+      "fieldCount": 1,
+      "fields": {
+        "list": {
+          "name": "list",
+          "path": [
+            "timestamp_array_field",
+            "list"
+          ],
+          "repetitionType": "REPEATED",
+          "rLevelMax": 1,
+          "dLevelMax": 2,
+          "isNested": true,
+          "fieldCount": 1,
+          "fields": {
+            "element": {
+              "name": "element",
+              "primitiveType": "INT64",
+              "originalType": "TIMESTAMP_MILLIS",
+              "path": [
+                "timestamp_array_field",
+                "list",
+                "element"
+              ],
+              "repetitionType": "OPTIONAL",
+              "encoding": "PLAIN",
+              "compression": "UNCOMPRESSED",
+              "rLevelMax": 1,
+              "dLevelMax": 3
+            }
+          }
+        }
+      },
+      "originalType": "LIST"
+    },
+    {
+      "name": "list",
+      "path": [
+        "timestamp_array_field",
+        "list"
+      ],
+      "repetitionType": "REPEATED",
+      "rLevelMax": 1,
+      "dLevelMax": 2,
+      "isNested": true,
+      "fieldCount": 1,
+      "fields": {
+        "element": {
+          "name": "element",
+          "primitiveType": "INT64",
+          "originalType": "TIMESTAMP_MILLIS",
+          "path": [
+            "timestamp_array_field",
+            "list",
+            "element"
+          ],
+          "repetitionType": "OPTIONAL",
+          "encoding": "PLAIN",
+          "compression": "UNCOMPRESSED",
+          "rLevelMax": 1,
+          "dLevelMax": 3
+        }
+      }
+    },
+    {
+      "name": "element",
+      "primitiveType": "INT64",
+      "originalType": "TIMESTAMP_MILLIS",
+      "path": [
+        "timestamp_array_field",
+        "list",
+        "element"
+      ],
+      "repetitionType": "OPTIONAL",
+      "encoding": "PLAIN",
+      "compression": "UNCOMPRESSED",
+      "rLevelMax": 1,
+      "dLevelMax": 3
+    },
+    {
       "name": "timestamp_field",
-      "primitiveType": "BYTE_ARRAY",
-      "originalType": "UTF8",
+      "primitiveType": "INT64",
+      "originalType": "TIMESTAMP_MILLIS",
       "path": [
         "timestamp_field"
       ],
