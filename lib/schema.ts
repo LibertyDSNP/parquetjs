@@ -146,7 +146,7 @@ function buildFields(schema: SchemaDefinition, rLevelParentMax?: number, dLevelP
       nameWithPath = `${path}.${nameWithPath}`
     }
 
-    const typeDef = opts.type ? parquet_types.PARQUET_LOGICAL_TYPES[opts.type] : undefined;
+    const typeDef = opts.type ? parquet_types.getParquetTypeDataObject(opts.type, opts) : undefined;
     if (!typeDef) {
       fieldErrors.push(`Invalid parquet type: ${(opts.type || "missing type")}, for Column: ${nameWithPath}`);
       continue;
@@ -172,7 +172,7 @@ function buildFields(schema: SchemaDefinition, rLevelParentMax?: number, dLevelP
     if (typeDef.originalType === 'DECIMAL') {
       // Default scale to 0 per https://github.com/apache/parquet-format/blob/master/LogicalTypes.md#decimal
       if (typeof opts.scale === "undefined") opts.scale = 0;
-      fieldErrors = fieldErrors.concat(errorsForDecimalOpts(typeDef.originalType, opts, nameWithPath));
+      fieldErrors = fieldErrors.concat(errorsForDecimalOpts(typeDef.originalType, typeDef.primitiveType, opts, nameWithPath));
     }
 
     /* add to schema */
@@ -219,7 +219,7 @@ function isDefined<T>(val: T | undefined): val is T {
   return val !== undefined;
 }
 
-function errorsForDecimalOpts(type: string, opts: FieldDefinition, columnName: string): string[] {
+function errorsForDecimalOpts(type: string, primitiveType: string | undefined, opts: FieldDefinition, columnName: string): string[] {
   const fieldErrors = []
   if(opts.precision === undefined || opts.precision < 1) {
     fieldErrors.push(
@@ -231,9 +231,9 @@ function errorsForDecimalOpts(type: string, opts: FieldDefinition, columnName: s
       `invalid schema for type: ${type}, for Column: ${columnName}, precision must be an integer`
     );
   }
-  else if (opts.precision > 18) {
+  else if (primitiveType === "INT64" && opts.precision > 18) {
     fieldErrors.push(
-      `invalid schema for type: ${type}, for Column: ${columnName}, can not handle precision over 18`
+      `invalid schema for type: ${type} and primitive type: ${primitiveType} for Column: ${columnName}, can not handle precision over 18`
     );
   }
   if (typeof opts.scale === "undefined" || opts.scale < 0) {
@@ -246,8 +246,7 @@ function errorsForDecimalOpts(type: string, opts: FieldDefinition, columnName: s
       `invalid schema for type: ${type}, for Column: ${columnName}, scale must be an integer`
     );
   }
-  // Default precision to 18 if it is undefined as that is a different error
-  else if (opts.scale > (opts.precision || 18)) {
+  else if (opts.precision !== undefined && opts.scale > opts.precision) {
     fieldErrors.push(
       `invalid schema or precision for type: ${type}, for Column: ${columnName}, precision must be greater than or equal to scale`
     );

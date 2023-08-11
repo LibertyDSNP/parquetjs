@@ -6,7 +6,7 @@ import * as parquet_codec from './codec'
 import * as parquet_compression from './compression'
 import * as parquet_types from './types'
 import * as bloomFilterWriter from "./bloomFilterIO/bloomFilterWriter"
-import { WriterOptions, ParquetCodec, ParquetField, ColumnMetaDataExt, RowGroupExt, Page } from './declare'
+import { WriterOptions, ParquetCodec, ParquetField, ColumnMetaDataExt, RowGroupExt, Page, FieldDefinition } from './declare'
 import { Options } from './codec/types'
 import { ParquetSchema } from './schema'
 import Int64 from 'node-int64'
@@ -386,7 +386,7 @@ function encodeStatisticsValue(value: any, column: ParquetField | Options) {
     return Buffer.alloc(0);
   }
   if (column.originalType) {
-    value = parquet_types.toPrimitive(column.originalType,value);
+    value = parquet_types.toPrimitive(column.originalType, column as FieldDefinition, value);
   }
   if (column.primitiveType !== 'BYTE_ARRAY') {
     value = encodeValues(column.primitiveType!,'PLAIN',[value],column);

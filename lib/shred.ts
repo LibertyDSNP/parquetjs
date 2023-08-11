@@ -151,7 +151,7 @@ function shredRecordInternal(fields: Record<string, ParquetField>, record: Recor
             field.dLevelMax);
       } else {
         data[path].distinct_values!.add(values[i]);
-        data[path].values!.push(parquet_types.toPrimitive(fieldType as string, values[i]));
+        data[path].values!.push(parquet_types.toPrimitive(fieldType as string, field, values[i]));
         data[path].rlevels!.push(rlvl_i);
         data[path].dlevels!.push(field.dLevelMax);
         data[path].count! += 1;
@@ -205,6 +205,7 @@ export const materializeRecords = function(schema: ParquetSchema, buffer: Record
       if (dLevel === field.dLevelMax) {
         value = parquet_types.fromPrimitive(
             field.originalType || field.primitiveType,
+            field,
             values.next().value);
       }
 

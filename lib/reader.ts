@@ -720,7 +720,7 @@ function decodeStatisticsValue(value: any, column: ParquetField | Options) {
   }
 
   if (column.originalType) {
-    value = parquet_types.fromPrimitive(column.originalType, value);
+    value = parquet_types.fromPrimitive(column.originalType, column as FieldDefinition, value);
   }
   return value;
 }

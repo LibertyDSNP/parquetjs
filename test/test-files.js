@@ -20,6 +20,11 @@ describe('test-files', function() {
     return records;
   }
 
+  async function readSchema(file) {
+    const reader = await parquet.ParquetReader.openFile(path.join(__dirname, 'test-files', file));
+    return reader.getSchema();
+  }
+
   function bufferToString(d) {
     if (d instanceof Buffer) {
       return d.toString();
@@ -132,5 +137,55 @@ describe('test-files', function() {
       {'bhello':'people','f':3,'i32':3,'i64':3n,'hello':'people'},
       {'bhello':'you','f':4,'i32':4,'i64':4n,'hello':'you'}
     ]);
+  });
+
+  it('fixed_length_decimal.parquet loads', async function () {
+    const schema = await readSchema('fixed_length_decimal.parquet');
+    const data = await readData('fixed_length_decimal.parquet');
+
+    const scale = schema.fields["value"].scale;
+    assert.equal(scale, 2);
+    const divider = 10 ** scale;
+    
+    for (let i = 0; i < data.length; i++) {
+      const valueToMatch = i + 1;
+      // Decimal values whose primitive types are fixed length byte array will
+      // be returned as raw buffer values.
+      // For the test data, the actual decimal values are small enough so we can
+      // take the last 3 bytes of the buffer and compare the values.
+      // In reality, the user will need to use a more novel approach to parse the
+      // buffer to an object that can handle large fractional numbers.
+      const lastThreeBytes = data[i].value.slice(-3);
+      const numericalValue = (lastThreeBytes[0] * 0x10000 + lastThreeBytes[1] * 0x100 ** 1 + lastThreeBytes[2]) / divider;
+      assert.equal(numericalValue, valueToMatch);
+    }
+  });
+  
+  it('byte_array_decimal.parquet loads', async function () {
+    const schema = await readSchema('byte_array_decimal.parquet');
+    const data = await readData('byte_array_decimal.parquet');
+    
+    const scale = schema.fields["value"].scale;
+    assert.equal(scale, 2);
+    const divider = 10 ** scale;
+
+    for (let i = 0; i < data.length; i++) {
+      const valueToMatch = i + 1;
+      // Decimal values whose primitive types are byte array will
+      // be returned as raw buffer values.
+      // For the test data, the actual decimal values and the corresponding buffer lengths 
+      // are small enough so we can treat the buffer as a positive integer and compare the values.
+      // In reality, the user will need to use a more novel approach to parse the
+      // buffer to an object that can handle large fractional numbers.
+      const bytes = data[i].value;
+      let decimalValue = 0;
+      for (let j = 0; j < bytes.length; j++) {
+        decimalValue = decimalValue * 0x100;
+        const nextByte = bytes[j];
+        decimalValue = decimalValue + nextByte;
+      }
+      decimalValue = decimalValue / divider;
+      assert.equal(decimalValue, valueToMatch);
+    }
   });
 });
