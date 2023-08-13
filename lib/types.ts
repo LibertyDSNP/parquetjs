@@ -1,7 +1,8 @@
 'use strict';
 // Thanks to https://github.com/kbajalc/parquets for some of the code.
 import * as BSON from "bson"
-import { PrimitiveType, OriginalType, ParquetType, FieldDefinition } from "./declare"
+import { PrimitiveType, OriginalType, ParquetType, FieldDefinition, ParquetField } from "./declare"
+import { Options } from "./codec/types";
 
 type ParquetTypeDataObject = {
   primitiveType?: PrimitiveType,
@@ -17,7 +18,7 @@ interface INTERVAL {
   milliseconds: number
 }
 
-export function getParquetTypeDataObject(type: ParquetType, fieldDef: FieldDefinition): ParquetTypeDataObject {
+export function getParquetTypeDataObject(type: ParquetType, fieldDef: ParquetField | Options | FieldDefinition): ParquetTypeDataObject {
   if (type === 'DECIMAL') {
     if (fieldDef.typeLength !== undefined) {
       return {
@@ -233,7 +234,7 @@ function isParquetType(type: string | undefined): type is ParquetType {
  * Convert a value from it's native representation to the internal/underlying
  * primitive type
  */
-export function toPrimitive(type: string | undefined, field: FieldDefinition, value: unknown) {
+export function toPrimitive(type: string | undefined, field: ParquetField | Options, value: unknown) {
   if (!isParquetType(type)) {
     throw 'invalid type: ' + type || "undefined";
   }
@@ -245,7 +246,7 @@ export function toPrimitive(type: string | undefined, field: FieldDefinition, va
  * Convert a value from it's internal/underlying primitive representation to
  * the native representation
  */
-export function fromPrimitive(type: string | undefined, field: FieldDefinition, value: unknown) {
+export function fromPrimitive(type: string | undefined, field: ParquetField | Options, value: unknown) {
   if (!isParquetType(type)) {
     throw 'invalid type: ' + type || "undefined";
   }
