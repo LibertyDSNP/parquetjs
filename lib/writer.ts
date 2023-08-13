@@ -386,7 +386,7 @@ function encodeStatisticsValue(value: any, column: ParquetField | Options) {
     return Buffer.alloc(0);
   }
   if (column.originalType) {
-    value = parquet_types.toPrimitive(column.originalType, column, value);
+    value = parquet_types.toPrimitive(column.originalType, value, column);
   }
   if (column.primitiveType !== 'BYTE_ARRAY') {
     value = encodeValues(column.primitiveType!,'PLAIN',[value],column);

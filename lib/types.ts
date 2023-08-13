@@ -18,20 +18,20 @@ interface INTERVAL {
   milliseconds: number
 }
 
-export function getParquetTypeDataObject(type: ParquetType, fieldDef: ParquetField | Options | FieldDefinition): ParquetTypeDataObject {
+export function getParquetTypeDataObject(type: ParquetType, field?: ParquetField | Options | FieldDefinition): ParquetTypeDataObject {
   if (type === 'DECIMAL') {
-    if (fieldDef.typeLength !== undefined) {
+    if (field?.typeLength !== undefined) {
       return {
         primitiveType: 'FIXED_LEN_BYTE_ARRAY',
         originalType: 'DECIMAL',
-        typeLength: fieldDef.typeLength,
+        typeLength: field.typeLength,
         toPrimitive: toPrimitive_FIXED_LEN_BYTE_ARRAY_DECIMAL
       };
-    } else if (fieldDef.precision !== undefined && fieldDef.precision > 18) {
+    } else if (field?.precision !== undefined && field.precision > 18) {
       return {
         primitiveType: 'BYTE_ARRAY',
         originalType: 'DECIMAL',
-        typeLength: fieldDef.typeLength,
+        typeLength: field.typeLength,
         toPrimitive: toPrimitive_BYTE_ARRAY_DECIMAL
       };
     } else {
@@ -234,11 +234,10 @@ function isParquetType(type: string | undefined): type is ParquetType {
  * Convert a value from it's native representation to the internal/underlying
  * primitive type
  */
-export function toPrimitive(type: string | undefined, field: ParquetField | Options, value: unknown) {
+export function toPrimitive(type: string | undefined, value: unknown, field?: ParquetField | Options) {
   if (!isParquetType(type)) {
     throw 'invalid type: ' + type || "undefined";
   }
-
   return getParquetTypeDataObject(type, field).toPrimitive(value);
 }
 
@@ -246,7 +245,7 @@ export function toPrimitive(type: string | undefined, field: ParquetField | Opti
  * Convert a value from it's internal/underlying primitive representation to
  * the native representation
  */
-export function fromPrimitive(type: string | undefined, field: ParquetField | Options, value: unknown) {
+export function fromPrimitive(type: string | undefined, value: unknown, field?: ParquetField | Options) {
   if (!isParquetType(type)) {
     throw 'invalid type: ' + type || "undefined";
   }
