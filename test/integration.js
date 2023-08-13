@@ -583,6 +583,8 @@ describe('Parquet', function() {
       no_scale_column: { type: 'DECIMAL', precision: 10 },
       scale_64_column: { type: 'DECIMAL', precision: 10, scale: 2 },
       scale_32_column: { type: 'DECIMAL', precision: 8, scale: 2 },
+      fixed_length_column: { type: 'DECIMAL', typeLength: 4, precision: 20, scale: 2},
+      non_fixed_length_column: { type: 'DECIMAL', precision: 20, scale: 2},
     });
 
     const rowData = {
@@ -590,6 +592,8 @@ describe('Parquet', function() {
       no_scale_column: 2,
       scale_64_column: 3.345678901234567,
       scale_32_column: 3.3,
+      fixed_length_column: Buffer.from([0x0, 0x0, 0x0, 0x64]), // 0x64 = 100 = 1 * 10 ** 2 = value * 10 ** scale
+      non_fixed_length_column: Buffer.from([[0x64]]), // 0x64 = 100 = 1 * 10 ** 2 = value * 10 ** scale
     };
 
     it('write a test file with decimals in v1 data page and read it back', async function() {
@@ -609,6 +613,8 @@ describe('Parquet', function() {
         no_scale_column: 2,
         scale_64_column: 3.34, // Scale 2
         scale_32_column: 3.3,
+        fixed_length_column: Buffer.from([0x0, 0x0, 0x0, 0x64]),
+        non_fixed_length_column: Buffer.from([0x64])
       })
     });
 
@@ -629,6 +635,8 @@ describe('Parquet', function() {
         no_scale_column: 2,
         scale_64_column: 3.34, // Scale 2
         scale_32_column: 3.3,
+        fixed_length_column: Buffer.from([0x0, 0x0, 0x0, 0x64]),
+        non_fixed_length_column: Buffer.from([0x64])
       })
     });
   });
