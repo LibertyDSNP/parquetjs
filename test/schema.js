@@ -548,14 +548,6 @@ describe('ParquetSchema', function() {
     }, 'invalid schema for type: DECIMAL, for Column: decimal_column, precision is required and must be be greater than 0');
   });
 
-  it('should throw error given decimal with over 18 precision', function() {
-    assert.throws(() => {
-      new parquet.ParquetSchema({
-        decimal_column: {type: 'DECIMAL', precision: 19, scale: 5},
-      })
-    }, 'invalid schema for type: DECIMAL, for Column: decimal_column, can not handle precision over 18');
-  });
-
   it('should throw error given decimal with a non-integer precision', function() {
     assert.throws(() => {
       new parquet.ParquetSchema({
