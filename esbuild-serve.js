@@ -11,7 +11,7 @@ require('esbuild')
       }, {
         entryPoints: ['parquet.ts'],
         outfile: 'main.js',
-        define: {"process.env.NODE_DEBUG": false, "process.env.NODE_ENV": "\"production\"", global: "window" },
+        define: {"process.env.NODE_DEBUG": "false", "process.env.NODE_ENV": "\"production\"", global: "window" },
         platform: 'browser',
         plugins: [compressionBrowserPlugin,wasmPlugin],
         sourcemap: "external",

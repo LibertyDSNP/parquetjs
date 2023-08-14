@@ -6,7 +6,7 @@ const baseConfig = {
     bundle: true,
     entryPoints: ['parquet.ts'],
     define: {
-        "process.env.NODE_DEBUG": false,
+        "process.env.NODE_DEBUG": "false",
         "process.env.NODE_ENV": "\"production\"",
         global: "window"
     },
@@ -21,7 +21,7 @@ const testConfig = {
     bundle: true,
     entryPoints: ['test/browser/main.ts'],
     define: {
-        "process.env.NODE_DEBUG": false,
+        "process.env.NODE_DEBUG": "false",
         "process.env.NODE_ENV": "\"production\"",
         global: "window"
     },
@@ -61,6 +61,7 @@ Promise.all(targets.map(esbuild.build))
     })
     .catch(e => {
         console.error("Finished with errors: ", e.toString());
+        process.exit(1);
     });
 
 
