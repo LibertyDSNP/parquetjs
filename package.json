@@ -80,7 +80,7 @@
     "zlib": "browserify-zlib"
   },
   "engines": {
-    "node": ">=16.15.1"
+    "node": ">=18.18.2"
   },
   "files": [
     "dist/**/*",
