@@ -21,7 +21,7 @@ This is a forked repository with code from various sources:
 - Secondary source [ZJONSSON](https://github.com/ZJONSSON/parquetjs) [npm: parquetjs-lite](https://www.npmjs.com/package/parquetjs-lite)
 
 ## Installation
-_parquet.js requires node.js >= 14.16.0_
+_parquet.js requires node.js >= 18.18.2_
 
 ```
   $ npm install @dsnp/parquetjs
