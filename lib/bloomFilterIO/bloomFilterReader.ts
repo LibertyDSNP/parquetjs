@@ -1,8 +1,8 @@
 import * as parquet_util from "../util";
 import parquet_thrift from "../../gen-nodejs/parquet_types";
+import sbbf from "../bloom/sbbf";
 import { ParquetEnvelopeReader } from "../reader"
 import { ColumnChunkData } from "../declare";
-import sbbf from "../bloom/sbbf";
 
 const filterColumnChunksWithBloomFilters = (
   columnChunkDataCollection: Array<ColumnChunkData>

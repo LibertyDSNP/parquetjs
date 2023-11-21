@@ -4,9 +4,10 @@ import parquet from "../parquet";
 import parquet_thrift from "../gen-nodejs/parquet_types";
 import {decodeThrift} from "../lib/util";
 import SplitBlockBloomFilter from "../lib/bloom/sbbf";
+
 const TEST_VTIME = new Date();
 
-const TEST_FILE= '/tmp/fruits-bloomfilter.parquet'
+const TEST_FILE = '/tmp/fruits-bloomfilter.parquet'
 
 type BloomFilterColumnData = {
   sbbf: SplitBlockBloomFilter,
@@ -41,9 +42,9 @@ const sampleColumnHeaders = async (filename: string) => {
 describe("bloom filter", async function () {
   let row: any;
   let reader: any;
-  let bloomFilters: Record<string,Array<BloomFilterColumnData>>;
+  let bloomFilters: Record<string, Array<BloomFilterColumnData>>;
 
-  describe("non-nested", () => {
+  describe("a nested schema", () => {
     const schema = new parquet.ParquetSchema({
       name: {type: "UTF8"},
       quantity: {type: "INT64", optional: true},
@@ -200,9 +201,9 @@ describe("bloom filter", async function () {
       );
     })
   });
-  describe("nested list schema with bloom filters", () => {
+  describe("a simple schema with a nested list", () => {
     const nestedListSchema = new parquet.ParquetSchema({
-      name: { type: "UTF8"},
+      name: {type: "UTF8"},
       querystring: {
         type: "LIST",
         fields: {
@@ -223,21 +224,21 @@ describe("bloom filter", async function () {
 
     it("can be written, read and checked", async () => {
       const file = "/tmp/issue-98.parquet";
-      const nestedListFilterColumn =  "querystring,list,element,key";
+      const nestedListFilterColumn = "querystring,list,element,key";
       const writer = await parquet.ParquetWriter.openFile(nestedListSchema, file, {
         bloomFilters: [
-          { column: "name" },
-          { column: nestedListFilterColumn },
+          {column: "name"},
+          {column: nestedListFilterColumn},
         ],
       });
 
       await writer.appendRow({
-        name:  "myquery",
+        name: "myquery",
         querystring: {
           list: [
-            { element: {key: "foo", value: "bar" } },
-            { element: {key: "foo2", value: "bar2" } },
-            { element: {key: "foo3", value: "bar3" } }
+            {element: {key: "foo", value: "bar"}},
+            {element: {key: "foo2", value: "bar2"}},
+            {element: {key: "foo3", value: "bar3"}}
           ]
         }
       });

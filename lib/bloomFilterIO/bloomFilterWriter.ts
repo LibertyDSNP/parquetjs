@@ -2,7 +2,7 @@ import * as parquet_util from "../util";
 import parquet_thrift from "../../gen-nodejs/parquet_types";
 import SplitBlockBloomFilter from "../bloom/sbbf";
 
-import { Block } from "../declare";
+import {Block} from "../declare";
 import Int64 from 'node-int64'
 
 export type createSBBFParams = {
@@ -13,7 +13,7 @@ export type createSBBFParams = {
 };
 
 export const createSBBF = (params: createSBBFParams): SplitBlockBloomFilter => {
-  const { numFilterBytes, falsePositiveRate, numDistinct } = params;
+  const {numFilterBytes, falsePositiveRate, numDistinct} = params;
 
   const bloomFilter = new SplitBlockBloomFilter();
 
@@ -73,5 +73,5 @@ export const getSerializedBloomFilterData = (
   const filterBlocks = splitBlockBloomFilter.getFilter();
   const filterByteSize = splitBlockBloomFilter.getNumFilterBytes();
 
-  return serializeFilterData({ filterBlocks, filterByteSize });
+  return serializeFilterData({filterBlocks, filterByteSize});
 };
