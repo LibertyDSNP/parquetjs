@@ -92,7 +92,7 @@ class ParquetCursor  {
     this.rowGroupIndex = 0;
     this.cursorIndex = 0;
   }
-}
+};
 
 /**
  * A parquet reader allows retrieving the rows from a parquet file in order.
@@ -264,8 +264,8 @@ export class ParquetReader {
         columnList);
   }
 
-  async getBloomFiltersFor(paths: Array<string>) {
-    const bloomFilterData = await getBloomFiltersFor(paths, this.envelopeReader!);
+  async getBloomFiltersFor(columnNames: string[]) {
+    const bloomFilterData = await getBloomFiltersFor(columnNames, this.envelopeReader!);
     return bloomFilterData.reduce((acc: Record<string, typeof bloomFilterData>, value) => {
       if (acc[value.columnName]) acc[value.columnName].push(value)
       else acc[value.columnName] = [value]
@@ -1053,7 +1053,7 @@ function decodeSchema(schemaElements: Array<parquet_thrift.SchemaElement>) {
       case 'REPEATED':
         repeated = true;
         break;
-    }
+    };
 
     if (schemaElement.num_children != undefined && schemaElement.num_children > 0) {
       (schema as SchemaDefinition)[schemaElement.name] = {

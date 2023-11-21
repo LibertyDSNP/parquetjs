@@ -62,15 +62,15 @@ describe("bloom filter", async function () {
         pageSize: 3,
         bloomFilters: [
           {
-            path: "name",
+            column: "name",
             numFilterBytes: 1024,
           },
           {
-            path: "quantity",
+            column: "quantity",
             numFilterBytes: 1024,
           },
           {
-            path: "stock,warehouse",
+            column: "stock,warehouse",
             numFilterBytes: 1024,
           }
         ],
@@ -221,8 +221,8 @@ describe("bloom filter", async function () {
       const nestedListFilterColumn =  "querystring,list,element,key";
       const writer = await parquet.ParquetWriter.openFile(nestedListSchema, file, {
         bloomFilters: [
-          { path: "name" },
-          { path: nestedListFilterColumn },
+          { column: "name" },
+          { column: nestedListFilterColumn },
         ],
       });
 

@@ -9,7 +9,7 @@ export type createSBBFParams = {
   numFilterBytes?: number;
   falsePositiveRate?: number;
   numDistinct?: number;
-  path?: any;
+  column?: any;
 };
 
 export const createSBBF = (params: createSBBFParams): SplitBlockBloomFilter => {
