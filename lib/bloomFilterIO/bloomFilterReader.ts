@@ -3,14 +3,6 @@ import parquet_thrift from "../../gen-nodejs/parquet_types";
 import { ParquetEnvelopeReader } from "../reader"
 import { ColumnChunkData } from "../declare";
 import sbbf from "../bloom/sbbf";
-import SplitBlockBloomFilter from "../bloom/sbbf";
-
-// TODO: maybe move this somewhere else?
-export type BloomFilterColumnData = {
-  sbbf: SplitBlockBloomFilter,
-  columnName: string,
-  rowGroupIndex: number,
-}
 
 const filterColumnChunksWithBloomFilters = (
   columnChunkDataCollection: Array<ColumnChunkData>

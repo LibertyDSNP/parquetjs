@@ -259,7 +259,6 @@ export class ParquetEnvelopeWriter {
   writeBloomFilters() {
     this.rowGroups.forEach(group => {
       group.columns.forEach(column => {
-        // new
         if (!column.meta_data) { return }
         if (!column.meta_data.path_in_schema.length) { return }
 
@@ -270,16 +269,6 @@ export class ParquetEnvelopeWriter {
 
         bloomFilterWriter.setFilterOffset(column, this.offset);
 
-        // old
-        // const columnName = column.meta_data?.path_in_schema[0];
-        // if (!columnName || columnName in this.bloomFilters === false) return;
-        //
-        // const serializedBloomFilterData =
-        //   bloomFilterWriter.getSerializedBloomFilterData(this.bloomFilters[columnName]);
-        //
-        // bloomFilterWriter.setFilterOffset(column, this.offset);
-
-        // end changes
         this.writeSection(serializedBloomFilterData);
       });
     });
@@ -430,7 +419,6 @@ async function encodePages(schema: ParquetSchema, rowBuffer: parquet_shredder.Re
 
     let page;
 
-    // new
     const columnPath = field.path.join(',');
     const values = rowBuffer.columnData![columnPath];
 
@@ -438,15 +426,6 @@ async function encodePages(schema: ParquetSchema, rowBuffer: parquet_shredder.Re
       const splitBlockBloomFilter = opts.bloomFilters[columnPath];
       values.values!.forEach(v => splitBlockBloomFilter.insert(v));
     }
-
-    // old
-    // const values = rowBuffer.columnData![field.path.join(',')];
-    //
-    // if (opts.bloomFilters && (field.name in opts.bloomFilters)) {
-    //   const splitBlockBloomFilter = opts.bloomFilters[field.name];
-    //   values.values!.forEach(v => splitBlockBloomFilter.insert(v));
-    // }
-    // end changes
 
     let statistics: parquet_thrift.Statistics = {};
     if (field.statistics !== false) {

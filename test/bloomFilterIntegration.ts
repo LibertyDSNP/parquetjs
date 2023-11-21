@@ -1,13 +1,18 @@
 import {assert} from "chai";
 import parquet from "../parquet";
-import SplitBlockBloomFilter from "../lib/bloom/sbbf";
-import {BloomFilterColumnData} from "../lib/bloomFilterIO/bloomFilterReader";
 
 import parquet_thrift from "../gen-nodejs/parquet_types";
 import {decodeThrift} from "../lib/util";
+import SplitBlockBloomFilter from "../lib/bloom/sbbf";
 const TEST_VTIME = new Date();
 
 const TEST_FILE= '/tmp/fruits-bloomfilter.parquet'
+
+type BloomFilterColumnData = {
+  sbbf: SplitBlockBloomFilter,
+  columnName: string,
+  rowGroupIndex: number,
+}
 
 const sampleColumnHeaders = async (filename: string) => {
   let reader = await parquet.ParquetReader.openFile(filename);
