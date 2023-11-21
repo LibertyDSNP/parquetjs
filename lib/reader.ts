@@ -676,7 +676,6 @@ export class ParquetEnvelopeReader {
       this.fileSize = await this.fileSize();
     }
 
-    // After the changes, thinks the fruits.parquet filesize is 4???
     let trailerLen = PARQUET_MAGIC.length + 4;
 
     let trailerBuf = await this.read((this.fileSize as number) - trailerLen, trailerLen);

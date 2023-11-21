@@ -130,7 +130,6 @@ export const fread = function(fd: number, position: number | null, length: numbe
   return new Promise((resolve, reject) => {
     fs.read(fd, buffer, 0, length, position, (err, bytesRead, buf) => {
       if (err || bytesRead != length) {
-        // TODO: fruits.parquet read is failing here b/c length = 8 and bytesRead = 4
         reject(err || Error('read failed'));
       } else {
         resolve(buf);

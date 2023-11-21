@@ -12,7 +12,6 @@ const {expect} = require("chai");
 
 const TEST_NUM_ROWS = 10000;
 const TEST_VTIME =  new Date();
-const TEST_FILE_PATH = '/tmp/integration-tests.parquet';
 
 function mkTestSchema(opts) {
   return new parquet.ParquetSchema({
@@ -103,7 +102,7 @@ function mkTestRows(opts) {
 async function writeTestFile(opts) {
   let schema = mkTestSchema(opts);
 
-  let writer = await parquet.ParquetWriter.openFile(schema, TEST_FILE_PATH, opts);
+  let writer = await parquet.ParquetWriter.openFile(schema, 'fruits.parquet', opts);
   writer.setMetadata("myuid", "420");
   writer.setMetadata("fnord", "dronf");
 
@@ -139,7 +138,7 @@ async function writeTestStream(opts) {
 }
 
 async function sampleColumnHeaders() {
-  let reader = await parquet.ParquetReader.openFile(TEST_FILE_PATH);
+  let reader = await parquet.ParquetReader.openFile('fruits.parquet');
   let column = reader.metadata.row_groups[0].columns[0];
   let buffer = await reader.envelopeReader.read(+column.meta_data.data_page_offset, +column.meta_data.total_compressed_size);
 
@@ -157,7 +156,15 @@ async function sampleColumnHeaders() {
     pages.push(pageHeader);
     cursor.offset += pageHeader.compressed_page_size;
   }
+
   return {column, pages};
+}
+
+async function verifyBloomFilterOffset() {
+  const headers = await sampleColumnHeaders();
+  const { column: { meta_data: { bloom_filter_offset } } } = headers;
+
+  assert.equal(parseInt(bloom_filter_offset), 4106725);
 }
 
 async function verifyPages() {
@@ -194,7 +201,7 @@ async function verifyStatistics() {
 }
 
 async function readTestFile() {
-  let reader = await parquet.ParquetReader.openFile(TEST_FILE_PATH);
+  let reader = await parquet.ParquetReader.openFile('fruits.parquet');
   assert.equal(reader.getRowCount(), TEST_NUM_ROWS * 4);
   assert.deepEqual(reader.getMetadata(), { "myuid": "420", "fnord": "dronf" })
 
@@ -369,7 +376,7 @@ async function readTestFile() {
   reader.close();
 }
 
-describe('Parquet integration', function() {
+describe('Parquet', function() {
   this.timeout(60000);
 
 
@@ -415,6 +422,10 @@ describe('Parquet integration', function() {
     it('write a test file and then read it back', function() {
       const opts = { useDataPageV2: true, pageSize: 2000, compression: 'UNCOMPRESSED', bloomFilters };
       return writeTestFile(opts).then(readTestFile);
+    });
+
+    it('verify that bloom filter offset is set', function() {
+      return verifyBloomFilterOffset();
     });
   });
 
@@ -477,14 +488,14 @@ describe('Parquet integration', function() {
       const schema = new parquet.ParquetSchema({
         data: { type: 'BYTE_ARRAY', compression: opts.compression },
       });
-      let writer = await parquet.ParquetWriter.openFile(schema, TEST_FILE_PATH, opts);
+      let writer = await parquet.ParquetWriter.openFile(schema, 'fruits.parquet', opts);
       writer.setMetadata("myuid", "420");
       writer.setMetadata("fnord", "dronf");
 
       await writer.appendRow({ data: Uint8Array.from([12345,365]), });
       await writer.close();
 
-      let reader = await parquet.ParquetReader.openFile(TEST_FILE_PATH);
+      let reader = await parquet.ParquetReader.openFile('fruits.parquet');
       assert.equal(reader.getRowCount(), 1);
       assert.deepEqual(reader.getMetadata(), { "myuid": "420", "fnord": "dronf" })
 
@@ -511,7 +522,7 @@ describe('Parquet integration', function() {
         const schema = new parquet.ParquetSchema({
           data: { type: 'BYTE_ARRAY', compression: opts.compression },
         });
-        let writer = await parquet.ParquetWriter.openFile(schema, '/tmp/unsupported-typed-array.parquet', opts);
+        let writer = await parquet.ParquetWriter.openFile(schema, 'fruits.parquet', opts);
         let gotError = false
         try {
           await writer.appendRow(row);
@@ -527,7 +538,6 @@ describe('Parquet integration', function() {
   });
 
   describe('using the Stream/Transform API', function() {
-    const testFile = '/tmp/fruits-stream.parquet';
 
     it('write a test file', async function() {
       const opts = { useDataPageV2: true, compression: 'GZIP' };
@@ -536,7 +546,7 @@ describe('Parquet integration', function() {
       transform.writer.setMetadata("myuid", "420");
       transform.writer.setMetadata("fnord", "dronf");
 
-      var ostream = fs.createWriteStream(testFile);
+      var ostream = fs.createWriteStream('fruits_stream.parquet');
       let istream = objectStream.fromArray(mkTestRows());
       istream.pipe(transform).pipe(ostream);
     });
@@ -548,7 +558,7 @@ describe('Parquet integration', function() {
       transform.writer.setMetadata("myuid", "420");
       transform.writer.setMetadata("fnord", "dronf");
 
-      var ostream = fs.createWriteStream(testFile);
+      var ostream = fs.createWriteStream('fruits_stream.parquet');
       let testRows = mkTestRows();
       testRows[4].quantity = 'N/A';
       let istream = objectStream.fromArray(testRows);
@@ -587,7 +597,7 @@ describe('Parquet integration', function() {
     };
 
     it('write a test file with decimals in v1 data page and read it back', async function() {
-      const file = "/tmp/decimal-test-v1.parquet";
+      const file = "decimal-test-v1.parquet";
       const opts = { useDataPageV2: false };
       const writer = await parquet.ParquetWriter.openFile(schema, file, opts);
 
@@ -609,7 +619,7 @@ describe('Parquet integration', function() {
     });
 
     it('write a test file with decimals in v2 data page and read it back', async function() {
-      const file = "/tmp/decimal-test-v2.parquet";
+      const file = "decimal-test-v2.parquet";
       const opts = { useDataPageV2: true };
       const writer = await parquet.ParquetWriter.openFile(schema, file, opts);
 

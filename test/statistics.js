@@ -3,7 +3,6 @@ const chai = require('chai');
 const assert = chai.assert;
 const parquet = require('../parquet');
 const TEST_VTIME =  new Date();
-const TEST_FILE='fruits-statistics.parquet';
 
 const schema = new parquet.ParquetSchema({
   name:       { type: 'UTF8' },
@@ -30,7 +29,7 @@ describe('statistics', async function() {
   let row, reader;
 
   before(async function(){
-    let writer = await parquet.ParquetWriter.openFile(schema, TEST_FILE, {pageSize: 3});
+    let writer = await parquet.ParquetWriter.openFile(schema, 'fruits-statistics.parquet', {pageSize: 3});
 
     await writer.appendRow({
       name: 'apples',
@@ -90,7 +89,7 @@ describe('statistics', async function() {
     });
 
     await writer.close();
-    reader = await parquet.ParquetReader.openFile(TEST_FILE);
+    reader = await parquet.ParquetReader.openFile('fruits-statistics.parquet');
     row = reader.metadata.row_groups[0];
   });
 
@@ -204,8 +203,7 @@ describe('statistics', async function() {
   });
 
   it('Setting pageIndex: false results in no column_index and no offset_index', async function() {
-    let testFile = '/tmp/fruits-no-index.parquet';
-    let writer = await parquet.ParquetWriter.openFile(schema, testFile, {pageSize: 3, pageIndex: false});
+    let writer = await parquet.ParquetWriter.openFile(schema, 'fruits-no-index.parquet', {pageSize: 3, pageIndex: false});
     await writer.appendRow({
       name: 'apples',
       quantity: 10n,
@@ -223,7 +221,7 @@ describe('statistics', async function() {
     });
     await writer.close();
 
-    let reader2 = await parquet.ParquetReader.openFile(testFile);
+    let reader2 = await parquet.ParquetReader.openFile('fruits-no-index.parquet');
     reader2.metadata.row_groups[0].columns.forEach(column => {
       assert.equal(column.offset_index_offset, null);
       assert.equal(column.offset_index_length, null);

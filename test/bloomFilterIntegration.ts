@@ -247,13 +247,5 @@ describe("bloom filter", async function () {
       const foo2IsThere = await bfForNestedList.check("foo2");
       assert(foo2IsThere);
     })
-
-    // TODO:  this one is failing
-    it('bfIntegration: verify that bloom filter offset is set', async () => {
-      const headers = await sampleColumnHeaders("test/test-files/fruits.parquet");
-      console.log({headers})
-      const bloom_filter_offset = headers.column?.meta_data?.bloom_filter_offset || 0;
-      assert.equal(bloom_filter_offset, 4106725);
-    });
   })
 });
