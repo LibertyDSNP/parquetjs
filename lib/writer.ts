@@ -220,7 +220,7 @@ export class ParquetEnvelopeWriter {
     this.bloomFilters = {};
 
     (opts.bloomFilters || []).forEach(bloomOption => {
-      this.bloomFilters[bloomOption.column] = bloomFilterWriter.createSBBF(bloomOption)
+        this.bloomFilters[bloomOption.path] = bloomFilterWriter.createSBBF(bloomOption)
     });
   }
 
@@ -259,6 +259,19 @@ export class ParquetEnvelopeWriter {
   writeBloomFilters() {
     this.rowGroups.forEach(group => {
       group.columns.forEach(column => {
+        // if (!column.meta_data) { return }
+        // if (!column.meta_data.path_in_schema.length) { return }
+        //
+        // const filterName = column.meta_data?.path_in_schema.join(',');
+        // if (!(filterName in this.bloomFilters)) { return; }
+        // const serializedBloomFilterData =
+        //   bloomFilterWriter.getSerializedBloomFilterData(this.bloomFilters[filterName]);
+        //
+        // console.log("offset: ", this.offset.valueOf());
+        // bloomFilterWriter.setFilterOffset(column, this.offset);
+        // console.log({serializedBloomFilterData})
+
+
         const columnName = column.meta_data?.path_in_schema[0];
         if (!columnName || columnName in this.bloomFilters === false) return;
 
@@ -416,6 +429,13 @@ async function encodePages(schema: ParquetSchema, rowBuffer: parquet_shredder.Re
     }
 
     let page;
+    // const columnPath = field.path.join(',');
+    // const values = rowBuffer.columnData![columnPath];
+    //
+    // if (opts.bloomFilters && (columnPath in opts.bloomFilters)) {
+    //   const splitBlockBloomFilter = opts.bloomFilters[columnPath];
+    //   values.values!.forEach(v => splitBlockBloomFilter.insert(v));
+    // }
     const values = rowBuffer.columnData![field.path.join(',')];
 
     if (opts.bloomFilters && (field.name in opts.bloomFilters)) {

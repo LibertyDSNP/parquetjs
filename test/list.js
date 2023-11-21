@@ -11,7 +11,22 @@ const parquet = require('../parquet');
   The Athena schema for this test is `id string, test (array<struct<a:string,b:string>>)`
   but instead of input data `{id: 'Row1', test: [{a: 'test1', b: 1}, {a: 'test2', b: 2}, {a: 'test3', b: 3}]}`
   we need to wrap the data inside `list` and every element inside `element`, i.e:
+  `{id: 'Row1', test: {list: [{element: {a:'test1
+  This test creates a test file that has an annotated LIST wrapper that works with AWS Athena
+  Currently the schema (and the input data) needs to follow the specification for an annotated list
+
+  The Athena schema for this test is `id string, test (array<struct<a:string,b:string>>)`
+  but instead of input data `{id: 'Row1', test: [{a: 'test1', b: 1}, {a: 'test2', b: 2}, {a: 'test3', b: 3}]}`
+  we need to wrap the data inside `list` and every element inside `element`, i.e:
   `{id: 'Row1', test: {list: [{element: {a:'test1', b:1}}, {element: { a: 'test2', b: 2}}, {element: {a: 'test3', b: 3}}]}`
+  and the schema needs to match this structure as well (see listSchema below)
+
+  To see a working example on Athena, run this test and copy the list.parquet file to an s3 bucket.
+
+  In Athena create the listTest table with the following command:
+
+  CREATE EXTERNAL TABLE `listTest`(
+    id', b:1}}, {element: { a: 'test2', b: 2}}, {element: {a: 'test3', b: 3}}]}`
   and the schema needs to match this structure as well (see listSchema below)
 
   To see a working example on Athena, run this test and copy the list.parquet file to an s3 bucket.
@@ -34,6 +49,8 @@ const parquet = require('../parquet');
   And verify that Athena parses the parquet file correctly by `SELECT * from listTest`
 */
 
+const TEST_FILE = '/tmp/list.parquet';
+const TEST_LIST_ARRAY_FILE = '/tmp/list-array.parquet'
 describe('struct list', async function () {
   let reader;
 
@@ -68,13 +85,13 @@ describe('struct list', async function () {
   };
 
   before(async function () {
-    let writer = await parquet.ParquetWriter.openFile(listStructSchema, 'list.parquet', { pageSize: 100 });
+    let writer = await parquet.ParquetWriter.openFile(listStructSchema, TEST_FILE, { pageSize: 100 });
 
     writer.appendRow(row1);
     writer.appendRow(row2);
 
     await writer.close();
-    reader = await parquet.ParquetReader.openFile('list.parquet');
+    reader = await parquet.ParquetReader.openFile(TEST_FILE);
   });
 
   it('schema is encoded correctly', async function () {
@@ -124,13 +141,13 @@ describe('array list', async function () {
   };
 
   before(async function () {
-    let writer = await parquet.ParquetWriter.openFile(listArraySchema, 'list-array.parquet', { pageSize: 100 });
+    let writer = await parquet.ParquetWriter.openFile(listArraySchema, TEST_LIST_ARRAY_FILE, { pageSize: 100 });
 
     writer.appendRow(row1);
     writer.appendRow(row2);
 
     await writer.close();
-    reader = await parquet.ParquetReader.openFile('list-array.parquet');
+    reader = await parquet.ParquetReader.openFile(TEST_LIST_ARRAY_FILE);
   });
 
   it('schema is encoded correctly', async function () {

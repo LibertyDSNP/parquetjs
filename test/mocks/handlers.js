@@ -9,12 +9,12 @@ const rangeHandle = rest.get(
   "http://fruits-bloomfilter.parquet",
   async (req, res, ctx) => {
     const fd = fs.openSync(
-      path.resolve(__dirname, "../../fruits-bloomfilter.parquet"),
+      path.resolve('/tmp', 'fruits-bloomfilter.parquet'),
       "r"
     );
 
     const { size: fileSize } = await fsPromises.stat(
-      path.resolve(__dirname, "../../fruits-bloomfilter.parquet")
+      path.resolve('/tmp', "fruits-bloomfilter.parquet")
     );
 
     const rangeHeader = req.headers.get("range");

@@ -153,7 +153,7 @@ describe("Json Schema Conversion Test File", async function () {
   let reader: ParquetReader;
 
   before(async function () {
-    const filename = 'json-schema-test-file.parquet';
+    const filename = '/tmp/json-schema-test-file.parquet';
     const writer = await ParquetWriter.openFile(parquetSchema, filename);
     await writer.appendRow(row1);
     await writer.close();

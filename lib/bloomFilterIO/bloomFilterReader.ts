@@ -1,8 +1,16 @@
 import * as parquet_util from "../util";
 import parquet_thrift from "../../gen-nodejs/parquet_types";
-import sbbf from "../bloom/sbbf";
 import { ParquetEnvelopeReader } from "../reader"
 import { ColumnChunkData } from "../declare";
+import sbbf from "../bloom/sbbf";
+import SplitBlockBloomFilter from "../bloom/sbbf";
+
+// TODO: maybe move this somewhere else?
+export type BloomFilterColumnData = {
+  sbbf: SplitBlockBloomFilter,
+  columnName: string,
+  rowGroupIndex: number,
+}
 
 const filterColumnChunksWithBloomFilters = (
   columnChunkDataCollection: Array<ColumnChunkData>
@@ -117,11 +125,11 @@ export const siftAllByteOffsets = (
 };
 
 export const getBloomFiltersFor = async (
-  columnNames: Array<string>,
+  paths: Array<string>,
   envelopeReader: InstanceType<typeof ParquetEnvelopeReader>
 ) => {
   const columnChunkDataCollection = envelopeReader.getAllColumnChunkDataFor(
-    columnNames
+    paths
   );
   const bloomFilterOffsetData = siftAllByteOffsets(columnChunkDataCollection);
   const offsetByteValues = bloomFilterOffsetData.map(
