@@ -7,7 +7,7 @@ import SplitBlockBloomFilter from "../lib/bloom/sbbf";
 
 const TEST_VTIME = new Date();
 
-const TEST_FILE = '/tmp/fruits-bloomfilter.parquet'
+const TEST_FILE = 'fruits-bloomfilter.parquet'
 
 type BloomFilterColumnData = {
   sbbf: SplitBlockBloomFilter,
