@@ -267,10 +267,7 @@ export class ParquetEnvelopeWriter {
   writeBloomFilters() {
     this.rowGroups.forEach(group => {
       group.columns.forEach(column => {
-        if (!column.meta_data) {
-          return
-        }
-        if (!column.meta_data.path_in_schema.length) {
+        if (!column.meta_data?.path_in_schema.length) {
           return
         }
 
