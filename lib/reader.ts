@@ -25,6 +25,9 @@ import {
   ColumnChunkExt
 } from './declare';
 import {Cursor, Options} from './codec/types';
+import { GetObjectCommand, HeadObjectCommand, S3Client, GetObjectCommandInput } from "@aws-sdk/client-s3";
+import { Readable } from "stream";
+import { Blob } from "buffer";
 
 const {
   getBloomFiltersFor,
@@ -137,13 +140,23 @@ export class ParquetReader {
   }
 
   /**
-   * Open the parquet file from S3 using the supplied aws client and params
-   * The params have to include `Bucket` and `Key` to the file requested
-   * This function returns a new parquet reader
+   * Open the parquet file from S3 using the supplied aws client [, commands] and params
+   * The params have to include `Bucket` and `Key` to the file requested,
+   * If using v3 of the AWS SDK, combine the client and commands into an object wiht keys matching
+   * the original module names, and do not instantiate the commands; pass them as classes/modules.
+   *
+   * This function returns a new parquet reader [ or throws an Error.]
    */
-  static async openS3(client: ClientS3, params: ClientParameters, options?: BufferReaderOptions) {
-    let envelopeReader = await ParquetEnvelopeReader.openS3(client, params, options);
-    return this.openEnvelopeReader(envelopeReader, options);
+  static async openS3(client: any, params: ClientParameters, options?: BufferReaderOptions) {
+    try {
+      let envelopeReader: ParquetEnvelopeReader =
+        'function' === typeof client['headObject'] ?
+          await ParquetEnvelopeReader.openS3(client as ClientS3, params, options) :// S3 client v2
+          await ParquetEnvelopeReader.openS3v3(client as S3Client, params, options) ; // S3 client v3
+      return this.openEnvelopeReader(envelopeReader, options);
+    } catch (e: any) {
+      throw new Error(`Error accessing S3 Bucket ${params.Bucket}. Message: ${e.message}`);
+    }
   }
 
   /**
@@ -446,6 +459,55 @@ export class ParquetEnvelopeReader {
     let closeFn = () => ({});
 
     return new ParquetEnvelopeReader(readFn, closeFn, fileStat, options);
+  }
+
+  static async openS3v3(client: S3Client, params: any, options: any) {
+    const fileStat = async () => {
+      try {
+        let headObjectCommand = await client.send(new HeadObjectCommand(params));
+        return Promise.resolve(headObjectCommand.ContentLength);
+      }
+      catch (e: any){
+        // having params match command names makes e.message clear to user
+        return Promise.reject("rejected headObjectCommand: " + e.message);
+      }
+    }
+
+    const readFn = async (offset: number, length: number, file: string|undefined): Promise<Buffer> => {
+      if (file) {
+        return Promise.reject("external references are not supported");
+      }
+      const Range = `bytes=${offset}-${offset+length-1}`;
+      const response = await client.send(new GetObjectCommand({ ...{ Range }, ...params }));
+
+      const body = response.Body;
+      if (body) {
+        return ParquetEnvelopeReader.streamToBuffer(body);
+      }
+      return Buffer.of();
+    };
+
+    let closeFn = () => ({});
+
+    return new ParquetEnvelopeReader(readFn, closeFn, fileStat, options);
+  }
+
+  static async streamToBuffer(body: any): Promise<Buffer> {
+    const blob = body as Blob;
+    if (blob.arrayBuffer !== undefined) {
+      const arrayBuffer = await blob.arrayBuffer();
+      const uint8Array: Uint8Array = new Uint8Array(arrayBuffer);
+      return new Buffer(uint8Array);
+    }
+
+    //Assumed to be a Readable like object
+    const readable = body as Readable;
+    return await new Promise((resolve, reject) => {
+      const chunks: Uint8Array[] = [];
+      readable.on("data", (chunk) => chunks.push(chunk));
+      readable.on("error", reject);
+      readable.on("end", () => resolve(Buffer.concat(chunks)));
+    });
   }
 
   static async openUrl(url: Parameter | URL | string, options?: BufferReaderOptions) {

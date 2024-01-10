@@ -34,7 +34,7 @@ describe("ParquetReader", () => {
           price: 2.6,
           day: new Date("2017-11-26"),
           finger: Buffer.from("FNORD"),
-          inter: { months: 10, days: 5, milliseconds: 777 },
+          inter: {months: 10, days: 5, milliseconds: 777},
           colour: ["green", "red"],
         }
       );
@@ -47,7 +47,7 @@ describe("ParquetReader", () => {
           price: 2.7,
           day: new Date("2018-03-03"),
           finger: Buffer.from("ABCDE"),
-          inter: { months: 42, days: 23, milliseconds: 777 },
+          inter: {months: 42, days: 23, milliseconds: 777},
           colour: ["orange"],
         }
       );
@@ -60,7 +60,7 @@ describe("ParquetReader", () => {
           price: 4.2,
           day: new Date("2008-11-26"),
           finger: Buffer.from("XCVBN"),
-          inter: { months: 60, days: 1, milliseconds: 99 },
+          inter: {months: 60, days: 1, milliseconds: 99},
           colour: ["green", "brown", "yellow"],
           stock: [
             {
@@ -82,7 +82,7 @@ describe("ParquetReader", () => {
           price: 3.2,
           day: new Date("2017-11-26"),
           finger: Buffer.from("FNORD"),
-          inter: { months: 1, days: 15, milliseconds: 888 },
+          inter: {months: 1, days: 15, milliseconds: 888},
           colour: ["yellow"],
           meta_json: {
             shape: "curved",
@@ -97,7 +97,7 @@ describe("ParquetReader", () => {
   describe("#asyncIterator", () => {
     it("responds to for await", async () => {
       const reader = await parquet.ParquetReader.openFile(
-        path.join(__dirname,'test-files','fruits.parquet')
+        path.join(__dirname, 'test-files', 'fruits.parquet')
       );
 
       let counter = 0;
@@ -109,23 +109,33 @@ describe("ParquetReader", () => {
     })
   });
 
-    describe("#handleDecimal", () => {
-        it("loads parquet with columns configured as DECIMAL", async () => {
-            const reader = await parquet.ParquetReader.openFile(
-                path.join(__dirname,'test-files','valid-decimal-columns.parquet')
-            );
+  describe("#handleDecimal", () => {
+    it("loads parquet with columns configured as DECIMAL", async () => {
+      const reader = await parquet.ParquetReader.openFile(
+        path.join(__dirname, 'test-files', 'valid-decimal-columns.parquet')
+      );
 
-            const data = []
-            for await(const record of reader) {
-                data.push(record)
-            }
+      const data = []
+      for await(const record of reader) {
+        data.push(record)
+      }
 
-            assert.equal(data.length, 4);
-            assert.equal(data[0].over_9_digits, 118.0297106);
-            assert.equal(data[1].under_9_digits, 18.7106);
-            // handling null values
-            assert.equal(data[2].over_9_digits, undefined);
-            assert.equal(data[2].under_9_digits, undefined);
-        })
+      assert.equal(data.length, 4);
+      assert.equal(data[0].over_9_digits, 118.0297106);
+      assert.equal(data[1].under_9_digits, 18.7106);
+      // handling null values
+      assert.equal(data[2].over_9_digits, undefined);
+      assert.equal(data[2].under_9_digits, undefined);
+    })
+  });
+
+  describe('#openS3', () => {
+
+    describe("S3V2",() => {});
+    describe("S3V3",() => {
+      it('works', async () => {
+
+      })
     });
+  });
 });
