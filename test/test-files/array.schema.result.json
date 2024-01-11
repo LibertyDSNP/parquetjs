@@ -9,7 +9,7 @@
           "fields": {
             "element": {
               "optional": true,
-              "type": "INT64",
+              "type": "DOUBLE",
               "encoding": "PLAIN",
               "compression": "UNCOMPRESSED"
             }
@@ -61,7 +61,7 @@
           "fields": {
             "element": {
               "name": "element",
-              "primitiveType": "INT64",
+              "primitiveType": "DOUBLE",
               "path": [
                 "numberArray",
                 "list",
@@ -148,7 +148,7 @@
           "fields": {
             "element": {
               "name": "element",
-              "primitiveType": "INT64",
+              "primitiveType": "DOUBLE",
               "path": [
                 "numberArray",
                 "list",
@@ -179,7 +179,7 @@
       "fields": {
         "element": {
           "name": "element",
-          "primitiveType": "INT64",
+          "primitiveType": "DOUBLE",
           "path": [
             "numberArray",
             "list",
@@ -195,7 +195,7 @@
     },
     {
       "name": "element",
-      "primitiveType": "INT64",
+      "primitiveType": "DOUBLE",
       "path": [
         "numberArray",
         "list",
