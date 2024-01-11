@@ -329,12 +329,12 @@ var schema = new parquet.ParquetSchema({
 The Parquet hybrid run length and bitpacking encoding allows to compress runs
 of numbers very efficiently. Note that the RLE encoding can only be used in
 combination with the `BOOLEAN`, `INT32` and `INT64` types. The RLE encoding
-requires an additional `bitWidth` parameter that contains the maximum number of
+requires an additional `typeLength` parameter that contains the maximum number of
 bits required to store the largest value of the field.
 
 ``` js
 var schema = new parquet.ParquetSchema({
-  age: { type: 'UINT_32', encoding: 'RLE', bitWidth: 7 },
+  age: { type: 'UINT_32', encoding: 'RLE', typeLength: 7 },
 });
 ```
 

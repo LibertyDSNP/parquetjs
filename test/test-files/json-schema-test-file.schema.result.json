@@ -12,6 +12,12 @@
       "encoding": "PLAIN",
       "compression": "UNCOMPRESSED"
     },
+    "number_field": {
+      "optional": true,
+      "type": "DOUBLE",
+      "encoding": "PLAIN",
+      "compression": "UNCOMPRESSED"
+    },
     "array_field": {
       "type": "LIST",
       "optional": true,
@@ -150,6 +156,18 @@
       "primitiveType": "INT64",
       "path": [
         "int_field"
+      ],
+      "repetitionType": "OPTIONAL",
+      "encoding": "PLAIN",
+      "compression": "UNCOMPRESSED",
+      "rLevelMax": 0,
+      "dLevelMax": 1
+    },
+    "number_field": {
+      "name": "number_field",
+      "primitiveType": "DOUBLE",
+      "path": [
+        "number_field"
       ],
       "repetitionType": "OPTIONAL",
       "encoding": "PLAIN",
@@ -494,6 +512,18 @@
       "primitiveType": "INT64",
       "path": [
         "int_field"
+      ],
+      "repetitionType": "OPTIONAL",
+      "encoding": "PLAIN",
+      "compression": "UNCOMPRESSED",
+      "rLevelMax": 0,
+      "dLevelMax": 1
+    },
+    {
+      "name": "number_field",
+      "primitiveType": "DOUBLE",
+      "path": [
+        "number_field"
       ],
       "repetitionType": "OPTIONAL",
       "encoding": "PLAIN",
