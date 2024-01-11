@@ -6,11 +6,25 @@ import * as parquet_schema from './schema';
 import * as parquet_codec from './codec';
 import * as parquet_compression from './compression';
 import * as parquet_types from './types';
-import BufferReader , { BufferReaderOptions } from './bufferReader';
+import BufferReader, {BufferReaderOptions} from './bufferReader';
 import * as bloomFilterReader from './bloomFilterIO/bloomFilterReader';
 import fetch from 'cross-fetch';
-import { ParquetCodec, Parameter,PageData, SchemaDefinition, ParquetType, FieldDefinition, ParquetField, ClientS3, ClientParameters, FileMetaDataExt, NewPageHeader, RowGroupExt, ColumnChunkExt } from './declare';
-import { Cursor, Options } from './codec/types';
+import {
+  ParquetCodec,
+  Parameter,
+  PageData,
+  SchemaDefinition,
+  ParquetType,
+  FieldDefinition,
+  ParquetField,
+  ClientS3,
+  ClientParameters,
+  FileMetaDataExt,
+  NewPageHeader,
+  RowGroupExt,
+  ColumnChunkExt
+} from './declare';
+import {Cursor, Options} from './codec/types';
 
 const {
   getBloomFiltersFor,
@@ -35,7 +49,7 @@ const PARQUET_RDLVL_ENCODING = 'RLE';
 /**
  * A parquet cursor is used to retrieve rows from a parquet file in order
  */
-class ParquetCursor  {
+class ParquetCursor {
 
   metadata: FileMetaDataExt;
   envelopeReader: ParquetEnvelopeReader;
@@ -44,13 +58,14 @@ class ParquetCursor  {
   rowGroup: Array<unknown>;
   rowGroupIndex: number;
   cursorIndex: number;
+
   /**
    * Create a new parquet reader from the file metadata and an envelope reader.
    * It is usually not recommended to call this constructor directly except for
    * advanced and internal use cases. Consider using getCursor() on the
    * ParquetReader instead
    */
-  constructor( metadata: FileMetaDataExt, envelopeReader: ParquetEnvelopeReader, schema: parquet_schema.ParquetSchema, columnList: Array<Array<unknown>>) {
+  constructor(metadata: FileMetaDataExt, envelopeReader: ParquetEnvelopeReader, schema: parquet_schema.ParquetSchema, columnList: Array<Array<unknown>>) {
     this.metadata = metadata;
     this.envelopeReader = envelopeReader;
     this.schema = schema;
@@ -72,9 +87,9 @@ class ParquetCursor  {
       }
 
       let rowBuffer = await this.envelopeReader.readRowGroup(
-          this.schema,
-          this.metadata.row_groups[this.rowGroupIndex],
-          this.columnList);
+        this.schema,
+        this.metadata.row_groups[this.rowGroupIndex],
+        this.columnList);
 
       this.rowGroup = parquet_shredder.materializeRecords(this.schema, rowBuffer);
       this.rowGroupIndex++;
@@ -363,7 +378,7 @@ export class ParquetReader {
   }
 
   decodePages(buffer: Buffer, opts: Options) {
-    return decodePages(buffer,opts);
+    return decodePages(buffer, opts);
   }
 
 }
@@ -375,6 +390,7 @@ export class ParquetReader {
  * rows from a parquet file use the ParquetReader instead
  */
 let ParquetEnvelopeReaderIdCounter = 0;
+
 export class ParquetEnvelopeReader {
   readFn: (offset: number, length: number, file?: string) => Promise<Buffer>;
   close: () => unknown;
@@ -393,7 +409,7 @@ export class ParquetEnvelopeReader {
         return Promise.reject('external references are not supported');
       }
 
-      return  parquet_util.fread(fileDescriptor, offset, length);
+      return parquet_util.fread(fileDescriptor, offset, length);
     };
 
     let closeFn = parquet_util.fclose.bind(undefined, fileDescriptor);
@@ -407,7 +423,7 @@ export class ParquetEnvelopeReader {
         return Promise.reject('external references are not supported');
       }
 
-      return Promise.resolve(buffer.slice(offset,offset+length));
+      return Promise.resolve(buffer.slice(offset, offset + length));
     };
 
     let closeFn = () => ({});
@@ -415,7 +431,7 @@ export class ParquetEnvelopeReader {
   }
 
   static async openS3(client: ClientS3, params: ClientParameters, options?: BufferReaderOptions) {
-    let fileStat = async () => client.headObject(params).promise().then((d: {ContentLength: number}) => d.ContentLength);
+    let fileStat = async () => client.headObject(params).promise().then((d: { ContentLength: number }) => d.ContentLength);
 
     let readFn = async (offset: number, length: number, file?: string) => {
       if (file) {

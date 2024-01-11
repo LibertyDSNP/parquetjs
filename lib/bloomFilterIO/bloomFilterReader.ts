@@ -117,11 +117,11 @@ export const siftAllByteOffsets = (
 };
 
 export const getBloomFiltersFor = async (
-  columnNames: Array<string>,
+  paths: Array<string>,
   envelopeReader: InstanceType<typeof ParquetEnvelopeReader>
 ) => {
   const columnChunkDataCollection = envelopeReader.getAllColumnChunkDataFor(
-    columnNames
+    paths
   );
   const bloomFilterOffsetData = siftAllByteOffsets(columnChunkDataCollection);
   const offsetByteValues = bloomFilterOffsetData.map(

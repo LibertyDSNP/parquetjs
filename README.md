@@ -21,7 +21,7 @@ This is a forked repository with code from various sources:
 - Secondary source [ZJONSSON](https://github.com/ZJONSSON/parquetjs) [npm: parquetjs-lite](https://www.npmjs.com/package/parquetjs-lite)
 
 ## Installation
-_parquet.js requires node.js >= 14.16.0_
+_parquet.js requires node.js >= 18.18.2_
 
 ```
   $ npm install @dsnp/parquetjs
@@ -329,12 +329,12 @@ var schema = new parquet.ParquetSchema({
 The Parquet hybrid run length and bitpacking encoding allows to compress runs
 of numbers very efficiently. Note that the RLE encoding can only be used in
 combination with the `BOOLEAN`, `INT32` and `INT64` types. The RLE encoding
-requires an additional `bitWidth` parameter that contains the maximum number of
+requires an additional `typeLength` parameter that contains the maximum number of
 bits required to store the largest value of the field.
 
 ``` js
 var schema = new parquet.ParquetSchema({
-  age: { type: 'UINT_32', encoding: 'RLE', bitWidth: 7 },
+  age: { type: 'UINT_32', encoding: 'RLE', typeLength: 7 },
 });
 ```
 
