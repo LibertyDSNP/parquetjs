@@ -58,6 +58,7 @@ describe("Json Schema Conversion Test File", async function () {
     "properties": {
       "string_field": { "type": "string" },
       "int_field": { "type": "integer" },
+      "number_field": { "type": "number" },
       "array_field": {
         "type": "array",
         "items": { "type": "string" },
@@ -118,6 +119,7 @@ describe("Json Schema Conversion Test File", async function () {
   const row1 = {
     string_field: 'string value',
     int_field: 10n,
+    number_field: 2.5,
     timestamp_array_field: { list: [{ element: new Date("2023-01-01 GMT") }] },
 
     timestamp_field: new Date("2023-01-01 GMT"),

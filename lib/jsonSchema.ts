@@ -69,8 +69,9 @@ const fromJsonSchemaArray = (fieldValue: SupportedJSONSchema4, optionalFieldList
             }
             return fields.createListField('UTF8', optionalFieldList);
         case 'integer':
-        case 'number':
             return fields.createListField('INT64', optionalFieldList);
+        case 'number':
+            return fields.createListField('DOUBLE', optionalFieldList);
         case 'boolean':
             return fields.createListField('BOOLEAN', optionalFieldList);
         case 'object':
@@ -96,8 +97,9 @@ const fromJsonSchemaField = (jsonSchema: JSONSchema4) => (fieldName: string, fie
             }
             return fields.createStringField(optional);
         case 'integer':
-        case 'number':
             return fields.createIntField(64, optional);
+        case 'number':
+            return fields.createDoubleField(optional);
         case 'boolean':
             return fields.createBooleanField(optional);
         case 'array':
