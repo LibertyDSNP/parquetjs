@@ -146,7 +146,7 @@ describe('test-files', function() {
     const scale = schema.fields["value"].scale;
     assert.equal(scale, 2);
     const divider = 10 ** scale;
-    
+
     for (let i = 0; i < data.length; i++) {
       const valueToMatch = i + 1;
       // Decimal values whose primitive types are fixed length byte array will
@@ -160,11 +160,11 @@ describe('test-files', function() {
       assert.equal(numericalValue, valueToMatch);
     }
   });
-  
+
   it('byte_array_decimal.parquet loads', async function () {
     const schema = await readSchema('byte_array_decimal.parquet');
     const data = await readData('byte_array_decimal.parquet');
-    
+
     const scale = schema.fields["value"].scale;
     assert.equal(scale, 2);
     const divider = 10 ** scale;
@@ -173,7 +173,7 @@ describe('test-files', function() {
       const valueToMatch = i + 1;
       // Decimal values whose primitive types are byte array will
       // be returned as raw buffer values.
-      // For the test data, the actual decimal values and the corresponding buffer lengths 
+      // For the test data, the actual decimal values and the corresponding buffer lengths
       // are small enough so we can treat the buffer as a positive integer and compare the values.
       // In reality, the user will need to use a more novel approach to parse the
       // buffer to an object that can handle large fractional numbers.
@@ -188,4 +188,23 @@ describe('test-files', function() {
       assert.equal(decimalValue, valueToMatch);
     }
   });
+
+  describe("RLE", function () {
+    // Tracked in https://github.com/LibertyDSNP/parquetjs/issues/113
+    it.skip('rle_boolean_encoding.parquet loads', async function() {
+      const data = await readData('rle/rle_boolean_encoding.parquet');
+      assert.deepEqual(data[0],{ datatype_boolean: true });
+      assert.deepEqual(data[1],{ datatype_boolean: false });
+    });
+
+    it('rle-dict-snappy-checksum.parquet loads', async function() {
+      const data = await readData('rle/rle-dict-snappy-checksum.parquet');
+      assert.deepEqual(data[0],{ binary_field: "c95e263a-f5d4-401f-8107-5ca7146a1f98", long_field: "0" });
+    });
+
+    it('rle-dict-uncompressed-corrupt-checksum.parquet loads', async function() {
+      const data = await readData('rle/rle-dict-uncompressed-corrupt-checksum.parquet');
+      assert.deepEqual(data[0],{ binary_field: "6325c32b-f417-41aa-9e02-9b8601542aff", long_field: "0" });
+    });
+  })
 });
