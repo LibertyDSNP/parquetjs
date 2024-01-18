@@ -109,7 +109,7 @@ describe('test-files', function() {
 
   it('test-converted-type-null.parquet loads', async function() {
     const data = await readData('test-converted-type-null.parquet');
-    assert.deepEqual(data,[{foo: 'bar'},{}]);
+    assert.deepEqual(data,[{foo: 'bar'},{foo: null}]);
   });
 
   it('test-enum-type.parquet loads', async function() {
@@ -119,12 +119,20 @@ describe('test-files', function() {
 
   it('test-null-dictionary.parquet loads', async function() {
     const data = await readData('test-null-dictionary.parquet');
-    assert.deepEqual(data,[].concat.apply([{}],[...Array(3)].map( () => ([{foo: 'bar'}, {foo: 'baz'}]))));
+    assert.deepEqual(
+      data,
+      [
+        { foo: null },
+        { foo: 'bar' }, { foo: 'baz' },
+        { foo: 'bar' }, { foo: 'baz' },
+        { foo: 'bar' }, { foo: 'baz' }
+      ]
+    );
   });
 
   it('test-null.parquet loads', async function() {
     const data = await readData('test-null.parquet');
-    assert.deepEqual(data,[{foo: 1, bar: 2},{foo: 1}]);
+    assert.deepEqual(data,[{foo: 1, bar: 2},{foo: 1, bar: null}]);
   });
 
   it('test.parquet loads', async function() {

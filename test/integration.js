@@ -303,7 +303,8 @@ async function readTestFile() {
           { quantity: [10n], warehouse: "A" },
           { quantity: [20n], warehouse: "B" }
         ],
-        colour: [ 'green', 'red' ]
+        colour: [ 'green', 'red' ],
+        meta_json: null,
       });
 
       assert.deepEqual(await cursor.next(), {
@@ -317,11 +318,13 @@ async function readTestFile() {
         stock: [
           { quantity: [50n, 33n], warehouse: "X" }
         ],
-        colour: [ 'orange' ]
+        colour: [ 'orange' ],
+        meta_json: null,
       });
 
       assert.deepEqual(await cursor.next(), {
         name: 'kiwi',
+        quantity: null,
         price: 4.2,
         day: new Date('2017-11-26'),
         date: new Date(TEST_VTIME + 8000 * i),
@@ -337,11 +340,13 @@ async function readTestFile() {
 
       assert.deepEqual(await cursor.next(), {
         name: 'banana',
+        quantity: null,
         price: 3.2,
         day: new Date('2017-11-26'),
         date: new Date(TEST_VTIME + 6000 * i),
         finger: Buffer.from("FNORD"),
         inter: { months: 42, days: 23, milliseconds: 777 },
+        stock: null,
         colour: [ 'yellow' ],
         meta_json: { shape: 'curved' }
       });
@@ -366,8 +371,8 @@ async function readTestFile() {
     for (let i = 0; i < TEST_NUM_ROWS; ++i) {
       assert.deepEqual(await cursor.next(), { name: 'apples', quantity: 10n });
       assert.deepEqual(await cursor.next(), { name: 'oranges', quantity: 20n });
-      assert.deepEqual(await cursor.next(), { name: 'kiwi' });
-      assert.deepEqual(await cursor.next(), { name: 'banana' });
+      assert.deepEqual(await cursor.next(), { name: 'kiwi', quantity: null });
+      assert.deepEqual(await cursor.next(), { name: 'banana', quantity: null });
     }
 
     assert.equal(await cursor.next(), null);

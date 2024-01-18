@@ -498,11 +498,11 @@ describe('ParquetShredder', function() {
 
     assert.deepEqual(
         records[2],
-        { name: "kiwi", price: 99.0 });
+        { name: "kiwi", price: 99.0, stock: null });
 
     assert.deepEqual(
         records[3],
-        { name: "banana", stock: [{ warehouse: "C" }], price: 42.0 });
+        { name: "banana", stock: [{ quantity: null, warehouse: "C" }], price: 42.0 });
   });
 
   it('should materialize a static nested record with blank optional value', function() {
@@ -549,7 +549,7 @@ describe('ParquetShredder', function() {
 
     assert.deepEqual(
         records[0],
-        { fruit: { name: "apple" } });
+        { fruit: { name: "apple", colour: null } });
 
   });
 
