@@ -227,6 +227,8 @@ function materializeRecordField(record: Record<string, unknown>, branch: Array<P
   const node = branch[0];
 
   if (dLevel < node.dLevelMax) {
+    // This ensures that nulls are correctly processed
+    record[node.name] = value;
     return;
   }
 
