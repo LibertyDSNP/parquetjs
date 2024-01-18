@@ -10,7 +10,6 @@ const onlyTest = null;
 
 // Test files currently unsupported / needing separate test
 const unsupported = [
-  'dict-page-offset-zero.parquet', // BUG?
   'byte_stream_split.zstd.parquet', // ZSTD unsupported
   'hadoop_lz4_compressed.parquet', // LZ4 unsupported
   'hadoop_lz4_compressed_larger.parquet', // LZ4 unsupported

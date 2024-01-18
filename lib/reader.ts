@@ -672,8 +672,9 @@ export class ParquetEnvelopeReader {
       num_values: metadata.num_values
     });
 
-    if (metadata.dictionary_page_offset) {
-      const offset = +metadata.dictionary_page_offset;
+    // If this exists and is greater than zero then we need to have an offset
+    if (metadata.dictionary_page_offset && +metadata.dictionary_page_offset > 0) {
+      const offset: number = +metadata.dictionary_page_offset;
       const size = Math.min(+this.fileSize - offset, this.default_dictionary_size);
 
       await this.read(offset, size, colChunk.file_path).then(async (buffer: Buffer) => {
