@@ -24,8 +24,6 @@ const unsupported = [
   'delta_encoding_optional_column.parquet', // DELTA_BINARY_PACKED unsupported
   'delta_encoding_required_column.parquet', // DELTA_BINARY_PACKED unsupported
   'delta_length_byte_array.parquet', // ZSTD unsupported, DELTA_BINARY_PACKED unsupported
-  'float16_nonzeros_and_nans.parquet', // missing option: typeLength (required for FIXED_LEN_BYTE_ARRAY)
-  'float16_zeros_and_nans.parquet', // missing option: typeLength (required for FIXED_LEN_BYTE_ARRAY)
   'large_string_map.brotli.parquet', // BUG?
 ];
 
