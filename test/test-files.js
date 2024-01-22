@@ -69,9 +69,9 @@ describe('test-files', function() {
   });
 
   // repeated values
-  // it('nation.dict.parquet loads', async function() {
-  //   await check('nation.dict.parquet',['nation_key','name','region_key','comment_col']);
-  // });
+  it.skip('nation.dict.parquet loads', async function() {
+    await check('nation.dict.parquet',['nation_key','name','region_key','comment_col']);
+  });
 
   it('nation.impala.parquet loads', async function() {
     await check('nation.impala.parquet', ['n_nationkey','n_name','n_regionkey','n_comment']);

@@ -128,14 +128,4 @@ describe("ParquetReader", () => {
       assert.equal(data[2].under_9_digits, undefined);
     })
   });
-
-  describe('#openS3', () => {
-
-    describe("S3V2",() => {});
-    describe("S3V3",() => {
-      it('works', async () => {
-
-      })
-    });
-  });
 });

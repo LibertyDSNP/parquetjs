@@ -25,7 +25,11 @@ import {
   ColumnChunkExt
 } from './declare';
 import {Cursor, Options} from './codec/types';
-import { GetObjectCommand, HeadObjectCommand, S3Client, GetObjectCommandInput } from "@aws-sdk/client-s3";
+import {
+  GetObjectCommand,
+  HeadObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
 import { Readable } from "stream";
 import { Blob } from "buffer";
 
@@ -478,7 +482,8 @@ export class ParquetEnvelopeReader {
         return Promise.reject("external references are not supported");
       }
       const Range = `bytes=${offset}-${offset+length-1}`;
-      const response = await client.send(new GetObjectCommand({ ...{ Range }, ...params }));
+      const input = { ...{ Range }, ...params };
+      const response = await client.send(new GetObjectCommand(input));
 
       const body = response.Body;
       if (body) {
@@ -757,7 +762,8 @@ export class ParquetEnvelopeReader {
 
     let trailerLen = PARQUET_MAGIC.length + 4;
 
-    let trailerBuf = await this.read((this.fileSize as number) - trailerLen, trailerLen);
+    let offset = (this.fileSize as number) - trailerLen;
+    let trailerBuf = await this.read(offset, trailerLen);
 
     if (trailerBuf.slice(4).toString() != PARQUET_MAGIC) {
       throw 'not a valid parquet file';
