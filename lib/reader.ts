@@ -199,7 +199,6 @@ export class ParquetReader {
   constructor(metadata: FileMetaDataExt, envelopeReader: ParquetEnvelopeReader, opts?: BufferReaderOptions) {
     opts = opts || {};
 
-    console.log({metadata})
     if (!PARQUET_VERSIONS.includes(metadata.version)) {
       throw 'invalid parquet version';
     }
@@ -485,7 +484,6 @@ export class ParquetEnvelopeReader {
       }
       const Range = `bytes=${offset}-${offset+length-1}`;
       const input = { ...{ Range }, ...params };
-      console.log({input})
       const response = await client.send(new GetObjectCommand(input));
 
       const body = response.Body;
@@ -768,7 +766,6 @@ export class ParquetEnvelopeReader {
     let offset = (this.fileSize as number) - trailerLen;
     let trailerBuf = await this.read(offset, trailerLen);
 
-    console.log(trailerBuf.toString())
     if (trailerBuf.subarray(4).toString() != PARQUET_MAGIC) {
       throw 'not a valid parquet file';
     }
