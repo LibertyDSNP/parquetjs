@@ -11,18 +11,20 @@ describe('ParquetReader with S3', () => {
     const s3Mock = mockClient(S3Client);
 
     it('mocks get object', async () => {
+      let srcFile = 'test/test-files/nation.dict.parquet';
+
       const headStream = new Readable();
       headStream.push('PAR1');
       headStream.push(null);
       const headSdkStream = sdkStreamMixin(headStream)
 
-      const footStream = new Readable();
-      footStream.push(Uint8Array.from([234,0,0,0])); // metadata length is 234
-      footStream.push('PAR1');
-      footStream.push(null);
-      const footSdkStream = sdkStreamMixin(footStream)
+      const footStream = createReadStream(srcFile, {start: 2842, end: 2849})
+      const footSdkStream= sdkStreamMixin(footStream);
 
-      const stream = createReadStream('test/test-files/nation.dict.parquet');
+      const metadataStream = createReadStream(srcFile, {start: 2608, end: 2841});
+      const metaDataSdkStream = sdkStreamMixin(metadataStream)
+
+      const stream = createReadStream(srcFile);
 
       // wrap the Stream with SDK mixin
       const sdkStream = sdkStreamMixin(stream);
@@ -40,13 +42,12 @@ describe('ParquetReader with S3', () => {
       s3Mock.on(GetObjectCommand, {Range: 'bytes=2841-2848', Key: 'foo', Bucket: 'bar'})
             .resolves({Body: footSdkStream});
 
+      s3Mock.on(GetObjectCommand, {Range: 'bytes=2607-2840', Key: 'foo', Bucket: 'bar'})
+      .resolves({Body: metaDataSdkStream});
 
       const s3 = new S3Client({});
-      try {
-        await ParquetReader.openS3(s3, {Key: 'foo', Bucket: 'bar'});
-      } catch (e: any) {
-        assert(e.toString().includes('invalid parquet version'))
-      }
+      let res = await ParquetReader.openS3(s3, {Key: 'foo', Bucket: 'bar'});
+      assert(res.envelopeReader);
     });
   })
 })
