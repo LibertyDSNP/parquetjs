@@ -4,6 +4,12 @@ const path = require("path");
 const assert = chai.assert;
 const parquet = require("../parquet");
 const server = require("./mocks/server");
+const {mockClient} = require("aws-sdk-client-mock");
+const {S3Client, HeadObjectCommand, GetObjectCommand} = require("@aws-sdk/client-s3");
+const {Readable} = require("stream");
+const {sdkStreamMixin} = require("@smithy/util-stream");
+const {createReadStream} = require("fs");
+const {ParquetReader} = require("../parquet");
 
 describe("ParquetReader", () => {
   describe("#openUrl", () => {
@@ -128,4 +134,50 @@ describe("ParquetReader", () => {
       assert.equal(data[2].under_9_digits, undefined);
     })
   });
+  describe('ParquetReader with S3', () => {
+    describe('V3', () => {
+      const s3Mock = mockClient(S3Client);
+
+      it('works', async () => {
+        let srcFile = 'test/test-files/nation.dict.parquet';
+
+        const headStream = new Readable();
+        headStream.push('PAR1');
+        headStream.push(null);
+        const headSdkStream = sdkStreamMixin(headStream)
+
+        const footStream = createReadStream(srcFile, {start: 2842, end: 2849})
+        const footSdkStream= sdkStreamMixin(footStream);
+
+        const metadataStream = createReadStream(srcFile, {start: 2608, end: 2841});
+        const metaDataSdkStream = sdkStreamMixin(metadataStream)
+
+        const stream = createReadStream(srcFile);
+
+        // wrap the Stream with SDK mixin
+        const sdkStream = sdkStreamMixin(stream);
+
+        // mock all the way down to where metadata is being read
+        s3Mock.on(HeadObjectCommand)
+        .resolves({ContentLength: 2849});
+
+        s3Mock.on(GetObjectCommand,)
+        .resolves({Body: sdkStream});
+
+        s3Mock.on(GetObjectCommand, {Range: 'bytes=0-3', Key: 'foo', Bucket: 'bar'})
+        .resolves({Body: headSdkStream});
+
+        s3Mock.on(GetObjectCommand, {Range: 'bytes=2841-2848', Key: 'foo', Bucket: 'bar'})
+        .resolves({Body: footSdkStream});
+
+        s3Mock.on(GetObjectCommand, {Range: 'bytes=2607-2840', Key: 'foo', Bucket: 'bar'})
+        .resolves({Body: metaDataSdkStream});
+
+        const s3 = new S3Client({});
+        let res = await ParquetReader.openS3(s3, {Key: 'foo', Bucket: 'bar'});
+        assert(res.envelopeReader);
+      });
+    })
+  });
+
 });
