@@ -12,6 +12,7 @@ const baseConfig = {
     },
     inject: ['./esbuild-shims.js'],
     minify: true,
+    mainFields: ["browser", "module", "main"],
     platform: 'browser',  // default
     plugins: [compressionBrowserPlugin, wasmPlugin],
     target: "es2020"  // default
@@ -27,6 +28,7 @@ const testConfig = {
     },
     inject: ['./esbuild-shims.js'],
     minify: false,
+    mainFields: ["browser", "module", "main"],
     platform: 'browser',  // default
     plugins: [compressionBrowserPlugin, wasmPlugin],
     target: "es2020"  // default
