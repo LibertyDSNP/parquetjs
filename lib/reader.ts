@@ -30,8 +30,8 @@ import {
   HeadObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
-import { Readable } from "stream";
-import { Blob } from "buffer";
+import type { Readable } from "stream";
+import type { Blob } from "buffer";
 
 const {
   getBloomFiltersFor,
