@@ -503,7 +503,7 @@ export class ParquetEnvelopeReader {
     if (blob.arrayBuffer !== undefined) {
       const arrayBuffer = await blob.arrayBuffer();
       const uint8Array: Uint8Array = new Uint8Array(arrayBuffer);
-      return new Buffer(uint8Array);
+      return Buffer.from(uint8Array);
     }
 
     //Assumed to be a Readable like object
