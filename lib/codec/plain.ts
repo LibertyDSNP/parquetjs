@@ -205,7 +205,6 @@ function decodeValues_DOUBLE(cursor: Cursor, count: number) {
   return values;
 }
 
-// Waylands reminder to check again
 function encodeValues_BYTE_ARRAY(values: Array<Uint8Array>) {
   let buf_len = 0;
   const returnedValues: Array<Buffer> = [];
