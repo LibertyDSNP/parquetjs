@@ -1,4 +1,4 @@
-import chai, {expect} from "chai"
+import chai, { expect } from "chai"
 import sinon from "sinon"
 import sinonChai from "sinon-chai";
 import sinonChaiInOrder from 'sinon-chai-in-order';
@@ -30,7 +30,7 @@ describe("bufferReader", () => {
     it("only enqueues an item and reads on flushing the queue", async () => {
       const mockResolve = sinon.spy();
       const mockResolve2 = sinon.spy();
-      reader.envelopeReader = {readFn: sinon.fake.returns("buffer")}
+      reader.envelopeReader = { readFn: sinon.fake.returns(Buffer.from("buffer", "utf8")) }
 
       reader.queue = [{
         offset: 1,
@@ -44,15 +44,16 @@ describe("bufferReader", () => {
 
       await reader.processQueue();
 
-      sinon.assert.calledWith(mockResolve, "b")
-      sinon.assert.calledWith(mockResolve2, "uffe")
+
+      sinon.assert.calledWith(mockResolve, Buffer.from("b", "utf8"));
+      sinon.assert.calledWith(mockResolve2, Buffer.from("uffe", "utf8"));
     })
 
     it("enqueues items and then reads them", async () => {
       const mockResolve = sinon.spy();
       const mockResolve2 = sinon.spy();
       reader.maxLength = 1;
-      reader.envelopeReader = {readFn: sinon.fake.returns("buffer")}
+      reader.envelopeReader = { readFn: sinon.fake.returns(Buffer.from("buffer", "utf8")) }
 
       reader.queue = [{
         offset: 1,
@@ -66,81 +67,81 @@ describe("bufferReader", () => {
 
       await reader.processQueue();
 
-      sinon.assert.calledWith(mockResolve, "b")
-      sinon.assert.calledWith(mockResolve2, "uffe")
+      sinon.assert.calledWith(mockResolve, Buffer.from("b", "utf8"));
+      sinon.assert.calledWith(mockResolve2, Buffer.from("uffe", "utf8"));
     })
 
     it("enqueues items and reads them in order", async () => {
       const mockResolve = sinon.spy();
-      reader.envelopeReader = {readFn: sinon.fake.returns("thisisalargebuffer")}
+      reader.envelopeReader = { readFn: sinon.fake.returns(Buffer.from("thisisalargebuffer", "utf8")) }
 
       reader.queue = [{
-          offset: 1,
-          length: 4,
-          resolve: mockResolve,
-        }, {
-          offset: 5,
-          length: 2,
-          resolve: mockResolve,
-        }, {
-          offset: 7,
-          length: 1,
-          resolve: mockResolve,
-        }, {
-          offset: 8,
-          length: 5,
-          resolve: mockResolve,
-        }, {
-          offset: 13,
-          length: 6,
-          resolve: mockResolve,
-        }
+        offset: 1,
+        length: 4,
+        resolve: mockResolve,
+      }, {
+        offset: 5,
+        length: 2,
+        resolve: mockResolve,
+      }, {
+        offset: 7,
+        length: 1,
+        resolve: mockResolve,
+      }, {
+        offset: 8,
+        length: 5,
+        resolve: mockResolve,
+      }, {
+        offset: 13,
+        length: 6,
+        resolve: mockResolve,
+      }
       ];
 
       await reader.processQueue();
 
-      expect(mockResolve).inOrder.to.have.been.calledWith("this")
-        .subsequently.calledWith("is")
-        .subsequently.calledWith("a")
-        .subsequently.calledWith("large")
-        .subsequently.calledWith("buffer");
+      expect(mockResolve).inOrder.to.have.been.calledWith(Buffer.from("this", "utf8"))
+        .subsequently.calledWith(Buffer.from("is", "utf8"))
+        .subsequently.calledWith(Buffer.from("a", "utf8"))
+        .subsequently.calledWith(Buffer.from("large", "utf8"))
+        .subsequently.calledWith(Buffer.from("buffer", "utf8"));
     })
 
     it("should read even if the maxSpan has been exceeded", async () => {
       const mockResolve = sinon.spy();
       reader.maxSpan = 5;
-      reader.envelopeReader = {readFn: sinon.fake.returns("willslicefrombeginning")}
+      reader.envelopeReader = { readFn: sinon.fake.returns(Buffer.from("willslicefrombeginning", "utf8")) }
 
       reader.queue = [{
-          offset: 1,
-          length: 4,
-          resolve: mockResolve,
-        }, {
-          offset: 10,
-          length: 4,
-          resolve: mockResolve,
-        }, {
-          offset: 10,
-          length: 9,
-          resolve: mockResolve,
-        }, {
-          offset: 10,
-          length: 13,
-          resolve: mockResolve,
-        }, {
-          offset: 10,
-          length: 22,
-          resolve: mockResolve,
-        }
+        offset: 1,
+        length: 4,
+        resolve: mockResolve,
+      }, {
+        offset: 10,
+        length: 4,
+        resolve: mockResolve,
+      }, {
+        offset: 10,
+        length: 9,
+        resolve: mockResolve,
+      }, {
+        offset: 10,
+        length: 13,
+        resolve: mockResolve,
+      }, {
+        offset: 10,
+        length: 22,
+        resolve: mockResolve,
+      }
       ];
 
       await reader.processQueue();
 
-      expect(mockResolve).inOrder.to.have.been.calledWith("will")
-        .subsequently.calledWith("will")
-        .subsequently.calledWith("willslice")
-        .subsequently.calledWith("willslicefrom")
-        .subsequently.calledWith("willslicefrombeginning");
+      expect(mockResolve).inOrder.to.have.been.calledWith(Buffer.from("will", "utf8"))
+        .subsequently.calledWith(Buffer.from("will", "utf8"))
+        .subsequently.calledWith(Buffer.from("willslice", "utf8"))
+        .subsequently.calledWith(Buffer.from("willslicefrom", "utf8"))
+        .subsequently.calledWith(Buffer.from("willslicefrombeginning", "utf8"));
     })
   })
 })
