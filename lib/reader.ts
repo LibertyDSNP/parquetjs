@@ -441,7 +441,7 @@ export class ParquetEnvelopeReader {
         return Promise.reject('external references are not supported');
       }
 
-      return Promise.resolve(buffer.slice(offset, offset + length));
+      return Promise.resolve(buffer.subarray(offset, offset + length));
     };
 
     let closeFn = () => ({});
@@ -834,7 +834,7 @@ async function decodePage(cursor: Cursor, opts: Options): Promise<PageData> {
   const pageHeader = new NewPageHeader();
 
   const headerOffset = cursor.offset;
-  const headerSize = parquet_util.decodeThrift(pageHeader, cursor.buffer.slice(cursor.offset));
+  const headerSize = parquet_util.decodeThrift(pageHeader, cursor.buffer.subarray(cursor.offset));
   cursor.offset += headerSize;
 
   const pageType = parquet_util.getThriftEnum(
@@ -926,7 +926,7 @@ async function decodeDictionaryPage(cursor: Cursor, header: parquet_thrift.PageH
 
   let dictCursor = {
     offset: 0,
-    buffer: cursor.buffer.slice(cursor.offset,cursorEnd),
+    buffer: cursor.buffer.subarray(cursor.offset,cursorEnd),
     size: cursorEnd - cursor.offset
   };
 
@@ -935,7 +935,7 @@ async function decodeDictionaryPage(cursor: Cursor, header: parquet_thrift.PageH
   if (opts.compression && opts.compression !== 'UNCOMPRESSED') {
     let valuesBuf = await parquet_compression.inflate(
         opts.compression,
-        dictCursor.buffer.slice(dictCursor.offset,cursorEnd));
+        dictCursor.buffer.subarray(dictCursor.offset,cursorEnd));
 
     dictCursor = {
       buffer: valuesBuf,
@@ -963,7 +963,7 @@ async function decodeDataPage(cursor: Cursor, header: parquet_thrift.PageHeader,
   if (opts.compression && opts.compression !== 'UNCOMPRESSED') {
     let valuesBuf = await parquet_compression.inflate(
         opts.compression,
-        cursor.buffer.slice(cursor.offset, cursorEnd));
+        cursor.buffer.subarray(cursor.offset, cursorEnd));
 
     valuesBufCursor = {
       buffer: valuesBuf,
@@ -1090,7 +1090,7 @@ async function decodeDataPageV2(cursor: Cursor, header: parquet_thrift.PageHeade
   if (dataPageHeaderV2.is_compressed) {
     let valuesBuf = await parquet_compression.inflate(
         opts.compression!,
-        cursor.buffer.slice(cursor.offset, cursorEnd));
+        cursor.buffer.subarray(cursor.offset, cursorEnd));
 
     valuesBufCursor = {
       buffer: valuesBuf,

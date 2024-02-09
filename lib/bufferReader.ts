@@ -72,7 +72,7 @@ export default class BufferReader {
       const buffer = await this.envelopeReader.readFn(start, finish - start);
 
       processQueue.forEach(async d => {
-        d.resolve(buffer.slice(d.offset - start, d.offset + d.length - start));
+        d.resolve(buffer.subarray(d.offset - start, d.offset + d.length - start));
       });
     };
 

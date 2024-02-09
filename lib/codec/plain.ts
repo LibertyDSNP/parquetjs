@@ -231,7 +231,7 @@ function decodeValues_BYTE_ARRAY(cursor: Cursor, count: number) {
   for (let i = 0; i < count; ++i) {
     let len = cursor.buffer.readUInt32LE(cursor.offset);
     cursor.offset += 4;
-    values.push(cursor.buffer.slice(cursor.offset, cursor.offset + len));
+    values.push(cursor.buffer.subarray(cursor.offset, cursor.offset + len));
     cursor.offset += len;
   }
 
@@ -272,7 +272,7 @@ function decodeValues_FIXED_LEN_BYTE_ARRAY(
 
   for (let i = 0; i < count; ++i) {
     values.push(
-      cursor.buffer.slice(cursor.offset, cursor.offset + typeLength)
+      cursor.buffer.subarray(cursor.offset, cursor.offset + typeLength)
     );
     cursor.offset += typeLength;
   }

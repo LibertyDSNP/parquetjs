@@ -32,7 +32,7 @@ const sampleColumnHeaders = async (filename: string) => {
 
   while (cursor.offset < cursor.size) {
     const pageHeader = new parquet_thrift.PageHeader();
-    cursor.offset += decodeThrift(pageHeader, cursor.buffer.slice(cursor.offset));
+    cursor.offset += decodeThrift(pageHeader, cursor.buffer.subarray(cursor.offset));
     pages.push(pageHeader);
     cursor.offset += pageHeader.compressed_page_size;
   }
