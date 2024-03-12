@@ -20,14 +20,14 @@ interface INTERVAL {
 
 export function getParquetTypeDataObject(type: ParquetType, field?: ParquetField | Options | FieldDefinition): ParquetTypeDataObject {
   if (type === 'DECIMAL') {
-    if (field?.typeLength !== undefined) {
+    if (field?.typeLength !== undefined && field?.typeLength !== null) {
       return {
         primitiveType: 'FIXED_LEN_BYTE_ARRAY',
         originalType: 'DECIMAL',
         typeLength: field.typeLength,
         toPrimitive: toPrimitive_FIXED_LEN_BYTE_ARRAY_DECIMAL
       };
-    } else if (field?.precision !== undefined && field.precision > 18) {
+    } else if (field?.precision !== undefined && field?.precision !== null && field.precision > 18) {
       return {
         primitiveType: 'BYTE_ARRAY',
         originalType: 'DECIMAL',
