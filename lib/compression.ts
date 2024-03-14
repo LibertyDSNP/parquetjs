@@ -1,6 +1,6 @@
 import zlib from 'zlib'
 import snappy from 'snappyjs'
-import { compress as brotliCompress, decompress as brotliDecompress } from 'wasm-brotli'
+import { compress as brotliCompress, decompress as brotliDecompress } from 'brotli-wasm'
 
 type d_identity = (value: ArrayBuffer | Buffer | Uint8Array ) => ArrayBuffer | Buffer | Uint8Array
 type d_gzip = (value: ArrayBuffer | Buffer | string ) => Buffer
@@ -64,7 +64,7 @@ async function deflate_brotli(value: Uint8Array) {
     lgwin: 22
   }
   */)
-  
+
   return Buffer.from(compressedContent);
 }
 

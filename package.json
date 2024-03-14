@@ -19,6 +19,7 @@
     "@types/long": "^4.0.2",
     "@types/node-int64": "^0.4.29",
     "@types/thrift": "^0.10.11",
+    "brotli-wasm": "^2.0.1",
     "browserify-zlib": "^0.2.0",
     "bson": "4.6.3",
     "cross-fetch": "^3.1.4",
@@ -27,7 +28,6 @@
     "snappyjs": "^0.6.1",
     "thrift": "0.16.0",
     "varint": "^6.0.0",
-    "wasm-brotli": "^2.0.2",
     "xxhash-wasm": "^1.0.2"
   },
   "devDependencies": {
