@@ -1,13 +1,13 @@
-const { rest } = require("msw");
+const { http } = require("msw");
 const fs = require("fs");
 const fsPromises = require("fs/promises");
 const util = require("util");
 const path = require("path");
 const readPromsify = util.promisify(fs.read);
 
-const rangeHandle = rest.get(
+const rangeHandle = http.get(
   "http://fruits-bloomfilter.parquet",
-  async (req, res, ctx) => {
+  async ({ request }) => {
     const fd = fs.openSync(
       path.resolve(__dirname, "../../fruits-bloomfilter.parquet"),
       "r"
@@ -17,8 +17,14 @@ const rangeHandle = rest.get(
       path.resolve(__dirname, "../../fruits-bloomfilter.parquet")
     );
 
-    const rangeHeader = req.headers.get("range");
-    if (!rangeHeader) return res(ctx.set("Content-Length", fileSize));
+    const rangeHeader = request.headers.get("range");
+    if (!rangeHeader) {
+      return new Response("", {
+        headers: {
+          "Content-Length": fileSize
+        }
+      });
+    }
 
     const [start, end] = rangeHeader
       .replace(/bytes=/, "")
@@ -34,14 +40,17 @@ const rangeHandle = rest.get(
       start
     );
 
-    return res(
-      ctx.status(206),
-      ctx.set("Accept-Ranges", "bytes"),
-      ctx.set("Content-Ranges", `bytes ${start}-${end}/${bytesRead}`),
-      ctx.set("Content-Type", "application/octet-stream"),
-      ctx.set("Content-Length", fileSize),
-      ctx.body(buffer)
-    );
+    const headers = {
+      'Accept-Ranges': "bytes",
+      'Content-Ranges': `bytes ${start}-${end}/${bytesRead}`,
+      'Content-Type': "application/octet-stream",
+      'Content-Length': fileSize,
+    };
+
+    return new Response(buffer, {
+      status: 206,
+        headers,
+      })
   }
 );
 

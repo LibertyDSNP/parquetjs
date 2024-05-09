@@ -12,15 +12,11 @@
     "sourceMap": false,
     "strict": true,
     "target": "ESNext",
-    "watch": false,
     "typeRoots": [
       "node_modules/@types",
       "gen-nodejs",
     ]
   },
   "include":  ["parquet.ts","lib/**/*", "gen-nodejs/*", "browser/*.ts"],
-  "files": ["lib/custom.d.ts"],
-  "ts-node": {
-    "files": true
-  }
+  "files": ["lib/custom.d.ts"]
 }
