@@ -5,9 +5,9 @@
   "license": "MIT",
   "dependencies": {
     "@dsnp/parquetjs": "../parquetjs",
-    "ejs": "^3.1.6"
+    "ejs": "^3.1.10"
   },
   "devDependencies": {
-    "express": "^4.17.1"
+    "express": "^4.19.2"
   }
 }
