@@ -1,8 +1,11 @@
 'use strict';
 // Thanks to https://github.com/kbajalc/parquets for some of the code.
-import * as BSON from "bson"
-import { PrimitiveType, OriginalType, ParquetType, FieldDefinition, ParquetField } from "./declare"
+import { PrimitiveType, OriginalType, ParquetType, FieldDefinition, ParquetField } from "./declare";
 import { Options } from "./codec/types";
+import type { Document as BsonDocument } from "bson";
+// BSON uses top level awaits, so use require for now
+const bsonSerialize = require('bson').serialize;
+const bsonDeserialize = require('bson').deserialize;
 
 type ParquetTypeDataObject = {
   primitiveType?: PrimitiveType,
@@ -439,12 +442,12 @@ function fromPrimitive_JSON(value: string) {
   return JSON.parse(value);
 }
 
-function toPrimitive_BSON(value: BSON.Document) {
-  return Buffer.from(BSON.serialize(value));
+function toPrimitive_BSON(value: BsonDocument) {
+  return Buffer.from(bsonSerialize(value));
 }
 
 function fromPrimitive_BSON(value: Buffer) {
-  return BSON.deserialize(value);
+  return bsonDeserialize(value);
 }
 
 function toNumberInternal(typeName: string, value: string | number): number {
@@ -556,4 +559,3 @@ function checkValidValue(lowerRange: number | bigint, upperRange: number | bigin
     throw "invalid value"
   }
 }
-
