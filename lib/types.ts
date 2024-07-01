@@ -1,47 +1,50 @@
 'use strict';
 // Thanks to https://github.com/kbajalc/parquets for some of the code.
-import { PrimitiveType, OriginalType, ParquetType, FieldDefinition, ParquetField } from "./declare";
-import { Options } from "./codec/types";
-import type { Document as BsonDocument } from "bson";
+import { PrimitiveType, OriginalType, ParquetType, FieldDefinition, ParquetField } from './declare';
+import { Options } from './codec/types';
+import type { Document as BsonDocument } from 'bson';
 // BSON uses top level awaits, so use require for now
 const bsonSerialize = require('bson').serialize;
 const bsonDeserialize = require('bson').deserialize;
 
 type ParquetTypeDataObject = {
-  primitiveType?: PrimitiveType,
-  toPrimitive: Function,
-  fromPrimitive?: Function,
-  originalType?: OriginalType,
-  typeLength?: number
+  primitiveType?: PrimitiveType;
+  toPrimitive: Function;
+  fromPrimitive?: Function;
+  originalType?: OriginalType;
+  typeLength?: number;
 };
 
 interface INTERVAL {
-  months: number,
-  days: number,
-  milliseconds: number
+  months: number;
+  days: number;
+  milliseconds: number;
 }
 
-export function getParquetTypeDataObject(type: ParquetType, field?: ParquetField | Options | FieldDefinition): ParquetTypeDataObject {
+export function getParquetTypeDataObject(
+  type: ParquetType,
+  field?: ParquetField | Options | FieldDefinition
+): ParquetTypeDataObject {
   if (type === 'DECIMAL') {
     if (field?.typeLength !== undefined && field?.typeLength !== null) {
       return {
         primitiveType: 'FIXED_LEN_BYTE_ARRAY',
         originalType: 'DECIMAL',
         typeLength: field.typeLength,
-        toPrimitive: toPrimitive_FIXED_LEN_BYTE_ARRAY_DECIMAL
+        toPrimitive: toPrimitive_FIXED_LEN_BYTE_ARRAY_DECIMAL,
       };
     } else if (field?.precision !== undefined && field?.precision !== null && field.precision > 18) {
       return {
         primitiveType: 'BYTE_ARRAY',
         originalType: 'DECIMAL',
         typeLength: field.typeLength,
-        toPrimitive: toPrimitive_BYTE_ARRAY_DECIMAL
+        toPrimitive: toPrimitive_BYTE_ARRAY_DECIMAL,
       };
     } else {
       return {
         primitiveType: 'INT64',
         originalType: 'DECIMAL',
-        toPrimitive: toPrimitive_INT64
+        toPrimitive: toPrimitive_INT64,
       };
     }
   } else {
@@ -78,150 +81,150 @@ const PARQUET_LOGICAL_TYPES = new Set<string>([
   'BSON',
   'INTERVAL',
   'MAP',
-  'LIST'
-] satisfies ParquetType[])
+  'LIST',
+] satisfies ParquetType[]);
 
 const PARQUET_LOGICAL_TYPE_DATA: { [logicalType: string]: ParquetTypeDataObject } = {
-  'BOOLEAN': {
+  BOOLEAN: {
     primitiveType: 'BOOLEAN',
     toPrimitive: toPrimitive_BOOLEAN,
-    fromPrimitive: fromPrimitive_BOOLEAN
+    fromPrimitive: fromPrimitive_BOOLEAN,
   },
-  'INT32': {
+  INT32: {
     primitiveType: 'INT32',
-    toPrimitive: toPrimitive_INT32
+    toPrimitive: toPrimitive_INT32,
   },
-  'INT64': {
+  INT64: {
     primitiveType: 'INT64',
-    toPrimitive: toPrimitive_INT64
+    toPrimitive: toPrimitive_INT64,
   },
-  'INT96': {
+  INT96: {
     primitiveType: 'INT96',
-    toPrimitive: toPrimitive_INT96
+    toPrimitive: toPrimitive_INT96,
   },
-  'FLOAT': {
+  FLOAT: {
     primitiveType: 'FLOAT',
-    toPrimitive: toPrimitive_FLOAT
+    toPrimitive: toPrimitive_FLOAT,
   },
-  'DOUBLE': {
+  DOUBLE: {
     primitiveType: 'DOUBLE',
-    toPrimitive: toPrimitive_DOUBLE
+    toPrimitive: toPrimitive_DOUBLE,
   },
-  'BYTE_ARRAY': {
+  BYTE_ARRAY: {
     primitiveType: 'BYTE_ARRAY',
-    toPrimitive: toPrimitive_BYTE_ARRAY
+    toPrimitive: toPrimitive_BYTE_ARRAY,
   },
-  'FIXED_LEN_BYTE_ARRAY': {
+  FIXED_LEN_BYTE_ARRAY: {
     primitiveType: 'FIXED_LEN_BYTE_ARRAY',
-    toPrimitive: toPrimitive_BYTE_ARRAY
+    toPrimitive: toPrimitive_BYTE_ARRAY,
   },
-  'UTF8': {
+  UTF8: {
     primitiveType: 'BYTE_ARRAY',
     originalType: 'UTF8',
     toPrimitive: toPrimitive_UTF8,
-    fromPrimitive: fromPrimitive_UTF8
+    fromPrimitive: fromPrimitive_UTF8,
   },
-  'ENUM': {
+  ENUM: {
     primitiveType: 'BYTE_ARRAY',
     originalType: 'UTF8',
     toPrimitive: toPrimitive_UTF8,
-    fromPrimitive: fromPrimitive_UTF8
+    fromPrimitive: fromPrimitive_UTF8,
   },
-  'TIME_MILLIS': {
+  TIME_MILLIS: {
     primitiveType: 'INT32',
     originalType: 'TIME_MILLIS',
-    toPrimitive: toPrimitive_TIME_MILLIS
+    toPrimitive: toPrimitive_TIME_MILLIS,
   },
-  'TIME_MICROS': {
+  TIME_MICROS: {
     primitiveType: 'INT64',
     originalType: 'TIME_MICROS',
-    toPrimitive: toPrimitive_TIME_MICROS
+    toPrimitive: toPrimitive_TIME_MICROS,
   },
-  'DATE': {
+  DATE: {
     primitiveType: 'INT32',
     originalType: 'DATE',
     toPrimitive: toPrimitive_DATE,
-    fromPrimitive: fromPrimitive_DATE
+    fromPrimitive: fromPrimitive_DATE,
   },
-  'TIMESTAMP_MILLIS': {
+  TIMESTAMP_MILLIS: {
     primitiveType: 'INT64',
     originalType: 'TIMESTAMP_MILLIS',
     toPrimitive: toPrimitive_TIMESTAMP_MILLIS,
-    fromPrimitive: fromPrimitive_TIMESTAMP_MILLIS
+    fromPrimitive: fromPrimitive_TIMESTAMP_MILLIS,
   },
-  'TIMESTAMP_MICROS': {
+  TIMESTAMP_MICROS: {
     primitiveType: 'INT64',
     originalType: 'TIMESTAMP_MICROS',
     toPrimitive: toPrimitive_TIMESTAMP_MICROS,
-    fromPrimitive: fromPrimitive_TIMESTAMP_MICROS
+    fromPrimitive: fromPrimitive_TIMESTAMP_MICROS,
   },
-  'UINT_8': {
+  UINT_8: {
     primitiveType: 'INT32',
     originalType: 'UINT_8',
-    toPrimitive: toPrimitive_UINT8
+    toPrimitive: toPrimitive_UINT8,
   },
-  'UINT_16': {
+  UINT_16: {
     primitiveType: 'INT32',
     originalType: 'UINT_16',
-    toPrimitive: toPrimitive_UINT16
+    toPrimitive: toPrimitive_UINT16,
   },
-  'UINT_32': {
+  UINT_32: {
     primitiveType: 'INT32',
     originalType: 'UINT_32',
-    toPrimitive: toPrimitive_UINT32
+    toPrimitive: toPrimitive_UINT32,
   },
-  'UINT_64': {
+  UINT_64: {
     primitiveType: 'INT64',
     originalType: 'UINT_64',
-    toPrimitive: toPrimitive_UINT64
+    toPrimitive: toPrimitive_UINT64,
   },
-  'INT_8': {
+  INT_8: {
     primitiveType: 'INT32',
     originalType: 'INT_8',
-    toPrimitive: toPrimitive_INT8
+    toPrimitive: toPrimitive_INT8,
   },
-  'INT_16': {
+  INT_16: {
     primitiveType: 'INT32',
     originalType: 'INT_16',
-    toPrimitive: toPrimitive_INT16
+    toPrimitive: toPrimitive_INT16,
   },
-  'INT_32': {
+  INT_32: {
     primitiveType: 'INT32',
     originalType: 'INT_32',
-    toPrimitive: toPrimitive_INT32
+    toPrimitive: toPrimitive_INT32,
   },
-  'INT_64': {
+  INT_64: {
     primitiveType: 'INT64',
     originalType: 'INT_64',
-    toPrimitive: toPrimitive_INT64
+    toPrimitive: toPrimitive_INT64,
   },
-  'JSON': {
+  JSON: {
     primitiveType: 'BYTE_ARRAY',
     originalType: 'JSON',
     toPrimitive: toPrimitive_JSON,
-    fromPrimitive: fromPrimitive_JSON
+    fromPrimitive: fromPrimitive_JSON,
   },
-  'BSON': {
+  BSON: {
     primitiveType: 'BYTE_ARRAY',
     originalType: 'BSON',
     toPrimitive: toPrimitive_BSON,
-    fromPrimitive: fromPrimitive_BSON
+    fromPrimitive: fromPrimitive_BSON,
   },
-  'INTERVAL': {
+  INTERVAL: {
     primitiveType: 'FIXED_LEN_BYTE_ARRAY',
     originalType: 'INTERVAL',
     typeLength: 12,
     toPrimitive: toPrimitive_INTERVAL,
-    fromPrimitive: fromPrimitive_INTERVAL
+    fromPrimitive: fromPrimitive_INTERVAL,
   },
   MAP: {
-      originalType: 'MAP',
-      toPrimitive: toPrimitive_MAP,
+    originalType: 'MAP',
+    toPrimitive: toPrimitive_MAP,
   },
   LIST: {
-      originalType: 'LIST',
-      toPrimitive: toPrimitive_LIST,
-  }
+    originalType: 'LIST',
+    toPrimitive: toPrimitive_LIST,
+  },
 };
 
 /**
@@ -239,7 +242,7 @@ function isParquetType(type: string | undefined): type is ParquetType {
  */
 export function toPrimitive(type: string | undefined, value: unknown, field?: ParquetField | Options) {
   if (!isParquetType(type)) {
-    throw 'invalid type: ' + type || "undefined";
+    throw 'invalid type: ' + type || 'undefined';
   }
   return getParquetTypeDataObject(type, field).toPrimitive(value);
 }
@@ -250,12 +253,12 @@ export function toPrimitive(type: string | undefined, value: unknown, field?: Pa
  */
 export function fromPrimitive(type: string | undefined, value: unknown, field?: ParquetField | Options) {
   if (!isParquetType(type)) {
-    throw 'invalid type: ' + type || "undefined";
+    throw 'invalid type: ' + type || 'undefined';
   }
 
-  const typeFromPrimitive = getParquetTypeDataObject(type, field).fromPrimitive
+  const typeFromPrimitive = getParquetTypeDataObject(type, field).fromPrimitive;
   if (typeFromPrimitive !== undefined) {
-    return typeFromPrimitive(value)
+    return typeFromPrimitive(value);
   } else {
     return value;
   }
@@ -297,7 +300,7 @@ function toPrimitive_INT8(value: number | bigint | string) {
 
     return v;
   } catch {
-      throw 'invalid value for INT8: ' + value;
+    throw 'invalid value for INT8: ' + value;
   }
 }
 
@@ -309,7 +312,7 @@ function toPrimitive_UINT8(value: number | bigint | string) {
 
     return v;
   } catch {
-      throw 'invalid value for UINT8: ' + value;
+    throw 'invalid value for UINT8: ' + value;
   }
 }
 
@@ -321,7 +324,7 @@ function toPrimitive_INT16(value: number | bigint | string) {
 
     return v;
   } catch {
-      throw 'invalid value for INT16: ' + value;
+    throw 'invalid value for INT16: ' + value;
   }
 }
 
@@ -333,7 +336,7 @@ function toPrimitive_UINT16(value: number | bigint | string) {
 
     return v;
   } catch {
-      throw 'invalid value for UINT16: ' + value;
+    throw 'invalid value for UINT16: ' + value;
   }
 }
 
@@ -345,10 +348,9 @@ function toPrimitive_INT32(value: number | bigint | string) {
 
     return v;
   } catch {
-      throw 'invalid value for INT32: ' + value;
+    throw 'invalid value for INT32: ' + value;
   }
 }
-
 
 function toPrimitive_UINT32(value: number | bigint | string) {
   try {
@@ -358,7 +360,7 @@ function toPrimitive_UINT32(value: number | bigint | string) {
 
     return v;
   } catch {
-      throw 'invalid value for UINT32: ' + value;
+    throw 'invalid value for UINT32: ' + value;
   }
 }
 
@@ -373,7 +375,7 @@ function toPrimitive_INT64(value: number | bigint | string) {
 
     return v;
   } catch {
-      throw 'invalid value for INT64: ' + value;
+    throw 'invalid value for INT64: ' + value;
   }
 }
 
@@ -387,7 +389,7 @@ function toPrimitive_UINT64(value: number | bigint | string) {
 
     return v;
   } catch {
-      throw 'invalid value for UINT64: ' + value;
+    throw 'invalid value for UINT64: ' + value;
   }
 }
 
@@ -402,7 +404,7 @@ function toPrimitive_INT96(value: number | bigint | string) {
 
     return v;
   } catch {
-      throw 'invalid value for INT96: ' + value;
+    throw 'invalid value for INT96: ' + value;
   }
 }
 
@@ -431,7 +433,7 @@ function toPrimitive_UTF8(value: string) {
 }
 
 function fromPrimitive_UTF8(value: string) {
-  return (value !== undefined && value !== null)  ? value.toString() : value;
+  return value !== undefined && value !== null ? value.toString() : value;
 }
 
 function toPrimitive_JSON(value: object) {
@@ -453,10 +455,10 @@ function fromPrimitive_BSON(value: Buffer) {
 function toNumberInternal(typeName: string, value: string | number): number {
   let numberValue = 0;
   switch (typeof value) {
-    case "string":
+    case 'string':
       numberValue = parseInt(value, 10);
       break;
-    case "number":
+    case 'number':
       numberValue = value;
       break;
     default:
@@ -466,16 +468,16 @@ function toNumberInternal(typeName: string, value: string | number): number {
   if (numberValue < 0 || numberValue >= Number.MAX_SAFE_INTEGER) {
     throw `${typeName} value is out of bounds: ${numberValue}`;
   }
-  return numberValue
+  return numberValue;
 }
 
 function toPrimitive_TIME_MILLIS(value: string | number) {
-  return toNumberInternal("TIME_MILLIS", value);
+  return toNumberInternal('TIME_MILLIS', value);
 }
 
 function toPrimitive_TIME_MICROS(value: string | number | bigint) {
   const v = BigInt(value);
-  if (v < 0n ) {
+  if (v < 0n) {
     throw 'TIME_MICROS value is out of bounds: ' + value;
   }
   return v;
@@ -488,20 +490,19 @@ function toPrimitive_DATE(value: string | Date | number) {
   if (value instanceof Date) {
     return value.getTime() / kMillisPerDay;
   }
-  return toNumberInternal("DATE", value )
+  return toNumberInternal('DATE', value);
 }
 
-function fromPrimitive_DATE(value: number ) {
+function fromPrimitive_DATE(value: number) {
   return new Date(+value * kMillisPerDay);
 }
-
 
 function toPrimitive_TIMESTAMP_MILLIS(value: string | Date | number) {
   /* convert from date */
   if (value instanceof Date) {
     return value.getTime();
   }
-  return toNumberInternal("TIMESTAMP_MILLIS", value);
+  return toNumberInternal('TIMESTAMP_MILLIS', value);
 }
 
 function fromPrimitive_TIMESTAMP_MILLIS(value: number | string | bigint) {
@@ -529,13 +530,13 @@ function toPrimitive_TIMESTAMP_MICROS(value: Date | string | number | bigint) {
 }
 
 function fromPrimitive_TIMESTAMP_MICROS(value: number | bigint) {
-    if (typeof value === 'bigint') return new Date(Number(value / 1000n));
-    return new Date(value / 1000);
-  }
+  if (typeof value === 'bigint') return new Date(Number(value / 1000n));
+  return new Date(value / 1000);
+}
 
 function toPrimitive_INTERVAL(value: INTERVAL) {
   if (!value.months || !value.days || !value.milliseconds) {
-    throw "value for INTERVAL must be object { months: ..., days: ..., milliseconds: ... }";
+    throw 'value for INTERVAL must be object { months: ..., days: ..., milliseconds: ... }';
   }
 
   let buf = Buffer.alloc(12);
@@ -556,6 +557,6 @@ function fromPrimitive_INTERVAL(value: string) {
 
 function checkValidValue(lowerRange: number | bigint, upperRange: number | bigint, v: number | bigint) {
   if (v < lowerRange || v > upperRange) {
-    throw "invalid value"
+    throw 'invalid value';
   }
 }

@@ -3,9 +3,8 @@ const chai = require('chai');
 const assert = chai.assert;
 const parquet = require('../parquet');
 
-describe('ParquetSchema', function() {
-
-  it('should assign correct defaults in a simple flat schema', function() {
+describe('ParquetSchema', function () {
+  it('should assign correct defaults in a simple flat schema', function () {
     var schema = new parquet.ParquetSchema({
       name: { type: 'UTF8' },
       quantity: { type: 'INT64' },
@@ -61,10 +60,9 @@ describe('ParquetSchema', function() {
       assert.equal(!!c.isNested, false);
       assert.equal(c.fieldCount, undefined);
     }
-
   });
 
-  it('should assign correct defaults in a flat schema with optional fieldList', function() {
+  it('should assign correct defaults in a flat schema with optional fieldList', function () {
     var schema = new parquet.ParquetSchema({
       name: { type: 'UTF8' },
       quantity: { type: 'INT64', optional: true },
@@ -122,7 +120,7 @@ describe('ParquetSchema', function() {
     }
   });
 
-  it('should assign correct defaults in a flat schema with repeated fieldList', function() {
+  it('should assign correct defaults in a flat schema with repeated fieldList', function () {
     var schema = new parquet.ParquetSchema({
       name: { type: 'UTF8' },
       quantity: { type: 'INT64', repeated: true },
@@ -180,14 +178,14 @@ describe('ParquetSchema', function() {
     }
   });
 
-  it('should assign correct defaults in a nested schema without repetition modifiers', function() {
+  it('should assign correct defaults in a nested schema without repetition modifiers', function () {
     var schema = new parquet.ParquetSchema({
       name: { type: 'UTF8' },
       stock: {
         fields: {
           quantity: { type: 'INT64' },
           warehouse: { type: 'UTF8' },
-        }
+        },
       },
       price: { type: 'DOUBLE' },
     });
@@ -275,7 +273,7 @@ describe('ParquetSchema', function() {
     }
   });
 
-  it('should assign correct defaults in a nested schema with optional fields', function() {
+  it('should assign correct defaults in a nested schema with optional fields', function () {
     var schema = new parquet.ParquetSchema({
       name: { type: 'UTF8' },
       stock: {
@@ -283,7 +281,7 @@ describe('ParquetSchema', function() {
         fields: {
           quantity: { type: 'INT64', optional: true },
           warehouse: { type: 'UTF8' },
-        }
+        },
       },
       price: { type: 'DOUBLE' },
     });
@@ -371,7 +369,7 @@ describe('ParquetSchema', function() {
     }
   });
 
-  it('should assign correct defaults in a nested schema with repeated fields', function() {
+  it('should assign correct defaults in a nested schema with repeated fields', function () {
     var schema = new parquet.ParquetSchema({
       name: { type: 'UTF8' },
       stock: {
@@ -379,7 +377,7 @@ describe('ParquetSchema', function() {
         fields: {
           quantity: { type: 'INT64', optional: true },
           warehouse: { type: 'UTF8' },
-        }
+        },
       },
       price: { type: 'DOUBLE' },
     });
@@ -467,33 +465,33 @@ describe('ParquetSchema', function() {
     }
   });
 
-  it('should indicate which column had an invalid type in a simple flat schema', function() {
+  it('should indicate which column had an invalid type in a simple flat schema', function () {
     assert.throws(() => {
       new parquet.ParquetSchema({
-        quantity: {type: 'UNKNOWN'},
-      })
+        quantity: { type: 'UNKNOWN' },
+      });
     }, 'Invalid parquet type: UNKNOWN, for Column: quantity');
   });
 
-  it('should indicate each column which has an invalid type in a simple flat schema', function() {
+  it('should indicate each column which has an invalid type in a simple flat schema', function () {
     assert.throws(() => {
       new parquet.ParquetSchema({
-        quantity: {type: 'UNKNOWN'},
-        value: {type: 'UNKNOWN'},
-      })
+        quantity: { type: 'UNKNOWN' },
+        value: { type: 'UNKNOWN' },
+      });
     }, 'Invalid parquet type: UNKNOWN, for Column: quantity\nInvalid parquet type: UNKNOWN, for Column: value');
   });
 
-  it('should indicate each column which has an invalid type when one is correct in a simple flat schema', function() {
+  it('should indicate each column which has an invalid type when one is correct in a simple flat schema', function () {
     assert.throws(() => {
       new parquet.ParquetSchema({
-        quantity: {type: 'INT32'},
-        value: {type: 'UNKNOWN'},
-      })
+        quantity: { type: 'INT32' },
+        value: { type: 'UNKNOWN' },
+      });
     }, 'Invalid parquet type: UNKNOWN, for Column: value');
   });
 
-  it('should indicate each column which has an invalid type in a nested schema', function() {
+  it('should indicate each column which has an invalid type in a nested schema', function () {
     assert.throws(() => {
       new parquet.ParquetSchema({
         name: { type: 'UTF8' },
@@ -501,83 +499,82 @@ describe('ParquetSchema', function() {
           fields: {
             quantity: { type: 'UNKNOWN' },
             warehouse: { type: 'UNKNOWN' },
-          }
+          },
         },
         price: { type: 'UNKNOWN' },
-      })
+      });
     }, 'Invalid parquet type: UNKNOWN, for Column: stock.quantity\nInvalid parquet type: UNKNOWN, for Column: stock.warehouse');
   });
 
-  it('should indicate which column had an invalid encoding in a simple flat schema', function() {
+  it('should indicate which column had an invalid encoding in a simple flat schema', function () {
     assert.throws(() => {
       new parquet.ParquetSchema({
-        quantity: {type: 'INT32', encoding: 'UNKNOWN'},
-      })
+        quantity: { type: 'INT32', encoding: 'UNKNOWN' },
+      });
     }, 'Unsupported parquet encoding: UNKNOWN, for Column: quantity');
   });
 
-  it('should indicate which column had an invalid compression type in a simple flat schema', function() {
+  it('should indicate which column had an invalid compression type in a simple flat schema', function () {
     assert.throws(() => {
       new parquet.ParquetSchema({
-        quantity: {type: 'INT32', compression: 'UNKNOWN'},
-      })
+        quantity: { type: 'INT32', compression: 'UNKNOWN' },
+      });
     }, 'Unsupported compression method: UNKNOWN, for Column: quantity');
   });
 
-  it('should throw error given decimal with no precision', function() {
+  it('should throw error given decimal with no precision', function () {
     assert.throws(() => {
       new parquet.ParquetSchema({
-        test_decimal_col: {type: 'DECIMAL', scale: 4},
-      })
+        test_decimal_col: { type: 'DECIMAL', scale: 4 },
+      });
     }, 'invalid schema for type: DECIMAL, for Column: test_decimal_col, precision is required and must be be greater than 0');
   });
 
-  it('should NOT throw error given decimal with no scale', function() {
+  it('should NOT throw error given decimal with no scale', function () {
     assert.doesNotThrow(() => {
       new parquet.ParquetSchema({
-        test_decimal_col: {type: 'DECIMAL', precision: 4},
-      })
+        test_decimal_col: { type: 'DECIMAL', precision: 4 },
+      });
     });
   });
 
-  it('should throw error given decimal with negative precision', function() {
+  it('should throw error given decimal with negative precision', function () {
     assert.throws(() => {
       new parquet.ParquetSchema({
-        decimal_column: {type: 'DECIMAL', precision: -1, scale: 0},
-      })
+        decimal_column: { type: 'DECIMAL', precision: -1, scale: 0 },
+      });
     }, 'invalid schema for type: DECIMAL, for Column: decimal_column, precision is required and must be be greater than 0');
   });
 
-  it('should throw error given decimal with a non-integer precision', function() {
+  it('should throw error given decimal with a non-integer precision', function () {
     assert.throws(() => {
       new parquet.ParquetSchema({
-        decimal_column: {type: 'DECIMAL', precision: 6.1, scale: 5},
-      })
+        decimal_column: { type: 'DECIMAL', precision: 6.1, scale: 5 },
+      });
     }, 'invalid schema for type: DECIMAL, for Column: decimal_column, precision must be an integer');
   });
 
-  it('should throw error given decimal with a non-integer scale', function() {
+  it('should throw error given decimal with a non-integer scale', function () {
     assert.throws(() => {
       new parquet.ParquetSchema({
-        decimal_column: {type: 'DECIMAL', precision: 6, scale: 5.1},
-      })
+        decimal_column: { type: 'DECIMAL', precision: 6, scale: 5.1 },
+      });
     }, 'invalid schema for type: DECIMAL, for Column: decimal_column, scale must be an integer');
   });
 
-  it('should throw error given decimal with negative scale', function() {
+  it('should throw error given decimal with negative scale', function () {
     assert.throws(() => {
       new parquet.ParquetSchema({
-        decimal_column: {type: 'DECIMAL', precision: 6, scale: -1},
-      })
+        decimal_column: { type: 'DECIMAL', precision: 6, scale: -1 },
+      });
     }, 'invalid schema for type: DECIMAL, for Column: decimal_column, scale is required to be 0 or greater');
   });
 
-  it('should throw error given decimal with scale > precision', function() {
+  it('should throw error given decimal with scale > precision', function () {
     assert.throws(() => {
       new parquet.ParquetSchema({
-        decimal_column: {type: 'DECIMAL', precision: 5, scale: 6},
-      })
+        decimal_column: { type: 'DECIMAL', precision: 5, scale: 6 },
+      });
     }, 'invalid schema or precision for type: DECIMAL, for Column: decimal_column, precision must be greater than or equal to scale');
   });
-
 });

@@ -4,7 +4,7 @@ const assert = chai.assert;
 
 const EPSILON_DEFAULT = 0.01;
 
-exports.assertArrayEqualEpsilon = function(a, b, e) {
+exports.assertArrayEqualEpsilon = function (a, b, e) {
   if (!e) {
     e = EPSILON_DEFAULT;
   }
@@ -13,4 +13,4 @@ exports.assertArrayEqualEpsilon = function(a, b, e) {
   for (let i = 0; i < a.length; ++i) {
     assert(Math.abs(a[i] - b[i]) < e);
   }
-}
+};

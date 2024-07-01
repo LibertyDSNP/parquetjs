@@ -21,12 +21,12 @@ export const ParquetShredder = shredder;
 export const ParquetFieldBuilder = fields;
 
 export default {
-    ParquetEnvelopeReader,
-    ParquetReader,
-    ParquetEnvelopeWriter,
-    ParquetWriter,
-    ParquetTransformer,
-    ParquetSchema,
-    ParquetShredder,
-    ParquetFieldBuilder,
-}
+  ParquetEnvelopeReader,
+  ParquetReader,
+  ParquetEnvelopeWriter,
+  ParquetWriter,
+  ParquetTransformer,
+  ParquetSchema,
+  ParquetShredder,
+  ParquetFieldBuilder,
+};

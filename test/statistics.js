@@ -2,34 +2,33 @@
 const chai = require('chai');
 const assert = chai.assert;
 const parquet = require('../parquet');
-const TEST_VTIME =  new Date();
+const TEST_VTIME = new Date();
 
 const schema = new parquet.ParquetSchema({
-  name:       { type: 'UTF8' },
+  name: { type: 'UTF8' },
   //quantity:   { type: 'INT64', encoding: 'RLE', typeLength: 6, optional: true }, // parquet-mr actually doesnt support this
-  quantity:   { type: 'INT64', optional: true },
-  price:      { type: 'DOUBLE' },
-  date:       { type: 'TIMESTAMP_MICROS' },
-  day:        { type: 'DATE' },
-  finger:     { type: 'FIXED_LEN_BYTE_ARRAY', typeLength: 5 },
-  inter:      { type: 'INTERVAL', statistics: false },
+  quantity: { type: 'INT64', optional: true },
+  price: { type: 'DOUBLE' },
+  date: { type: 'TIMESTAMP_MICROS' },
+  day: { type: 'DATE' },
+  finger: { type: 'FIXED_LEN_BYTE_ARRAY', typeLength: 5 },
+  inter: { type: 'INTERVAL', statistics: false },
   stock: {
     repeated: true,
     fields: {
       quantity: { type: 'INT64', repeated: true },
       warehouse: { type: 'UTF8' },
-    }
+    },
   },
-  colour:     { type: 'UTF8', repeated: true },
-  meta_json:  { type: 'BSON', optional: true, statistics: false},
+  colour: { type: 'UTF8', repeated: true },
+  meta_json: { type: 'BSON', optional: true, statistics: false },
 });
 
-
-describe('statistics', async function() {
+describe('statistics', async function () {
   let row, reader;
 
-  before(async function(){
-    let writer = await parquet.ParquetWriter.openFile(schema, 'fruits-statistics.parquet', {pageSize: 3});
+  before(async function () {
+    let writer = await parquet.ParquetWriter.openFile(schema, 'fruits-statistics.parquet', { pageSize: 3 });
 
     await writer.appendRow({
       name: 'apples',
@@ -37,13 +36,13 @@ describe('statistics', async function() {
       price: 2.6,
       day: new Date('2017-11-26'),
       date: new Date(TEST_VTIME + 1000),
-      finger: "FNORD",
+      finger: 'FNORD',
       inter: { months: 10, days: 5, milliseconds: 777 },
       stock: [
-        { quantity: 10n, warehouse: "A" },
-        { quantity: 20n, warehouse: "B" }
+        { quantity: 10n, warehouse: 'A' },
+        { quantity: 20n, warehouse: 'B' },
       ],
-      colour: [ 'green', 'red' ]
+      colour: ['green', 'red'],
     });
 
     await writer.appendRow({
@@ -52,13 +51,13 @@ describe('statistics', async function() {
       price: 2.7,
       day: new Date('2018-03-03'),
       date: new Date(TEST_VTIME + 2000),
-      finger: "ABCDE",
+      finger: 'ABCDE',
       inter: { months: 42, days: 23, milliseconds: 777 },
       stock: {
         quantity: [50n, 33n, 34n, 35n, 36n],
-        warehouse: "X"
+        warehouse: 'X',
       },
-      colour: [ 'orange' ]
+      colour: ['orange'],
     });
 
     await writer.appendRow({
@@ -67,14 +66,14 @@ describe('statistics', async function() {
       quantity: 15n,
       day: new Date('2008-11-26'),
       date: new Date(TEST_VTIME + 8000),
-      finger: "XCVBN",
+      finger: 'XCVBN',
       inter: { months: 60, days: 1, milliseconds: 99 },
       stock: [
-        { quantity: 42n, warehouse: "f" },
-        { quantity: 21n, warehouse: "x" }
+        { quantity: 42n, warehouse: 'f' },
+        { quantity: 21n, warehouse: 'x' },
       ],
-      colour: [ 'green', 'brown', 'yellow' ],
-      meta_json: { expected_ship_date: TEST_VTIME }
+      colour: ['green', 'brown', 'yellow'],
+      meta_json: { expected_ship_date: TEST_VTIME },
     });
 
     await writer.appendRow({
@@ -82,10 +81,10 @@ describe('statistics', async function() {
       price: 3.2,
       day: new Date('2017-11-26'),
       date: new Date(TEST_VTIME + 6000),
-      finger: "FNORD",
+      finger: 'FNORD',
       inter: { months: 1, days: 15, milliseconds: 888 },
-      colour: [ 'yellow'],
-      meta_json: { shape: 'curved' }
+      colour: ['yellow'],
+      meta_json: { shape: 'curved' },
     });
 
     await writer.close();
@@ -93,21 +92,19 @@ describe('statistics', async function() {
     row = reader.metadata.row_groups[0];
   });
 
-  it('column statistics should match input', async function() {
+  it('column statistics should match input', async function () {
     const rowStats = (path) =>
-            row.columns.find(
-              d => d.meta_data.path_in_schema.join(',') == path
-            ).meta_data.statistics;
+      row.columns.find((d) => d.meta_data.path_in_schema.join(',') == path).meta_data.statistics;
 
-    assert.equal(rowStats('name').min_value,'apples');
-    assert.equal(rowStats('name').max_value,'oranges');
-    assert.equal(+rowStats('name').distinct_count,4);
-    assert.equal(+rowStats('name').null_count,0);
+    assert.equal(rowStats('name').min_value, 'apples');
+    assert.equal(rowStats('name').max_value, 'oranges');
+    assert.equal(+rowStats('name').distinct_count, 4);
+    assert.equal(+rowStats('name').null_count, 0);
 
-    assert.equal(rowStats('quantity').min_value,10);
-    assert.equal(rowStats('quantity').max_value,20);
-    assert.equal(+rowStats('quantity').distinct_count,3);
-    assert.equal(+rowStats('quantity').null_count,1);
+    assert.equal(rowStats('quantity').min_value, 10);
+    assert.equal(rowStats('quantity').max_value, 20);
+    assert.equal(+rowStats('quantity').distinct_count, 3);
+    assert.equal(+rowStats('quantity').null_count, 1);
 
     assert.equal(rowStats('price').min_value, 2.6);
     assert.equal(rowStats('price').max_value, 4.2);
@@ -143,13 +140,12 @@ describe('statistics', async function() {
     assert.equal(rowStats('meta_json'), null);
   });
 
-  it('columnIndex statistics should match input', async function() {
-
+  it('columnIndex statistics should match input', async function () {
     /*  we split the data into pages by 3, so we should have page 1 with 3 recs and page 2 with 1 */
 
     const name = await reader.envelopeReader.readColumnIndex('name', row);
-    assert.deepEqual(name.min_values, ['apples','banana']);
-    assert.deepEqual(name.max_values, ['oranges','banana']);
+    assert.deepEqual(name.min_values, ['apples', 'banana']);
+    assert.deepEqual(name.max_values, ['oranges', 'banana']);
     assert.deepEqual(name.null_pages, [false, false]);
     assert.deepEqual(name.boundary_order, 0);
 
@@ -163,66 +159,69 @@ describe('statistics', async function() {
     assert.deepEqual(price.min_values, [2.6, 3.2]);
     assert.deepEqual(price.max_values, [4.2, 3.2]);
     assert.deepEqual(price.null_pages, [false, false]);
-    assert.deepEqual(price.boundary_order, 0)
+    assert.deepEqual(price.boundary_order, 0);
 
     const day = await reader.envelopeReader.readColumnIndex('day', row);
-    assert.deepEqual(day.min_values, [ new Date('2008-11-26'), new Date('2017-11-26') ]);
-    assert.deepEqual(day.max_values, [ new Date('2018-03-03'), new Date('2017-11-26') ]);
+    assert.deepEqual(day.min_values, [new Date('2008-11-26'), new Date('2017-11-26')]);
+    assert.deepEqual(day.max_values, [new Date('2018-03-03'), new Date('2017-11-26')]);
     assert.deepEqual(day.null_pages, [false, false]);
-    assert.deepEqual(day.boundary_order, 0)
+    assert.deepEqual(day.boundary_order, 0);
 
     const finger = await reader.envelopeReader.readColumnIndex('finger', row);
-    assert.deepEqual(finger.min_values, [ Buffer.from('ABCDE'), Buffer.from('FNORD') ]);
-    assert.deepEqual(finger.max_values, [ Buffer.from('XCVBN'), Buffer.from('FNORD')]);
+    assert.deepEqual(finger.min_values, [Buffer.from('ABCDE'), Buffer.from('FNORD')]);
+    assert.deepEqual(finger.max_values, [Buffer.from('XCVBN'), Buffer.from('FNORD')]);
     assert.deepEqual(finger.null_pages, [false, false]);
-    assert.deepEqual(finger.boundary_order, 0)
+    assert.deepEqual(finger.boundary_order, 0);
 
     const stockQuantity = await reader.envelopeReader.readColumnIndex('stock,quantity', row);
-    assert.deepEqual(stockQuantity.min_values, [ 10n, undefined ]);
-    assert.deepEqual(stockQuantity.max_values, [ 50n, undefined ]);
+    assert.deepEqual(stockQuantity.min_values, [10n, undefined]);
+    assert.deepEqual(stockQuantity.max_values, [50n, undefined]);
     assert.deepEqual(stockQuantity.null_pages, [false, false]);
-    assert.deepEqual(stockQuantity.boundary_order, 0)
+    assert.deepEqual(stockQuantity.boundary_order, 0);
 
     const stockWarehouse = await reader.envelopeReader.readColumnIndex('stock,warehouse', row);
-    assert.deepEqual(stockWarehouse.min_values, [ 'A', undefined ]);
-    assert.deepEqual(stockWarehouse.max_values, [ 'x', undefined ]);
+    assert.deepEqual(stockWarehouse.min_values, ['A', undefined]);
+    assert.deepEqual(stockWarehouse.max_values, ['x', undefined]);
     assert.deepEqual(stockWarehouse.null_pages, [false, false]);
-    assert.deepEqual(stockWarehouse.boundary_order, 0)
+    assert.deepEqual(stockWarehouse.boundary_order, 0);
 
     const colour = await reader.envelopeReader.readColumnIndex('colour', row);
-    assert.deepEqual(colour.min_values, [ 'brown', 'yellow' ]);
-    assert.deepEqual(colour.max_values, [ 'yellow', 'yellow' ]);
+    assert.deepEqual(colour.min_values, ['brown', 'yellow']);
+    assert.deepEqual(colour.max_values, ['yellow', 'yellow']);
     assert.deepEqual(colour.null_pages, [false, false]);
-    assert.deepEqual(colour.boundary_order, 0)
+    assert.deepEqual(colour.boundary_order, 0);
 
-    const inter = await reader.envelopeReader.readColumnIndex('inter', row).catch(e => e);
-    assert.equal(inter.message,'Column Index Missing');
+    const inter = await reader.envelopeReader.readColumnIndex('inter', row).catch((e) => e);
+    assert.equal(inter.message, 'Column Index Missing');
 
-    const meta_json = await reader.envelopeReader.readColumnIndex('meta_json', row).catch(e => e);
-    assert.equal(meta_json.message,'Column Index Missing');
+    const meta_json = await reader.envelopeReader.readColumnIndex('meta_json', row).catch((e) => e);
+    assert.equal(meta_json.message, 'Column Index Missing');
   });
 
-  it('Setting pageIndex: false results in no column_index and no offset_index', async function() {
-    let writer = await parquet.ParquetWriter.openFile(schema, 'fruits-no-index.parquet', {pageSize: 3, pageIndex: false});
+  it('Setting pageIndex: false results in no column_index and no offset_index', async function () {
+    let writer = await parquet.ParquetWriter.openFile(schema, 'fruits-no-index.parquet', {
+      pageSize: 3,
+      pageIndex: false,
+    });
     await writer.appendRow({
       name: 'apples',
       quantity: 10n,
       price: 2.6,
       day: new Date('2017-11-26'),
       date: new Date(TEST_VTIME + 1000),
-      finger: "FNORD",
+      finger: 'FNORD',
       inter: { months: 10, days: 5, milliseconds: 777 },
       stock: [
-        { quantity: 10n, warehouse: "A" },
-        { quantity: 20n, warehouse: "B" }
+        { quantity: 10n, warehouse: 'A' },
+        { quantity: 20n, warehouse: 'B' },
       ],
-      colour: [ 'green', 'red' ],
-      meta_json: { expected_ship_date: TEST_VTIME }
+      colour: ['green', 'red'],
+      meta_json: { expected_ship_date: TEST_VTIME },
     });
     await writer.close();
 
     let reader2 = await parquet.ParquetReader.openFile('fruits-no-index.parquet');
-    reader2.metadata.row_groups[0].columns.forEach(column => {
+    reader2.metadata.row_groups[0].columns.forEach((column) => {
       assert.equal(column.offset_index_offset, null);
       assert.equal(column.offset_index_length, null);
       assert.equal(column.column_index_offset, null);

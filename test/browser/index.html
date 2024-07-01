@@ -1,22 +1,24 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
+  <head>
     <title>Mocha Tests</title>
-    <link rel="stylesheet" href="../../node_modules/mocha/mocha.css">
-</head>
+    <link rel="stylesheet" href="../../node_modules/mocha/mocha.css" />
+  </head>
 
-<body>
+  <body>
     <div id="mocha"></div>
     <script src="../../node_modules/mocha/mocha.js"></script>
     <script src="../../node_modules/chai/chai.js"></script>
-    <script>mocha.setup('bdd')</script>
+    <script>
+      mocha.setup('bdd');
+    </script>
 
     <!-- load code you want to test here -->
     <script src="./main.js"></script>
     <!-- load your test files here -->
 
     <script>
-        mocha.run();
+      mocha.run();
     </script>
-</body>
+  </body>
 </html>

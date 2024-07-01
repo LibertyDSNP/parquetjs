@@ -12,11 +12,8 @@
     "sourceMap": false,
     "strict": true,
     "target": "ESNext",
-    "typeRoots": [
-      "node_modules/@types",
-      "gen-nodejs",
-    ]
+    "typeRoots": ["node_modules/@types", "gen-nodejs"]
   },
-  "include":  ["parquet.ts","lib/**/*", "gen-nodejs/*", "browser/*.ts"],
+  "include": ["parquet.ts", "lib/**/*", "gen-nodejs/*", "browser/*.ts"],
   "files": ["lib/custom.d.ts"]
 }

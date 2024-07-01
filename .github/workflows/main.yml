@@ -2,9 +2,9 @@
 name: Tests CI
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ '**' ]
+    branches: ['**']
 jobs:
   test:
     runs-on: ubuntu-latest

@@ -1,7 +1,21 @@
 {
-    "type": "object",
-    "properties": {
-      "person": {
+  "type": "object",
+  "properties": {
+    "person": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "age": {
+          "type": "integer"
+        }
+      },
+      "required": ["name", "age"]
+    },
+    "people": {
+      "type": "array",
+      "items": {
         "type": "object",
         "properties": {
           "name": {
@@ -12,22 +26,8 @@
           }
         },
         "required": ["name", "age"]
-      },
-      "people": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "age": {
-              "type": "integer"
-            }
-          },
-          "required": ["name", "age"]
-        }
       }
-    },
-    "required": ["person", "people"]
-  }
+    }
+  },
+  "required": ["person", "people"]
+}

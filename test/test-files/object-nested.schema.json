@@ -1,68 +1,68 @@
 {
-    "type": "object",
-    "properties": {
-        "string_field": {
+  "type": "object",
+  "properties": {
+    "string_field": {
+      "type": "string"
+    },
+    "int_field": {
+      "type": "integer"
+    },
+    "array_field": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "additionalItems": false
+    },
+    "timestamp_field": {
+      "type": "string"
+    },
+    "obj_field": {
+      "type": "object",
+      "properties": {
+        "sub1": {
+          "type": "string"
+        },
+        "sub2": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "struct_field": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sub3": {
             "type": "string"
-        },
-        "int_field": {
-            "type": "integer"
-        },
-        "array_field": {
-            "type": "array",
-            "items": {
-                "type": "string"
-            },
-            "additionalItems": false
-        },
-        "timestamp_field": {
+          },
+          "sub4": {
             "type": "string"
-        },
-        "obj_field": {
+          },
+          "sub5": {
             "type": "object",
             "properties": {
-                "sub1": {
-                    "type": "string"
-                },
-                "sub2": {
-                    "type": "string"
-                }
+              "sub6": {
+                "type": "string"
+              },
+              "sub7": {
+                "type": "string"
+              }
             },
             "additionalProperties": false
-        },
-        "struct_field": {
+          },
+          "sub8": {
             "type": "array",
             "items": {
-                "type": "object",
-                "properties": {
-                    "sub3": {
-                        "type": "string"
-                    },
-                    "sub4": {
-                        "type": "string"
-                    },
-                    "sub5": {
-                        "type": "object",
-                        "properties": {
-                            "sub6": {
-                                "type": "string"
-                            },
-                            "sub7": {
-                                "type": "string"
-                            }
-                        },
-                        "additionalProperties": false
-                    },
-                    "sub8": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "additionalProperties": false
-            },
-            "additionalItems": false
-        }
-    },
-    "additionalProperties": false
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "additionalItems": false
+    }
+  },
+  "additionalProperties": false
 }

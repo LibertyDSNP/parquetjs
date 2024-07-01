@@ -1,7 +1,7 @@
 'use strict';
 const parquet = require('..');
 
-process.on('unhandledRejection', r => console.error(r));
+process.on('unhandledRejection', (r) => console.error(r));
 
 // write a new file 'fruits.parquet'
 async function example() {
@@ -14,7 +14,7 @@ async function example() {
       fields: {
         quantity: { type: 'INT64', repeated: true },
         warehouse: { type: 'UTF8' },
-      }
+      },
     },
   });
 
@@ -23,27 +23,27 @@ async function example() {
   await writer.appendRow({
     name: 'apples',
     price: 2.6,
-    colour: [ 'green', 'red' ],
+    colour: ['green', 'red'],
     stock: [
-      { quantity: 10, warehouse: "A" },
-      { quantity: 20, warehouse: "B" }
-    ]
+      { quantity: 10, warehouse: 'A' },
+      { quantity: 20, warehouse: 'B' },
+    ],
   });
 
   await writer.appendRow({
     name: 'oranges',
     price: 2.7,
-    colour: [ 'orange' ],
+    colour: ['orange'],
     stock: {
       quantity: [50, 75],
-      warehouse: "X"
-    }
+      warehouse: 'X',
+    },
   });
 
   await writer.appendRow({
     name: 'kiwi',
     price: 4.2,
-    colour: [ 'green', 'brown' ]
+    colour: ['green', 'brown'],
   });
 
   await writer.close();
@@ -53,7 +53,7 @@ async function example() {
   {
     let cursor = reader.getCursor();
     let record = null;
-    while (record = await cursor.next()) {
+    while ((record = await cursor.next())) {
       console.log(record);
     }
   }
@@ -61,14 +61,12 @@ async function example() {
   {
     let cursor = reader.getCursor([['name'], ['stock', 'warehouse']]);
     let record = null;
-    while (record = await cursor.next()) {
+    while ((record = await cursor.next())) {
       console.log(record);
     }
   }
 
   await reader.close();
-
 }
 
 example();
-

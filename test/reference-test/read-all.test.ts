@@ -1,6 +1,6 @@
-import { expect } from "chai";
-import path from "node:path";
-import fs from "node:fs";
+import { expect } from 'chai';
+import path from 'node:path';
+import fs from 'node:fs';
 
 import parquet from '../../parquet';
 
@@ -27,10 +27,10 @@ const unsupported = [
   'large_string_map.brotli.parquet', // BUG?
 ];
 
-describe("Read Test for all files", function () {
-
-  const listOfFiles = fs.readdirSync(path.join(__dirname, 'files'))
-    .filter(x => x.endsWith(".parquet") && !unsupported.includes(x));
+describe('Read Test for all files', function () {
+  const listOfFiles = fs
+    .readdirSync(path.join(__dirname, 'files'))
+    .filter((x) => x.endsWith('.parquet') && !unsupported.includes(x));
 
   for (const filename of listOfFiles) {
     if (onlyTest && onlyTest !== filename) continue;
@@ -39,10 +39,10 @@ describe("Read Test for all files", function () {
       const schema = reader.getSchema();
       expect(schema.fieldList).to.have.length.greaterThan(0);
       const cursor = reader.getCursor();
-      const record = await cursor.next() as any;
+      const record = (await cursor.next()) as any;
       // Expect the same keys as top-level fields
-      const expectedRecordKeys = schema.fieldList.filter(x => x.path.length === 1).map(x => x.name);
+      const expectedRecordKeys = schema.fieldList.filter((x) => x.path.length === 1).map((x) => x.name);
       expect(Object.keys(record)).to.deep.equal(expectedRecordKeys);
-    })
+    });
   }
 });

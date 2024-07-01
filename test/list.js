@@ -3,7 +3,6 @@ const chai = require('chai');
 const assert = chai.assert;
 const parquet = require('../parquet');
 
-
 /*
   This test creates a test file that has an annotated LIST wrapper that works with AWS Athena
   Currently the schema (and the input data) needs to follow the specification for an annotated list
@@ -48,23 +47,29 @@ describe('struct list', async function () {
             element: {
               fields: {
                 a: { type: 'UTF8' },
-                b: { type: 'INT64' }
-              }
-            }
-          }
-        }
-      }
-    }
+                b: { type: 'INT64' },
+              },
+            },
+          },
+        },
+      },
+    },
   });
 
   const row1 = {
     id: 'Row1',
-    test: { list: [{ element: { a: 'test1', b: 1n } }, { element: { a: 'test2', b: 2n } }, { element: { a: 'test3', b: 3n } }] }
+    test: {
+      list: [
+        { element: { a: 'test1', b: 1n } },
+        { element: { a: 'test2', b: 2n } },
+        { element: { a: 'test3', b: 3n } },
+      ],
+    },
   };
 
   const row2 = {
     id: 'Row2',
-    test: { list: [{ element: { a: 'test4', b: 4n } }] }
+    test: { list: [{ element: { a: 'test4', b: 4n } }] },
   };
 
   before(async function () {
@@ -105,22 +110,22 @@ describe('array list', async function () {
           repeated: true,
           fields: {
             element: {
-              type: 'UTF8'
-            }
-          }
-        }
-      }
-    }
+              type: 'UTF8',
+            },
+          },
+        },
+      },
+    },
   });
 
   const row1 = {
     id: 'Row1',
-    test: { list: [{ element: "abcdef" }, { element: "fedcba" }] }
+    test: { list: [{ element: 'abcdef' }, { element: 'fedcba' }] },
   };
 
   const row2 = {
     id: 'Row2',
-    test: { list: [{ element: "ghijkl" }, { element: "lkjihg" }] }
+    test: { list: [{ element: 'ghijkl' }, { element: 'lkjihg' }] },
   };
 
   before(async function () {
@@ -148,4 +153,3 @@ describe('array list', async function () {
     assert.deepEqual(row, row2);
   });
 });
-

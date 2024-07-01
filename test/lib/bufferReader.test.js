@@ -1,169 +1,186 @@
-import chai, { expect } from "chai"
-import sinon from "sinon"
-import sinonChai from "sinon-chai";
+import chai, { expect } from 'chai';
+import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
 import sinonChaiInOrder from 'sinon-chai-in-order';
-import BufferReader from "../../lib/bufferReader"
-import { ParquetEnvelopeReader } from "../../lib/reader";
+import BufferReader from '../../lib/bufferReader';
+import { ParquetEnvelopeReader } from '../../lib/reader';
 
 chai.use(sinonChai);
 chai.use(sinonChaiInOrder);
 
-describe("bufferReader", () => {
+describe('bufferReader', () => {
   let reader;
 
   beforeEach(() => {
     const mockEnvelopeReader = sinon.fake();
     reader = new BufferReader(mockEnvelopeReader, {});
-  })
-  describe("#read", async () => {
-    describe("given that reader is scheduled", () => {
-      it("adds an item to the queue", () => {
+  });
+  describe('#read', async () => {
+    describe('given that reader is scheduled', () => {
+      it('adds an item to the queue', () => {
         const offset = 1;
         const length = 2;
         reader.read(offset, length);
         expect(reader.queue.length).to.eql(1);
-      })
-    })
-  })
+      });
+    });
+  });
 
-  describe("#processQueue", () => {
-    it("only enqueues an item and reads on flushing the queue", async () => {
+  describe('#processQueue', () => {
+    it('only enqueues an item and reads on flushing the queue', async () => {
       const mockResolve = sinon.spy();
       const mockResolve2 = sinon.spy();
-      reader.envelopeReader = { readFn: sinon.fake.returns(Buffer.from("buffer", "utf8")) }
+      reader.envelopeReader = { readFn: sinon.fake.returns(Buffer.from('buffer', 'utf8')) };
 
-      reader.queue = [{
-        offset: 1,
-        length: 1,
-        resolve: mockResolve,
-      }, {
-        offset: 2,
-        length: 4,
-        resolve: mockResolve2,
-      }];
+      reader.queue = [
+        {
+          offset: 1,
+          length: 1,
+          resolve: mockResolve,
+        },
+        {
+          offset: 2,
+          length: 4,
+          resolve: mockResolve2,
+        },
+      ];
 
       await reader.processQueue();
 
+      sinon.assert.calledWith(mockResolve, Buffer.from('b', 'utf8'));
+      sinon.assert.calledWith(mockResolve2, Buffer.from('uffe', 'utf8'));
+    });
 
-      sinon.assert.calledWith(mockResolve, Buffer.from("b", "utf8"));
-      sinon.assert.calledWith(mockResolve2, Buffer.from("uffe", "utf8"));
-    })
-
-    it("enqueues items and then reads them", async () => {
+    it('enqueues items and then reads them', async () => {
       const mockResolve = sinon.spy();
       const mockResolve2 = sinon.spy();
       reader.maxLength = 1;
-      reader.envelopeReader = { readFn: sinon.fake.returns(Buffer.from("buffer", "utf8")) }
+      reader.envelopeReader = { readFn: sinon.fake.returns(Buffer.from('buffer', 'utf8')) };
 
-      reader.queue = [{
-        offset: 1,
-        length: 1,
-        resolve: mockResolve,
-      }, {
-        offset: 2,
-        length: 4,
-        resolve: mockResolve2,
-      }];
-
-      await reader.processQueue();
-
-      sinon.assert.calledWith(mockResolve, Buffer.from("b", "utf8"));
-      sinon.assert.calledWith(mockResolve2, Buffer.from("uffe", "utf8"));
-    })
-
-    it("enqueues items and reads them in order", async () => {
-      const mockResolve = sinon.spy();
-      reader.envelopeReader = { readFn: sinon.fake.returns(Buffer.from("thisisalargebuffer", "utf8")) }
-
-      reader.queue = [{
-        offset: 1,
-        length: 4,
-        resolve: mockResolve,
-      }, {
-        offset: 5,
-        length: 2,
-        resolve: mockResolve,
-      }, {
-        offset: 7,
-        length: 1,
-        resolve: mockResolve,
-      }, {
-        offset: 8,
-        length: 5,
-        resolve: mockResolve,
-      }, {
-        offset: 13,
-        length: 6,
-        resolve: mockResolve,
-      }
+      reader.queue = [
+        {
+          offset: 1,
+          length: 1,
+          resolve: mockResolve,
+        },
+        {
+          offset: 2,
+          length: 4,
+          resolve: mockResolve2,
+        },
       ];
 
       await reader.processQueue();
 
-      expect(mockResolve).inOrder.to.have.been.calledWith(Buffer.from("this", "utf8"))
-        .subsequently.calledWith(Buffer.from("is", "utf8"))
-        .subsequently.calledWith(Buffer.from("a", "utf8"))
-        .subsequently.calledWith(Buffer.from("large", "utf8"))
-        .subsequently.calledWith(Buffer.from("buffer", "utf8"));
-    })
+      sinon.assert.calledWith(mockResolve, Buffer.from('b', 'utf8'));
+      sinon.assert.calledWith(mockResolve2, Buffer.from('uffe', 'utf8'));
+    });
 
-    it("should read even if the maxSpan has been exceeded", async () => {
+    it('enqueues items and reads them in order', async () => {
+      const mockResolve = sinon.spy();
+      reader.envelopeReader = { readFn: sinon.fake.returns(Buffer.from('thisisalargebuffer', 'utf8')) };
+
+      reader.queue = [
+        {
+          offset: 1,
+          length: 4,
+          resolve: mockResolve,
+        },
+        {
+          offset: 5,
+          length: 2,
+          resolve: mockResolve,
+        },
+        {
+          offset: 7,
+          length: 1,
+          resolve: mockResolve,
+        },
+        {
+          offset: 8,
+          length: 5,
+          resolve: mockResolve,
+        },
+        {
+          offset: 13,
+          length: 6,
+          resolve: mockResolve,
+        },
+      ];
+
+      await reader.processQueue();
+
+      expect(mockResolve)
+        .inOrder.to.have.been.calledWith(Buffer.from('this', 'utf8'))
+        .subsequently.calledWith(Buffer.from('is', 'utf8'))
+        .subsequently.calledWith(Buffer.from('a', 'utf8'))
+        .subsequently.calledWith(Buffer.from('large', 'utf8'))
+        .subsequently.calledWith(Buffer.from('buffer', 'utf8'));
+    });
+
+    it('should read even if the maxSpan has been exceeded', async () => {
       const mockResolve = sinon.spy();
       reader.maxSpan = 5;
-      reader.envelopeReader = { readFn: sinon.fake.returns(Buffer.from("willslicefrombeginning", "utf8")) }
+      reader.envelopeReader = { readFn: sinon.fake.returns(Buffer.from('willslicefrombeginning', 'utf8')) };
 
-      reader.queue = [{
-        offset: 1,
-        length: 4,
-        resolve: mockResolve,
-      }, {
-        offset: 10,
-        length: 4,
-        resolve: mockResolve,
-      }, {
-        offset: 10,
-        length: 9,
-        resolve: mockResolve,
-      }, {
-        offset: 10,
-        length: 13,
-        resolve: mockResolve,
-      }, {
-        offset: 10,
-        length: 22,
-        resolve: mockResolve,
-      }
+      reader.queue = [
+        {
+          offset: 1,
+          length: 4,
+          resolve: mockResolve,
+        },
+        {
+          offset: 10,
+          length: 4,
+          resolve: mockResolve,
+        },
+        {
+          offset: 10,
+          length: 9,
+          resolve: mockResolve,
+        },
+        {
+          offset: 10,
+          length: 13,
+          resolve: mockResolve,
+        },
+        {
+          offset: 10,
+          length: 22,
+          resolve: mockResolve,
+        },
       ];
 
       await reader.processQueue();
 
-      expect(mockResolve).inOrder.to.have.been.calledWith(Buffer.from("will", "utf8"))
-        .subsequently.calledWith(Buffer.from("will", "utf8"))
-        .subsequently.calledWith(Buffer.from("willslice", "utf8"))
-        .subsequently.calledWith(Buffer.from("willslicefrom", "utf8"))
-        .subsequently.calledWith(Buffer.from("willslicefrombeginning", "utf8"));
-    })
-  })
-})
+      expect(mockResolve)
+        .inOrder.to.have.been.calledWith(Buffer.from('will', 'utf8'))
+        .subsequently.calledWith(Buffer.from('will', 'utf8'))
+        .subsequently.calledWith(Buffer.from('willslice', 'utf8'))
+        .subsequently.calledWith(Buffer.from('willslicefrom', 'utf8'))
+        .subsequently.calledWith(Buffer.from('willslicefrombeginning', 'utf8'));
+    });
+  });
+});
 
-describe("bufferReader Integration Tests", () => {
+describe('bufferReader Integration Tests', () => {
   let reader;
   let envelopeReader;
 
-  describe("Reading a file", async () => {
+  describe('Reading a file', async () => {
     beforeEach(async () => {
-      envelopeReader = await ParquetEnvelopeReader.openFile("./test/lib/test.txt", {});
+      envelopeReader = await ParquetEnvelopeReader.openFile('./test/lib/test.txt', {});
       reader = new BufferReader(envelopeReader);
-    })
+    });
 
-    it("should properly read the file", async () => {
+    it('should properly read the file', async () => {
       const buffer = await reader.read(0, 5);
       const buffer2 = await reader.read(6, 5);
       const buffer3 = await reader.read(12, 5);
 
-      expect(buffer).to.eql(Buffer.from("Lorem"));
-      expect(buffer2).to.eql(Buffer.from("ipsum"));
-      expect(buffer3).to.eql(Buffer.from("dolor"));
-    })
-  })
-})
+      expect(buffer).to.eql(Buffer.from('Lorem'));
+      expect(buffer2).to.eql(Buffer.from('ipsum'));
+      expect(buffer3).to.eql(Buffer.from('dolor'));
+    });
+  });
+});

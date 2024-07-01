@@ -1,18 +1,18 @@
 {
-    "type": "object",
-    "properties": {
-      "numberArray": {
-        "type": "array",
-        "items": {
-          "type": "number"
-        }
-      },
-      "stringArray": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        }
+  "type": "object",
+  "properties": {
+    "numberArray": {
+      "type": "array",
+      "items": {
+        "type": "number"
       }
     },
-    "required": ["numberArray", "stringArray"]
-  }
+    "stringArray": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": ["numberArray", "stringArray"]
+}

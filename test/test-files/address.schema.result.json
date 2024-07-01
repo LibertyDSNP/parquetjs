@@ -48,9 +48,7 @@
       "name": "post-office-box",
       "primitiveType": "BYTE_ARRAY",
       "originalType": "UTF8",
-      "path": [
-        "post-office-box"
-      ],
+      "path": ["post-office-box"],
       "repetitionType": "OPTIONAL",
       "encoding": "PLAIN",
       "compression": "UNCOMPRESSED",
@@ -61,9 +59,7 @@
       "name": "extended-address",
       "primitiveType": "BYTE_ARRAY",
       "originalType": "UTF8",
-      "path": [
-        "extended-address"
-      ],
+      "path": ["extended-address"],
       "repetitionType": "OPTIONAL",
       "encoding": "PLAIN",
       "compression": "UNCOMPRESSED",
@@ -74,9 +70,7 @@
       "name": "street-address",
       "primitiveType": "BYTE_ARRAY",
       "originalType": "UTF8",
-      "path": [
-        "street-address"
-      ],
+      "path": ["street-address"],
       "repetitionType": "OPTIONAL",
       "encoding": "PLAIN",
       "compression": "UNCOMPRESSED",
@@ -87,9 +81,7 @@
       "name": "locality",
       "primitiveType": "BYTE_ARRAY",
       "originalType": "UTF8",
-      "path": [
-        "locality"
-      ],
+      "path": ["locality"],
       "repetitionType": "REQUIRED",
       "encoding": "PLAIN",
       "compression": "UNCOMPRESSED",
@@ -100,9 +92,7 @@
       "name": "region",
       "primitiveType": "BYTE_ARRAY",
       "originalType": "UTF8",
-      "path": [
-        "region"
-      ],
+      "path": ["region"],
       "repetitionType": "REQUIRED",
       "encoding": "PLAIN",
       "compression": "UNCOMPRESSED",
@@ -113,9 +103,7 @@
       "name": "postal-code",
       "primitiveType": "BYTE_ARRAY",
       "originalType": "UTF8",
-      "path": [
-        "postal-code"
-      ],
+      "path": ["postal-code"],
       "repetitionType": "OPTIONAL",
       "encoding": "PLAIN",
       "compression": "UNCOMPRESSED",
@@ -126,9 +114,7 @@
       "name": "country-name",
       "primitiveType": "BYTE_ARRAY",
       "originalType": "UTF8",
-      "path": [
-        "country-name"
-      ],
+      "path": ["country-name"],
       "repetitionType": "REQUIRED",
       "encoding": "PLAIN",
       "compression": "UNCOMPRESSED",
@@ -141,9 +127,7 @@
       "name": "post-office-box",
       "primitiveType": "BYTE_ARRAY",
       "originalType": "UTF8",
-      "path": [
-        "post-office-box"
-      ],
+      "path": ["post-office-box"],
       "repetitionType": "OPTIONAL",
       "encoding": "PLAIN",
       "compression": "UNCOMPRESSED",
@@ -154,9 +138,7 @@
       "name": "extended-address",
       "primitiveType": "BYTE_ARRAY",
       "originalType": "UTF8",
-      "path": [
-        "extended-address"
-      ],
+      "path": ["extended-address"],
       "repetitionType": "OPTIONAL",
       "encoding": "PLAIN",
       "compression": "UNCOMPRESSED",
@@ -167,9 +149,7 @@
       "name": "street-address",
       "primitiveType": "BYTE_ARRAY",
       "originalType": "UTF8",
-      "path": [
-        "street-address"
-      ],
+      "path": ["street-address"],
       "repetitionType": "OPTIONAL",
       "encoding": "PLAIN",
       "compression": "UNCOMPRESSED",
@@ -180,9 +160,7 @@
       "name": "locality",
       "primitiveType": "BYTE_ARRAY",
       "originalType": "UTF8",
-      "path": [
-        "locality"
-      ],
+      "path": ["locality"],
       "repetitionType": "REQUIRED",
       "encoding": "PLAIN",
       "compression": "UNCOMPRESSED",
@@ -193,9 +171,7 @@
       "name": "region",
       "primitiveType": "BYTE_ARRAY",
       "originalType": "UTF8",
-      "path": [
-        "region"
-      ],
+      "path": ["region"],
       "repetitionType": "REQUIRED",
       "encoding": "PLAIN",
       "compression": "UNCOMPRESSED",
@@ -206,9 +182,7 @@
       "name": "postal-code",
       "primitiveType": "BYTE_ARRAY",
       "originalType": "UTF8",
-      "path": [
-        "postal-code"
-      ],
+      "path": ["postal-code"],
       "repetitionType": "OPTIONAL",
       "encoding": "PLAIN",
       "compression": "UNCOMPRESSED",
@@ -219,9 +193,7 @@
       "name": "country-name",
       "primitiveType": "BYTE_ARRAY",
       "originalType": "UTF8",
-      "path": [
-        "country-name"
-      ],
+      "path": ["country-name"],
       "repetitionType": "REQUIRED",
       "encoding": "PLAIN",
       "compression": "UNCOMPRESSED",

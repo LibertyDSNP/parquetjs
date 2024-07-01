@@ -3,12 +3,13 @@ const chai = require('chai');
 const assert = chai.assert;
 const parquet = require('../parquet');
 
-describe('ParquetSchema', function() {
-  it('should handle complex nesting', function() {
+describe('ParquetSchema', function () {
+  it('should handle complex nesting', function () {
     var metadata = {
       version: 1,
       schema: [
-        { type: null,
+        {
+          type: null,
           type_length: null,
           repetition_type: null,
           name: 'root',
@@ -16,8 +17,9 @@ describe('ParquetSchema', function() {
           converted_type: null,
           scale: null,
           precision: null,
-          field_id: null
-        }, {
+          field_id: null,
+        },
+        {
           type: null,
           type_length: null,
           repetition_type: 0,
@@ -26,8 +28,9 @@ describe('ParquetSchema', function() {
           converted_type: null,
           scale: null,
           precision: null,
-          field_id: null
-        }, {
+          field_id: null,
+        },
+        {
           type: null,
           type_length: null,
           repetition_type: 0,
@@ -36,8 +39,9 @@ describe('ParquetSchema', function() {
           converted_type: null,
           scale: null,
           precision: null,
-          field_id: null
-        }, {
+          field_id: null,
+        },
+        {
           type: null,
           type_length: null,
           repetition_type: 0,
@@ -46,8 +50,9 @@ describe('ParquetSchema', function() {
           converted_type: null,
           scale: null,
           precision: null,
-          field_id: null
-        }, {
+          field_id: null,
+        },
+        {
           type: 6,
           type_length: null,
           repetition_type: 0,
@@ -56,8 +61,9 @@ describe('ParquetSchema', function() {
           converted_type: 0,
           scale: null,
           precision: null,
-          field_id: null
-       }, {
+          field_id: null,
+        },
+        {
           type: null,
           type_length: null,
           repetition_type: 0,
@@ -66,8 +72,9 @@ describe('ParquetSchema', function() {
           converted_type: null,
           scale: null,
           precision: null,
-          field_id: null
-        }, {
+          field_id: null,
+        },
+        {
           type: 6,
           type_length: null,
           repetition_type: 0,
@@ -76,8 +83,9 @@ describe('ParquetSchema', function() {
           converted_type: 0,
           scale: null,
           precision: null,
-          field_id: null
-        }, {
+          field_id: null,
+        },
+        {
           type: 6,
           type_length: null,
           repetition_type: 0,
@@ -86,8 +94,9 @@ describe('ParquetSchema', function() {
           converted_type: 0,
           scale: null,
           precision: null,
-          field_id: null
-        }, {
+          field_id: null,
+        },
+        {
           type: 6,
           type_length: null,
           repetition_type: 0,
@@ -96,155 +105,123 @@ describe('ParquetSchema', function() {
           converted_type: 0,
           scale: null,
           precision: null,
-          field_id: null
-        }
-      ]
+          field_id: null,
+        },
+      ],
     };
 
     const expected = {
-      "a": {
-        "name": "a",
-        "path": [
-          "a"
-        ],
-        "repetitionType": "REQUIRED",
-        "statistics": undefined,
-        "rLevelMax": 0,
-        "dLevelMax": 0,
-        "isNested": true,
-        "fieldCount": 2,
-        "fields": {
-          "b": {
-            "name": "b",
-            "path": [
-              "a",
-              "b"
-            ],
-            "repetitionType": "REQUIRED",
-            "statistics": undefined,
-            "rLevelMax": 0,
-            "dLevelMax": 0,
-            "isNested": true,
-            "fieldCount": 2,
-            "fields": {
-              "c": {
-                "name": "c",
-                "path": [
-                  "a",
-                  "b",
-                  "c"
-                ],
-                "repetitionType": "REQUIRED",
-                "statistics": undefined,
-                "rLevelMax": 0,
-                "dLevelMax": 0,
-                "isNested": true,
-                "fieldCount": 1,
-                "fields": {
-                  "d": {
-                    "name": "d",
-                    "primitiveType": "BYTE_ARRAY",
-                    "originalType": "UTF8",
-                    "path": [
-                      "a",
-                      "b",
-                      "c",
-                      "d"
-                    ],
-                    "repetitionType": "REQUIRED",
-                    "statistics": undefined,
-                    "typeLength": undefined,
-                    "encoding": "PLAIN",
-                    "compression": "UNCOMPRESSED",
-                    "rLevelMax": 0,
-                    "dLevelMax": 0,
-                    "precision": null,
-                    "scale": null
-                  }
-                }
-              },
-              "e": {
-                "name": "e",
-                "path": [
-                  "a",
-                  "b",
-                  "e"
-                ],
-                "repetitionType": "REQUIRED",
-                "statistics": undefined,
-                "rLevelMax": 0,
-                "dLevelMax": 0,
-                "isNested": true,
-                "fieldCount": 2,
-                "fields": {
-                  "f": {
-                    "name": "f",
-                    "primitiveType": "BYTE_ARRAY",
-                    "originalType": "UTF8",
-                    "path": [
-                      "a",
-                      "b",
-                      "e",
-                      "f"
-                    ],
-                    "repetitionType": "REQUIRED",
-                    "statistics": undefined,
-                    "typeLength": undefined,
-                    "encoding": "PLAIN",
-                    "compression": "UNCOMPRESSED",
-                    "rLevelMax": 0,
-                    "dLevelMax": 0,
-                    "precision": null,
-                    "scale": null
+      a: {
+        name: 'a',
+        path: ['a'],
+        repetitionType: 'REQUIRED',
+        statistics: undefined,
+        rLevelMax: 0,
+        dLevelMax: 0,
+        isNested: true,
+        fieldCount: 2,
+        fields: {
+          b: {
+            name: 'b',
+            path: ['a', 'b'],
+            repetitionType: 'REQUIRED',
+            statistics: undefined,
+            rLevelMax: 0,
+            dLevelMax: 0,
+            isNested: true,
+            fieldCount: 2,
+            fields: {
+              c: {
+                name: 'c',
+                path: ['a', 'b', 'c'],
+                repetitionType: 'REQUIRED',
+                statistics: undefined,
+                rLevelMax: 0,
+                dLevelMax: 0,
+                isNested: true,
+                fieldCount: 1,
+                fields: {
+                  d: {
+                    name: 'd',
+                    primitiveType: 'BYTE_ARRAY',
+                    originalType: 'UTF8',
+                    path: ['a', 'b', 'c', 'd'],
+                    repetitionType: 'REQUIRED',
+                    statistics: undefined,
+                    typeLength: undefined,
+                    encoding: 'PLAIN',
+                    compression: 'UNCOMPRESSED',
+                    rLevelMax: 0,
+                    dLevelMax: 0,
+                    precision: null,
+                    scale: null,
                   },
-                  "g": {
-                    "name": "g",
-                    "primitiveType": "BYTE_ARRAY",
-                    "originalType": "UTF8",
-                    "path": [
-                      "a",
-                      "b",
-                      "e",
-                      "g"
-                    ],
-                    "repetitionType": "REQUIRED",
-                    "statistics": undefined,
-                    "typeLength": undefined,
-                    "encoding": "PLAIN",
-                    "compression": "UNCOMPRESSED",
-                    "rLevelMax": 0,
-                    "dLevelMax": 0,
-                    "precision": null,
-                    "scale": null
-                  }
-                }
-              }
-            }
+                },
+              },
+              e: {
+                name: 'e',
+                path: ['a', 'b', 'e'],
+                repetitionType: 'REQUIRED',
+                statistics: undefined,
+                rLevelMax: 0,
+                dLevelMax: 0,
+                isNested: true,
+                fieldCount: 2,
+                fields: {
+                  f: {
+                    name: 'f',
+                    primitiveType: 'BYTE_ARRAY',
+                    originalType: 'UTF8',
+                    path: ['a', 'b', 'e', 'f'],
+                    repetitionType: 'REQUIRED',
+                    statistics: undefined,
+                    typeLength: undefined,
+                    encoding: 'PLAIN',
+                    compression: 'UNCOMPRESSED',
+                    rLevelMax: 0,
+                    dLevelMax: 0,
+                    precision: null,
+                    scale: null,
+                  },
+                  g: {
+                    name: 'g',
+                    primitiveType: 'BYTE_ARRAY',
+                    originalType: 'UTF8',
+                    path: ['a', 'b', 'e', 'g'],
+                    repetitionType: 'REQUIRED',
+                    statistics: undefined,
+                    typeLength: undefined,
+                    encoding: 'PLAIN',
+                    compression: 'UNCOMPRESSED',
+                    rLevelMax: 0,
+                    dLevelMax: 0,
+                    precision: null,
+                    scale: null,
+                  },
+                },
+              },
+            },
           },
-          "h": {
-            "name": "h",
-            "primitiveType": "BYTE_ARRAY",
-            "originalType": "UTF8",
-            "path": [
-              "a",
-              "h"
-            ],
-            "repetitionType": "REQUIRED",
-            "statistics": undefined,
-            "typeLength": undefined,
-            "encoding": "PLAIN",
-            "compression": "UNCOMPRESSED",
-            "rLevelMax": 0,
-            "dLevelMax": 0,
-            "precision": null,
-            "scale": null
-          }
-        }
-      }
+          h: {
+            name: 'h',
+            primitiveType: 'BYTE_ARRAY',
+            originalType: 'UTF8',
+            path: ['a', 'h'],
+            repetitionType: 'REQUIRED',
+            statistics: undefined,
+            typeLength: undefined,
+            encoding: 'PLAIN',
+            compression: 'UNCOMPRESSED',
+            rLevelMax: 0,
+            dLevelMax: 0,
+            precision: null,
+            scale: null,
+          },
+        },
+      },
     };
 
-    const reader = new parquet.ParquetReader(metadata,{});
-    assert.deepEqual(reader.schema.fields,expected);
+    const reader = new parquet.ParquetReader(metadata, {});
+    assert.deepEqual(reader.schema.fields, expected);
   });
-
 });

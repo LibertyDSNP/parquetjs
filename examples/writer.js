@@ -4,13 +4,13 @@ const parquet = require('..');
 // write a new file 'fruits.parquet'
 async function example() {
   let schema = new parquet.ParquetSchema({
-    name:       { type: 'UTF8' },
-    quantity:   { type: 'INT64', optional: true },
-    price:      { type: 'DOUBLE' },
-    date:       { type: 'TIMESTAMP_MICROS' },
-    in_stock:   { type: 'BOOLEAN' },
-    colour:     { type: 'UTF8', repeated: true },
-    meta_json:  { type: 'BSON', optional: true  },
+    name: { type: 'UTF8' },
+    quantity: { type: 'INT64', optional: true },
+    price: { type: 'DOUBLE' },
+    date: { type: 'TIMESTAMP_MICROS' },
+    in_stock: { type: 'BOOLEAN' },
+    colour: { type: 'UTF8', repeated: true },
+    meta_json: { type: 'BSON', optional: true },
   });
 
   let writer = await parquet.ParquetWriter.openFile(schema, 'fruits.parquet');
@@ -21,7 +21,7 @@ async function example() {
     price: 2.6,
     date: new Date(),
     in_stock: true,
-    colour: [ 'green', 'red' ]
+    colour: ['green', 'red'],
   });
 
   await writer.appendRow({
@@ -30,7 +30,7 @@ async function example() {
     price: 2.7,
     date: new Date(),
     in_stock: true,
-    colour: [ 'orange' ]
+    colour: ['orange'],
   });
 
   await writer.appendRow({
@@ -38,12 +38,11 @@ async function example() {
     price: 4.2,
     date: new Date(),
     in_stock: false,
-    colour: [ 'green', 'brown' ],
-    meta_json: { expected_ship_date: new Date() }
+    colour: ['green', 'brown'],
+    meta_json: { expected_ship_date: new Date() },
   });
 
   await writer.close();
 }
 
 example();
-

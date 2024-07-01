@@ -1,5 +1,5 @@
-import INT53 from "int53";
-import { Cursor, Options } from "./types";
+import INT53 from 'int53';
+import { Cursor, Options } from './types';
 
 function encodeValues_BOOLEAN(values: Array<boolean>) {
   let buf = Buffer.alloc(Math.ceil(values.length / 8));
@@ -32,7 +32,7 @@ function encodeValues_INT32(values: Array<number>, opts: Options) {
   let buf = Buffer.alloc(4 * values.length);
   for (let i = 0; i < values.length; i++) {
     if (isDecimal) {
-      buf.writeInt32LE(values[i] *  Math.pow(10, scale), i * 4);
+      buf.writeInt32LE(values[i] * Math.pow(10, scale), i * 4);
     } else {
       buf.writeInt32LE(values[i], i * 4);
     }
@@ -67,7 +67,7 @@ function encodeValues_INT64(values: Array<number>, opts: Options) {
   let buf = Buffer.alloc(8 * values.length);
   for (let i = 0; i < values.length; i++) {
     if (isDecimal) {
-      buf.writeBigInt64LE(BigInt(Math.floor(values[i] *  Math.pow(10, scale))), i * 8);
+      buf.writeBigInt64LE(BigInt(Math.floor(values[i] * Math.pow(10, scale))), i * 8);
     } else {
       buf.writeBigInt64LE(BigInt(values[i]), i * 8);
     }
@@ -102,7 +102,7 @@ function decodeValues_DECIMAL(cursor: Cursor, count: number, opts: Options) {
   // Default scale to 0 per spec
   const scale = opts.scale || 0;
 
-  const name = opts.name || undefined
+  const name = opts.name || undefined;
   if (!precision) {
     throw `missing option: precision (required for DECIMAL) for column: ${name}`;
   }
@@ -118,7 +118,7 @@ function decodeValues_DECIMAL(cursor: Cursor, count: number, opts: Options) {
     bufferFunction = (offset: number) => cursor.buffer.readBigInt64LE(offset);
   }
   for (let i = 0; i < count; ++i) {
-    const bufferSize = cursor.size || 0
+    const bufferSize = cursor.size || 0;
     if (bufferSize === 0 || cursor.offset < bufferSize) {
       const fullValue = bufferFunction(cursor.offset);
       const valueWithDecimalApplied = Number(fullValue) / Math.pow(10, scale);
@@ -237,12 +237,9 @@ function decodeValues_BYTE_ARRAY(cursor: Cursor, count: number) {
   return values;
 }
 
-function encodeValues_FIXED_LEN_BYTE_ARRAY(
-  values: Array<Uint8Array>,
-  opts: Options
-) {
+function encodeValues_FIXED_LEN_BYTE_ARRAY(values: Array<Uint8Array>, opts: Options) {
   if (!opts.typeLength) {
-    throw "missing option: typeLength (required for FIXED_LEN_BYTE_ARRAY)";
+    throw 'missing option: typeLength (required for FIXED_LEN_BYTE_ARRAY)';
   }
 
   const returnedValues: Array<Buffer> = [];
@@ -250,107 +247,96 @@ function encodeValues_FIXED_LEN_BYTE_ARRAY(
     returnedValues[i] = Buffer.from(values[i]);
 
     if (returnedValues[i].length !== opts.typeLength) {
-      throw "invalid value for FIXED_LEN_BYTE_ARRAY: " + returnedValues[i];
+      throw 'invalid value for FIXED_LEN_BYTE_ARRAY: ' + returnedValues[i];
     }
   }
 
   return Buffer.concat(returnedValues);
 }
 
-function decodeValues_FIXED_LEN_BYTE_ARRAY(
-  cursor: Cursor,
-  count: number,
-  opts: Options
-) {
+function decodeValues_FIXED_LEN_BYTE_ARRAY(cursor: Cursor, count: number, opts: Options) {
   let values = [];
-  const typeLength =
-    opts.typeLength ?? (opts.column ? opts.column.typeLength : undefined);
+  const typeLength = opts.typeLength ?? (opts.column ? opts.column.typeLength : undefined);
   if (!typeLength) {
-    throw "missing option: typeLength (required for FIXED_LEN_BYTE_ARRAY)";
+    throw 'missing option: typeLength (required for FIXED_LEN_BYTE_ARRAY)';
   }
 
   for (let i = 0; i < count; ++i) {
-    values.push(
-      cursor.buffer.subarray(cursor.offset, cursor.offset + typeLength)
-    );
+    values.push(cursor.buffer.subarray(cursor.offset, cursor.offset + typeLength));
     cursor.offset += typeLength;
   }
 
   return values;
 }
 
-type ValidValueTypes = "BOOLEAN" | "INT32" | "INT64" | "INT96" | "FLOAT" | "DOUBLE" | "BYTE_ARRAY" | "FIXED_LEN_BYTE_ARRAY"
+type ValidValueTypes =
+  | 'BOOLEAN'
+  | 'INT32'
+  | 'INT64'
+  | 'INT96'
+  | 'FLOAT'
+  | 'DOUBLE'
+  | 'BYTE_ARRAY'
+  | 'FIXED_LEN_BYTE_ARRAY';
 
-export const encodeValues = function (
-  type: ValidValueTypes | string,
-  values: Array<unknown>,
-  opts: Options
-) {
+export const encodeValues = function (type: ValidValueTypes | string, values: Array<unknown>, opts: Options) {
   switch (type) {
-    case "BOOLEAN":
+    case 'BOOLEAN':
       return encodeValues_BOOLEAN(values as Array<boolean>);
 
-    case "INT32":
+    case 'INT32':
       return encodeValues_INT32(values as Array<number>, opts);
 
-    case "INT64":
+    case 'INT64':
       return encodeValues_INT64(values as Array<number>, opts);
 
-    case "INT96":
+    case 'INT96':
       return encodeValues_INT96(values as Array<number>);
 
-    case "FLOAT":
+    case 'FLOAT':
       return encodeValues_FLOAT(values as Array<number>);
 
-    case "DOUBLE":
+    case 'DOUBLE':
       return encodeValues_DOUBLE(values as Array<number>);
 
-    case "BYTE_ARRAY":
+    case 'BYTE_ARRAY':
       return encodeValues_BYTE_ARRAY(values as Array<Uint8Array>);
 
-    case "FIXED_LEN_BYTE_ARRAY":
-      return encodeValues_FIXED_LEN_BYTE_ARRAY(
-        values as Array<Uint8Array>,
-        opts
-      );
+    case 'FIXED_LEN_BYTE_ARRAY':
+      return encodeValues_FIXED_LEN_BYTE_ARRAY(values as Array<Uint8Array>, opts);
 
     default:
-      throw "unsupported type: " + type;
+      throw 'unsupported type: ' + type;
   }
 };
 
-export const decodeValues = function (
-  type: ValidValueTypes | string,
-  cursor: Cursor,
-  count: number,
-  opts: Options
-) {
+export const decodeValues = function (type: ValidValueTypes | string, cursor: Cursor, count: number, opts: Options) {
   switch (type) {
-    case "BOOLEAN":
+    case 'BOOLEAN':
       return decodeValues_BOOLEAN(cursor, count);
 
-    case "INT32":
+    case 'INT32':
       return decodeValues_INT32(cursor, count, opts);
 
-    case "INT64":
+    case 'INT64':
       return decodeValues_INT64(cursor, count, opts);
 
-    case "INT96":
+    case 'INT96':
       return decodeValues_INT96(cursor, count);
 
-    case "FLOAT":
+    case 'FLOAT':
       return decodeValues_FLOAT(cursor, count);
 
-    case "DOUBLE":
+    case 'DOUBLE':
       return decodeValues_DOUBLE(cursor, count);
 
-    case "BYTE_ARRAY":
+    case 'BYTE_ARRAY':
       return decodeValues_BYTE_ARRAY(cursor, count);
 
-    case "FIXED_LEN_BYTE_ARRAY":
+    case 'FIXED_LEN_BYTE_ARRAY':
       return decodeValues_FIXED_LEN_BYTE_ARRAY(cursor, count, opts);
 
     default:
-      throw "unsupported type: " + type;
+      throw 'unsupported type: ' + type;
   }
 };

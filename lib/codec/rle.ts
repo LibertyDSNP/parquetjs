@@ -2,8 +2,8 @@
 //
 // https://github.com/apache/parquet-format/blob/master/Encodings.md
 
-import varint from 'varint'
-import { Cursor } from './types'
+import varint from 'varint';
+import { Cursor } from './types';
 
 function encodeRunBitpacked(values: Array<number>, opts: { bitWidth: number }) {
   for (let i = 0; i < values.length % 8; i++) {
@@ -13,19 +13,16 @@ function encodeRunBitpacked(values: Array<number>, opts: { bitWidth: number }) {
   let buf = Buffer.alloc(Math.ceil(opts.bitWidth * (values.length / 8)));
   for (let b = 0; b < opts.bitWidth * values.length; ++b) {
     if ((values[Math.floor(b / opts.bitWidth)] & (1 << b % opts.bitWidth)) > 0) {
-      buf[Math.floor(b / 8)] |= (1 << (b % 8));
+      buf[Math.floor(b / 8)] |= 1 << b % 8;
     }
   }
 
-  return Buffer.concat([
-    Buffer.from(varint.encode(((values.length / 8) << 1) | 1)),
-    buf
-  ]);
+  return Buffer.concat([Buffer.from(varint.encode(((values.length / 8) << 1) | 1)), buf]);
 }
 
 function encodeRunRepeated(value: number, count: number, opts: { bitWidth: number }) {
   let buf = Buffer.alloc(Math.ceil(opts.bitWidth / 8));
-  let remainingValue = value
+  let remainingValue = value;
 
   // This is encoded LSB to MSB, so we pick off the least
   // significant byte and shift to get the next one.
@@ -34,27 +31,27 @@ function encodeRunRepeated(value: number, count: number, opts: { bitWidth: numbe
     remainingValue = remainingValue >> 8;
   }
 
-  return Buffer.concat([
-    Buffer.from(varint.encode(count << 1)),
-    buf
-  ]);
+  return Buffer.concat([Buffer.from(varint.encode(count << 1)), buf]);
 }
 
 function unknownToParsedInt(value: string | number) {
   if (typeof value === 'string') {
-    return parseInt(value, 10)
+    return parseInt(value, 10);
   } else {
-    return value
+    return value;
   }
 }
 
-export const encodeValues = function(type: string, values: Array<number>, opts: { bitWidth: number, disableEnvelope?: boolean }) {
+export const encodeValues = function (
+  type: string,
+  values: Array<number>,
+  opts: { bitWidth: number; disableEnvelope?: boolean }
+) {
   if (!('bitWidth' in opts)) {
     throw 'bitWidth is required';
   }
 
   switch (type) {
-
     case 'BOOLEAN':
     case 'INT32':
     case 'INT64':
@@ -72,19 +69,19 @@ export const encodeValues = function(type: string, values: Array<number>, opts: 
   for (let i = 0; i < values.length; i++) {
     // If we are at the beginning of a run and the next value is same we start
     // collecting repeated values
-    if ( repeats === 0 && run.length % 8 === 0 && values[i] === values[i+1]) {
+    if (repeats === 0 && run.length % 8 === 0 && values[i] === values[i + 1]) {
       // If we have any data in runs we need to encode them
       if (run.length) {
         buf = Buffer.concat([buf, encodeRunBitpacked(run, opts)]);
         run = [];
       }
       repeats = 1;
-    } else if (repeats > 0 && values[i] === values[i-1]) {
-       repeats += 1;
+    } else if (repeats > 0 && values[i] === values[i - 1]) {
+      repeats += 1;
     } else {
       // If values changes we need to post any previous repeated values
       if (repeats) {
-        buf = Buffer.concat([buf, encodeRunRepeated(values[i-1], repeats, opts)]);
+        buf = Buffer.concat([buf, encodeRunRepeated(values[i - 1], repeats, opts)]);
         repeats = 0;
       }
       run.push(values[i]);
@@ -92,7 +89,7 @@ export const encodeValues = function(type: string, values: Array<number>, opts: 
   }
 
   if (repeats) {
-    buf = Buffer.concat([buf, encodeRunRepeated(values[values.length-1], repeats, opts)]);
+    buf = Buffer.concat([buf, encodeRunRepeated(values[values.length - 1], repeats, opts)]);
   } else if (run.length) {
     buf = Buffer.concat([buf, encodeRunBitpacked(run, opts)]);
   }
@@ -108,15 +105,15 @@ export const encodeValues = function(type: string, values: Array<number>, opts: 
   return envelope;
 };
 
-function decodeRunBitpacked(cursor : Cursor, count: number, opts: { bitWidth: number }) {
+function decodeRunBitpacked(cursor: Cursor, count: number, opts: { bitWidth: number }) {
   if (count % 8 !== 0) {
     throw 'must be a multiple of 8';
   }
 
   let values = new Array(count).fill(0);
   for (let b = 0; b < opts.bitWidth * count; ++b) {
-    if (cursor.buffer[cursor.offset + Math.floor(b / 8)] & (1 << (b % 8))) {
-      values[Math.floor(b / opts.bitWidth)] |= (1 << b % opts.bitWidth);
+    if (cursor.buffer[cursor.offset + Math.floor(b / 8)] & (1 << b % 8)) {
+      values[Math.floor(b / opts.bitWidth)] |= 1 << b % opts.bitWidth;
     }
   }
 
@@ -129,7 +126,7 @@ function decodeRunRepeated(cursor: Cursor, count: number, opts: { bitWidth: numb
   let value = 0;
 
   for (let i = 0; i < bytesNeededForFixedBitWidth; ++i) {
-    const byte = cursor.buffer[cursor.offset]
+    const byte = cursor.buffer[cursor.offset];
     // Bytes are stored LSB to MSB, so we need to shift
     // each new byte appropriately.
     value += byte << (i * 8);
@@ -139,7 +136,12 @@ function decodeRunRepeated(cursor: Cursor, count: number, opts: { bitWidth: numb
   return new Array(count).fill(value);
 }
 
-export const decodeValues = function(_: string, cursor: Cursor, count: number, opts: { bitWidth: number, disableEnvelope?: boolean }) {
+export const decodeValues = function (
+  _: string,
+  cursor: Cursor,
+  count: number,
+  opts: { bitWidth: number; disableEnvelope?: boolean }
+) {
   if (!('bitWidth' in opts)) {
     throw 'bitWidth is required';
   }
@@ -164,10 +166,10 @@ export const decodeValues = function(_: string, cursor: Cursor, count: number, o
       values.push(res[i]);
     }
   }
-  values = values.slice(0,count);
+  values = values.slice(0, count);
 
   if (values.length !== count) {
-    throw "invalid RLE encoding";
+    throw 'invalid RLE encoding';
   }
 
   return values;

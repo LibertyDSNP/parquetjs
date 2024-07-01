@@ -6,7 +6,7 @@ async function example() {
 
   let cursor = reader.getCursor();
   let record = null;
-  while (record = await cursor.next()) {
+  while ((record = await cursor.next())) {
     console.log(record);
   }
 
@@ -14,4 +14,3 @@ async function example() {
 }
 
 example();
-

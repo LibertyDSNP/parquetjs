@@ -17,10 +17,12 @@ of it back out efficiently. The Parquet format is based on [Google's Dremel pape
 ## Forked Notice
 
 This is a forked repository with code from various sources:
+
 - Primary source [ironSource](https://github.com/ironSource/parquetjs) [npm: parquetjs](https://www.npmjs.com/package/parquetjs)
 - Secondary source [ZJONSSON](https://github.com/ZJONSSON/parquetjs) [npm: parquetjs-lite](https://www.npmjs.com/package/parquetjs-lite)
 
 ## Installation
+
 _parquet.js requires node.js >= 18.18.2_
 
 ```
@@ -28,58 +30,66 @@ _parquet.js requires node.js >= 18.18.2_
 ```
 
 ### NodeJS
+
 To use with nodejs:
+
 ```javascript
-import parquetjs from "@dsnp/parquetjs"
+import parquetjs from '@dsnp/parquetjs';
 ```
 
 ### Browser with Bundler
+
 To use in a browser with a bundler, depending on your needs, write the appropriate plugin or resolver to point to either the Common JS or ES Module version:
+
 ```javascript
 // Common JS
-"node_modules/@dsnp/parquetjs/dist/browser/parquetjs.cjs"
+'node_modules/@dsnp/parquetjs/dist/browser/parquetjs.cjs';
 // ES Modules
-"node_modules/@dsnp/parquetjs/dist/browser/parquetjs.esm"
+'node_modules/@dsnp/parquetjs/dist/browser/parquetjs.esm';
 ```
+
 or:
+
 ```javascript
 // Common JS
-import parquetjs from "@dsnp/parquetjs/dist/browser/parquetjs.cjs"
+import parquetjs from '@dsnp/parquetjs/dist/browser/parquetjs.cjs';
 // ES Modules
-import parquetjs from "@dsnp/parquetjs/dist/browser/parquetjs.esm"
+import parquetjs from '@dsnp/parquetjs/dist/browser/parquetjs.esm';
 ```
 
 ### Browser Direct: ES Modules
+
 To use directly in the browser without a bundler using ES Modules:
 
 1. Build the package: `npm install && npm run build:browser`
 2. Copy to `dist/browser/parquetjs.esm.js` the server
 3. Use it in your html or other ES Modules:
-    ```html
-    <script type="module">
-      import parquetjs from '../parquet.esm.js';
-      // Use parquetjs
-    </script>
-    ```
+   ```html
+   <script type="module">
+     import parquetjs from '../parquet.esm.js';
+     // Use parquetjs
+   </script>
+   ```
 
 ### Browser Direct: Plain Ol' JavaScript
+
 To use directly in the browser without a bundler or ES Modules:
 
 1. Build the package: `npm install && npm run build:browser`
 2. Copy to `dist/browser/parquetjs.js` the server
-2. Use the global `parquetjs` variable to access parquetjs functions
+3. Use the global `parquetjs` variable to access parquetjs functions
    ```html
    <script>
-    // console.log(parquetjs)
-    </script>
-    ```
+     // console.log(parquetjs)
+   </script>
+   ```
 
 ## Usage: Writing files
 
 Once you have installed the parquet.js library, you can import it as a single
 module:
 
-``` js
+```js
 var parquet = require('@dsnp/parquetjs');
 ```
 
@@ -89,14 +99,14 @@ is a simple example that shows how to instantiate a `ParquetSchema` object:
 
 ### Native Schema Definition
 
-``` js
+```js
 // declare a schema for the `fruits` table
 var schema = new parquet.ParquetSchema({
   name: { type: 'UTF8' },
   quantity: { type: 'INT64' },
   price: { type: 'DOUBLE' },
   date: { type: 'TIMESTAMP_MILLIS' },
-  in_stock: { type: 'BOOLEAN' }
+  in_stock: { type: 'BOOLEAN' },
 });
 ```
 
@@ -108,38 +118,37 @@ var schema = new parquet.ParquetSchema({
   quantity: parquet.ParquetFieldBuilder.createIntField(64),
   price: parquet.ParquetFieldBuilder.createDoubleField(),
   date: parquet.ParquetFieldBuilder.createTimestampField(),
-  in_stock: parquet.ParquetFieldBuilder.createBooleanField()
+  in_stock: parquet.ParquetFieldBuilder.createBooleanField(),
 });
 ```
 
 ### JSON Schema
 
-``` js
+```js
 // declare a schema for the `fruits` JSON Schema
 var schema = new parquet.ParquetSchema.fromJsonSchema({
-  "type": "object",
-  "properties": {
-    "name": {
-      "type": "string"
+  type: 'object',
+  properties: {
+    name: {
+      type: 'string',
     },
-    "quantity": {
-      "type": "integer"
+    quantity: {
+      type: 'integer',
     },
-    "price": {
-      "type": "number"
+    price: {
+      type: 'number',
     },
-    "date": {
-      "type": "string",
-      "format": "date-time"
+    date: {
+      type: 'string',
+      format: 'date-time',
     },
-    "in_stock": {
-      "type": "boolean"
-    }
+    in_stock: {
+      type: 'boolean',
+    },
   },
-  "required": ["name", "quantity", "price", "date", "in_stock"]
+  required: ['name', 'quantity', 'price', 'date', 'in_stock'],
 });
 ```
-
 
 Note that the Parquet schema supports nesting, so you can store complex, arbitrarily
 nested records into a single row (more on that later) while still maintaining good
@@ -149,13 +158,13 @@ Once we have a schema, we can create a `ParquetWriter` object. The writer will
 take input rows as JSON objects, convert them to the Parquet format and store
 them on disk.
 
-``` js
+```js
 // create new ParquetWriter that writes to 'fruits.parquet`
 var writer = await parquet.ParquetWriter.openFile(schema, 'fruits.parquet');
 
 // append a few rows to the file
-await writer.appendRow({name: 'apples', quantity: 10, price: 2.5, date: new Date(), in_stock: true});
-await writer.appendRow({name: 'oranges', quantity: 10, price: 2.5, date: new Date(), in_stock: true});
+await writer.appendRow({ name: 'apples', quantity: 10, price: 2.5, date: new Date(), in_stock: true });
+await writer.appendRow({ name: 'oranges', quantity: 10, price: 2.5, date: new Date(), in_stock: true });
 ```
 
 Once we are finished adding rows to the file, we have to tell the writer object
@@ -165,32 +174,32 @@ to flush the metadata to disk and close the file by calling the `close()` method
 
 Bloom filters can be added to multiple columns as demonstrated below:
 
-``` js
-  const options = {
-    bloomFilters: [
-      {
-        column: "name",
-        numFilterBytes: 1024,
-      },
-      {
-        column: "quantity",
-        numFilterBytes: 1024,
-      },
-    ]
-  };
+```js
+const options = {
+  bloomFilters: [
+    {
+      column: 'name',
+      numFilterBytes: 1024,
+    },
+    {
+      column: 'quantity',
+      numFilterBytes: 1024,
+    },
+  ],
+};
 
 var writer = await parquet.ParquetWriter.openFile(schema, 'fruits.parquet', options);
 ```
 
-By default, not passing any additional options calculates the optimal number of blocks according to the default number of distinct values (128*1024) and default false positive probability (0.001), which gives a filter byte size of 29,920.
+By default, not passing any additional options calculates the optimal number of blocks according to the default number of distinct values (128\*1024) and default false positive probability (0.001), which gives a filter byte size of 29,920.
 
 The following options are provided to have the ability to adjust the split-block bloom filter settings.
 
-`numFilterBytes` - sets the desire size of bloom filter in bytes. Defaults to 128 * 1024 * 1024 bits.
+`numFilterBytes` - sets the desire size of bloom filter in bytes. Defaults to 128 _ 1024 _ 1024 bits.
 
 `falsePositiveRate` - set the desired false positive percentage for bloom filter. Defaults to 0.001.
 
-`numDistinct` - sets the number of distinct values. Defaults to 128 * 1024 bits.
+`numDistinct` - sets the number of distinct values. Defaults to 128 \* 1024 bits.
 
 Note that if numFilterBytes is provided then falsePositiveRate and numDistinct options are ignored.
 
@@ -204,7 +213,7 @@ You may open more than one cursor and use them concurrently. All cursors become
 invalid once close() is called on
 the reader object.
 
-``` js
+```js
 // create new ParquetReader that reads from 'fruits.parquet`
 let reader = await parquet.ParquetReader.openFile('fruits.parquet');
 
@@ -213,7 +222,7 @@ let cursor = reader.getCursor();
 
 // read all records from the file and print them
 let record = null;
-while (record = await cursor.next()) {
+while ((record = await cursor.next())) {
   console.log(record);
 }
 ```
@@ -221,7 +230,7 @@ while (record = await cursor.next()) {
 When creating a cursor, you can optionally request that only a subset of the
 columns should be read from disk. For example:
 
-``` js
+```js
 // create a new cursor that will only return the `name` and `price` columns
 let cursor = reader.getCursor(['name', 'price']);
 ```
@@ -229,7 +238,7 @@ let cursor = reader.getCursor(['name', 'price']);
 It is important that you call close() after you are finished reading the file to
 avoid leaking file descriptors.
 
-``` js
+```js
 await reader.close();
 ```
 
@@ -237,7 +246,8 @@ await reader.close();
 
 Bloom filters can be fetched from a parquet file by creating a reader
 and calling `getBloomFiltersFor`.
-``` js
+
+```js
 // create new ParquetReader that reads from 'fruits.parquet`
 let reader = await parquet.ParquetReader.openFile('fruits.parquet');
 
@@ -255,16 +265,16 @@ const bloomFilters = reader.getBloomFiltersFor(['name']);
 }
 
 ```
+
 Calling `getBloomFiltersFor` on the reader returns an object with the keys being a column name and value being an array of length equal to the number of row groups that the column spans.
 
 Given the SplitBlockBloomFilter<instance> inclusion of a value in the filter can be checked as follows:
 
-``` js
+```js
 const sbbf = bloomFilters.name[0].ssbf;
 
 sbbf.check('apples') ===> true
 ```
-
 
 ### Reading data from a url
 
@@ -272,9 +282,9 @@ Parquet files can be read from a url without having to download the whole file.
 You will have to supply the request library as a first argument and the request parameters
 as a second argument to the function `parquetReader.openUrl`.
 
-``` js
+```js
 const request = require('request');
-let reader = await parquet.ParquetReader.openUrl(request,'https://domain/fruits.parquet');
+let reader = await parquet.ParquetReader.openUrl(request, 'https://domain/fruits.parquet');
 ```
 
 ### Reading data from S3
@@ -283,26 +293,26 @@ Parquet files can be read from an S3 object without having to download the whole
 You will have to supply the aws-sdk client as first argument and the bucket/key information
 as second argument to the function `parquetReader.openS3`.
 
-``` js
+```js
 const AWS = require('aws-sdk');
 const client = new AWS.S3({
   accessKeyId: 'xxxxxxxxxxx',
-  secretAccessKey: 'xxxxxxxxxxx'
+  secretAccessKey: 'xxxxxxxxxxx',
 });
 
 const params = {
   Bucket: 'xxxxxxxxxxx',
-  Key: 'xxxxxxxxxxx'
+  Key: 'xxxxxxxxxxx',
 };
 
-let reader = await parquet.ParquetReader.openS3(client,params);
+let reader = await parquet.ParquetReader.openS3(client, params);
 ```
 
 ### Reading data from a buffer
 
 If the complete parquet file is in buffer it can be read directly from memory without incurring any additional I/O.
 
-``` js
+```js
 const file = fs.readFileSync('fruits.parquet');
 let reader = await parquet.ParquetReader.openBuffer(file);
 ```
@@ -318,7 +328,7 @@ The most simple encoding scheme is the PLAIN encoding. It simply stores the
 values as they are without any compression. The PLAIN encoding is currently
 the default for all types except `BOOLEAN`:
 
-``` js
+```js
 var schema = new parquet.ParquetSchema({
   name: { type: 'UTF8', encoding: 'PLAIN' },
 });
@@ -332,29 +342,27 @@ combination with the `BOOLEAN`, `INT32` and `INT64` types. The RLE encoding
 requires an additional `typeLength` parameter that contains the maximum number of
 bits required to store the largest value of the field.
 
-``` js
+```js
 var schema = new parquet.ParquetSchema({
   age: { type: 'UINT_32', encoding: 'RLE', typeLength: 7 },
 });
 ```
-
 
 ### Optional Fields
 
 By default, all fields are required to be present in each row. You can also mark
 a field as 'optional' which will let you store rows with that field missing:
 
-``` js
+```js
 var schema = new parquet.ParquetSchema({
   name: { type: 'UTF8' },
   quantity: { type: 'INT64', optional: true },
 });
 
 var writer = await parquet.ParquetWriter.openFile(schema, 'fruits.parquet');
-await writer.appendRow({name: 'apples', quantity: 10 });
-await writer.appendRow({name: 'banana' }); // not in stock
+await writer.appendRow({ name: 'apples', quantity: 10 });
+await writer.appendRow({ name: 'banana' }); // not in stock
 ```
-
 
 ### Nested Rows & Arrays
 
@@ -366,7 +374,7 @@ list instead:
 Consider this example, which allows us to store a more advanced "fruits" table
 where each row contains a name, a list of colours and a list of "stock" objects.
 
-``` js
+```js
 // advanced fruits table
 var schema = new parquet.ParquetSchema({
   name: { type: 'UTF8' },
@@ -376,8 +384,8 @@ var schema = new parquet.ParquetSchema({
     fields: {
       price: { type: 'DOUBLE' },
       quantity: { type: 'INT64' },
-    }
-  }
+    },
+  },
 });
 
 // the above schema allows us to store the following rows:
@@ -388,17 +396,17 @@ await writer.appendRow({
   colours: ['yellow'],
   stock: [
     { price: 2.45, quantity: 16 },
-    { price: 2.60, quantity: 420 }
-  ]
+    { price: 2.6, quantity: 420 },
+  ],
 });
 
 await writer.appendRow({
   name: 'apple',
   colours: ['red', 'green'],
   stock: [
-    { price: 1.20, quantity: 42 },
-    { price: 1.30, quantity: 230 }
-  ]
+    { price: 1.2, quantity: 42 },
+    { price: 1.3, quantity: 230 },
+  ],
 });
 
 await writer.close();
@@ -408,7 +416,7 @@ let reader = await parquet.ParquetReader.openFile('fruits.parquet');
 
 let cursor = reader.getCursor([['name'], ['stock', 'price']]);
 let record = null;
-while (record = await cursor.next()) {
+while ((record = await cursor.next())) {
   console.log(record);
 }
 
@@ -416,7 +424,7 @@ await reader.close();
 ```
 
 It might not be obvious why one would want to implement or use such a feature when
-the same can - in  principle - be achieved by serializing the record using JSON
+the same can - in principle - be achieved by serializing the record using JSON
 (or a similar scheme) and then storing it into a UTF8 field:
 
 Putting aside the philosophical discussion on the merits of strict typing,
@@ -425,11 +433,9 @@ have to duplicate this metadata (i.e. the field names) for every record. On top
 of that, knowing about the type of a field allows us to compress the remaining
 data more efficiently.
 
-
 ### Nested Lists for Hive / Athena
 
-Lists have to be annotated to be queriable with AWS Athena.   See [parquet-format](https://github.com/apache/parquet-format/blob/master/LogicalTypes.md#lists) for more detail and a full working example with comments in the test directory ([`test/list.js`](test/list.js))
-
+Lists have to be annotated to be queriable with AWS Athena. See [parquet-format](https://github.com/apache/parquet-format/blob/master/LogicalTypes.md#lists) for more detail and a full working example with comments in the test directory ([`test/list.js`](test/list.js))
 
 ### List of Supported Types & Encodings
 
@@ -463,7 +469,6 @@ encodings:
   <tr><td>UINT_64</td><td>INT64</td><td>PLAIN, RLE</td></tr>
 </table>
 
-
 ## Buffering & Row Group Size
 
 When writing a Parquet file, the `ParquetWriter` will buffer rows in memory
@@ -474,17 +479,15 @@ The size of a row group is configurable by the user and controls the maximum
 number of rows that are buffered in memory at any given time as well as the number
 of rows that are co-located on disk:
 
-``` js
+```js
 var writer = await parquet.ParquetWriter.openFile(schema, 'fruits.parquet');
 writer.setRowGroupSize(8192);
 ```
-
 
 ## Dependencies
 
 Parquet uses [thrift](https://thrift.apache.org/) to encode the schema and other
 metadata, but the actual data does not use thrift.
-
 
 ## Notes
 
