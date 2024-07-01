@@ -23,7 +23,7 @@ export default class BufferReader {
   maxLength: number;
   queueWait: number;
   scheduled?: boolean;
-  queue: Array<BufferReaderQueueRow>;
+  queue: BufferReaderQueueRow[];
   envelopeReader: ParquetEnvelopeReader;
 
   constructor(envelopeReader: ParquetEnvelopeReader, options: BufferReaderOptions) {
@@ -56,7 +56,7 @@ export default class BufferReader {
     this.queue = [];
     queue.sort((a, b) => a.offset - b.offset);
 
-    var subqueue: Array<BufferReaderQueueRow> = [];
+    let subqueue: BufferReaderQueueRow[] = [];
 
     const readSubqueue = async () => {
       if (!subqueue.length) {

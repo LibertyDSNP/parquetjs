@@ -31,7 +31,7 @@ import { Block } from '../declare';
  *      .init()
  */
 class SplitBlockBloomFilter {
-  private static readonly salt: Array<number> = [
+  private static readonly salt: number[] = [
     0x47b6137b, 0x44974d91, 0x8824ad5b, 0xa2b7289d, 0x705495c7, 0x2df1424b, 0x9efc4947, 0x5c6bfb31,
   ];
 
@@ -73,19 +73,19 @@ class SplitBlockBloomFilter {
    * from the provided Buffer
    * @param buffer a NodeJs Buffer containing bloom filter data for a row group.
    */
-  static from(buffer: Buffer, rowCount?: number): SplitBlockBloomFilter {
+  static from(buffer: Buffer, _rowCount?: number): SplitBlockBloomFilter {
     if (buffer.length === 0) {
       throw new Error('buffer is empty');
     }
     const chunkSize = SplitBlockBloomFilter.WORDS_PER_BLOCK;
     const uint32sFromBuf = new Uint32Array(buffer.buffer);
-    let result: Array<Block> = [];
+    const result: Block[] = [];
     const length = uint32sFromBuf.length;
 
     for (let index = 0; index < length; index += chunkSize) {
       result.push(uint32sFromBuf.subarray(index, index + chunkSize));
     }
-    let sb = new SplitBlockBloomFilter();
+    const sb = new SplitBlockBloomFilter();
     sb.splitBlockFilter = result;
     sb.numBlocks = result.length;
     // these will not be knowable when reading
@@ -151,7 +151,7 @@ class SplitBlockBloomFilter {
    * @return mask Block
    */
   static mask(hashValue: Long): Block {
-    let result: Block = SplitBlockBloomFilter.initBlock();
+    const result: Block = SplitBlockBloomFilter.initBlock();
     for (let i = 0; i < result.length; i++) {
       const y = hashValue.getLowBitsUnsigned() * SplitBlockBloomFilter.salt[i];
       result[i] = result[i] | (1 << (y >>> 27));
@@ -210,9 +210,9 @@ class SplitBlockBloomFilter {
    * Instance
    */
 
-  private splitBlockFilter: Array<Block> = [];
+  private splitBlockFilter: Block[] = [];
   private desiredFalsePositiveRate: number = SplitBlockBloomFilter.DEFAULT_FALSE_POSITIVE_RATE;
-  private numBlocks: number = 0;
+  private numBlocks = 0;
   private numDistinctValues: number = SplitBlockBloomFilter.DEFAULT_DISTINCT_VALUES;
   private hashStrategy = new parquet_thrift.BloomFilterHash(new parquet_thrift.XxHash());
   private hasher = new XxHasher();
@@ -230,7 +230,7 @@ class SplitBlockBloomFilter {
   getNumFilterBlocks(): number {
     return this.splitBlockFilter.length;
   }
-  getFilter(): Array<Block> {
+  getFilter(): Block[] {
     return this.splitBlockFilter;
   }
 

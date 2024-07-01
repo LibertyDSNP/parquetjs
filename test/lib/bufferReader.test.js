@@ -8,16 +8,17 @@ import { ParquetEnvelopeReader } from '../../lib/reader';
 chai.use(sinonChai);
 chai.use(sinonChaiInOrder);
 
-describe('bufferReader', () => {
+describe('bufferReader', function () {
   let reader;
 
-  beforeEach(() => {
+  beforeEach(function () {
     const mockEnvelopeReader = sinon.fake();
     reader = new BufferReader(mockEnvelopeReader, {});
   });
-  describe('#read', async () => {
-    describe('given that reader is scheduled', () => {
-      it('adds an item to the queue', () => {
+
+  describe('#read', function () {
+    describe('given that reader is scheduled', function () {
+      it('adds an item to the queue', function () {
         const offset = 1;
         const length = 2;
         reader.read(offset, length);
@@ -26,8 +27,8 @@ describe('bufferReader', () => {
     });
   });
 
-  describe('#processQueue', () => {
-    it('only enqueues an item and reads on flushing the queue', async () => {
+  describe('#processQueue', function () {
+    it('only enqueues an item and reads on flushing the queue', async function () {
       const mockResolve = sinon.spy();
       const mockResolve2 = sinon.spy();
       reader.envelopeReader = { readFn: sinon.fake.returns(Buffer.from('buffer', 'utf8')) };
@@ -51,7 +52,7 @@ describe('bufferReader', () => {
       sinon.assert.calledWith(mockResolve2, Buffer.from('uffe', 'utf8'));
     });
 
-    it('enqueues items and then reads them', async () => {
+    it('enqueues items and then reads them', async function () {
       const mockResolve = sinon.spy();
       const mockResolve2 = sinon.spy();
       reader.maxLength = 1;
@@ -76,7 +77,7 @@ describe('bufferReader', () => {
       sinon.assert.calledWith(mockResolve2, Buffer.from('uffe', 'utf8'));
     });
 
-    it('enqueues items and reads them in order', async () => {
+    it('enqueues items and reads them in order', async function () {
       const mockResolve = sinon.spy();
       reader.envelopeReader = { readFn: sinon.fake.returns(Buffer.from('thisisalargebuffer', 'utf8')) };
 
@@ -118,7 +119,7 @@ describe('bufferReader', () => {
         .subsequently.calledWith(Buffer.from('buffer', 'utf8'));
     });
 
-    it('should read even if the maxSpan has been exceeded', async () => {
+    it('should read even if the maxSpan has been exceeded', async function () {
       const mockResolve = sinon.spy();
       reader.maxSpan = 5;
       reader.envelopeReader = { readFn: sinon.fake.returns(Buffer.from('willslicefrombeginning', 'utf8')) };
@@ -163,17 +164,17 @@ describe('bufferReader', () => {
   });
 });
 
-describe('bufferReader Integration Tests', () => {
+describe('bufferReader Integration Tests', function () {
   let reader;
   let envelopeReader;
 
-  describe('Reading a file', async () => {
-    beforeEach(async () => {
+  describe('Reading a file', function () {
+    beforeEach(async function () {
       envelopeReader = await ParquetEnvelopeReader.openFile('./test/lib/test.txt', {});
       reader = new BufferReader(envelopeReader);
     });
 
-    it('should properly read the file', async () => {
+    it('should properly read the file', async function () {
       const buffer = await reader.read(0, 5);
       const buffer2 = await reader.read(6, 5);
       const buffer3 = await reader.read(12, 5);

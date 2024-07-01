@@ -7,13 +7,13 @@ import type { Document as BsonDocument } from 'bson';
 const bsonSerialize = require('bson').serialize;
 const bsonDeserialize = require('bson').deserialize;
 
-type ParquetTypeDataObject = {
+interface ParquetTypeDataObject {
   primitiveType?: PrimitiveType;
-  toPrimitive: Function;
-  fromPrimitive?: Function;
+  toPrimitive: (x: any) => any;
+  fromPrimitive?: (x: any) => any;
   originalType?: OriginalType;
   typeLength?: number;
-};
+}
 
 interface INTERVAL {
   months: number;
@@ -84,7 +84,7 @@ const PARQUET_LOGICAL_TYPES = new Set<string>([
   'LIST',
 ] satisfies ParquetType[]);
 
-const PARQUET_LOGICAL_TYPE_DATA: { [logicalType: string]: ParquetTypeDataObject } = {
+const PARQUET_LOGICAL_TYPE_DATA: Record<string, ParquetTypeDataObject> = {
   BOOLEAN: {
     primitiveType: 'BOOLEAN',
     toPrimitive: toPrimitive_BOOLEAN,
@@ -408,11 +408,11 @@ function toPrimitive_INT96(value: number | bigint | string) {
   }
 }
 
-function toPrimitive_FIXED_LEN_BYTE_ARRAY_DECIMAL(value: Array<number>) {
+function toPrimitive_FIXED_LEN_BYTE_ARRAY_DECIMAL(value: number[]) {
   return Buffer.from(value);
 }
 
-function toPrimitive_BYTE_ARRAY_DECIMAL(value: Array<number>) {
+function toPrimitive_BYTE_ARRAY_DECIMAL(value: number[]) {
   return Buffer.from(value);
 }
 
@@ -424,7 +424,7 @@ function toPrimitive_LIST(value: any) {
   return value;
 }
 
-function toPrimitive_BYTE_ARRAY(value: Array<number>) {
+function toPrimitive_BYTE_ARRAY(value: number[]) {
   return Buffer.from(value);
 }
 
@@ -539,7 +539,7 @@ function toPrimitive_INTERVAL(value: INTERVAL) {
     throw 'value for INTERVAL must be object { months: ..., days: ..., milliseconds: ... }';
   }
 
-  let buf = Buffer.alloc(12);
+  const buf = Buffer.alloc(12);
   buf.writeUInt32LE(value.months, 0);
   buf.writeUInt32LE(value.days, 4);
   buf.writeUInt32LE(value.milliseconds, 8);

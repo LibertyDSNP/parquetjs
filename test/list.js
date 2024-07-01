@@ -33,28 +33,45 @@ const parquet = require('../parquet');
   And verify that Athena parses the parquet file correctly by `SELECT * from listTest`
 */
 
-describe('struct list', async function () {
-  let reader;
-
-  const listStructSchema = new parquet.ParquetSchema({
-    id: { type: 'UTF8' },
-    test: {
-      type: 'LIST',
-      fields: {
-        list: {
-          repeated: true,
-          fields: {
-            element: {
-              fields: {
-                a: { type: 'UTF8' },
-                b: { type: 'INT64' },
-              },
+const listStructSchema = new parquet.ParquetSchema({
+  id: { type: 'UTF8' },
+  test: {
+    type: 'LIST',
+    fields: {
+      list: {
+        repeated: true,
+        fields: {
+          element: {
+            fields: {
+              a: { type: 'UTF8' },
+              b: { type: 'INT64' },
             },
           },
         },
       },
     },
-  });
+  },
+});
+
+const listArraySchema = new parquet.ParquetSchema({
+  id: { type: 'UTF8' },
+  test: {
+    type: 'LIST',
+    fields: {
+      list: {
+        repeated: true,
+        fields: {
+          element: {
+            type: 'UTF8',
+          },
+        },
+      },
+    },
+  },
+});
+
+describe('struct list', function () {
+  let reader;
 
   const row1 = {
     id: 'Row1',
@@ -98,25 +115,8 @@ describe('struct list', async function () {
   });
 });
 
-describe('array list', async function () {
+describe('array list', function () {
   let reader;
-
-  const listArraySchema = new parquet.ParquetSchema({
-    id: { type: 'UTF8' },
-    test: {
-      type: 'LIST',
-      fields: {
-        list: {
-          repeated: true,
-          fields: {
-            element: {
-              type: 'UTF8',
-            },
-          },
-        },
-      },
-    },
-  });
 
   const row1 = {
     id: 'Row1',

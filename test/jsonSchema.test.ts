@@ -54,70 +54,70 @@ describe('Json Schema Conversion', function () {
   });
 });
 
-describe('Json Schema Conversion Test File', async function () {
-  const parquetSchema = ParquetSchema.fromJsonSchema({
-    type: 'object',
-    properties: {
-      string_field: { type: 'string' },
-      int_field: { type: 'integer' },
-      number_field: { type: 'number' },
-      array_field: {
-        type: 'array',
-        items: { type: 'string' },
-        additionalItems: false,
-      },
-      timestamp_array_field: {
-        type: 'array',
-        items: {
-          type: 'string',
-          format: 'date-time',
-        },
-        additionalItems: false,
-      },
-      timestamp_field: {
+const parquetSchema = ParquetSchema.fromJsonSchema({
+  type: 'object',
+  properties: {
+    string_field: { type: 'string' },
+    int_field: { type: 'integer' },
+    number_field: { type: 'number' },
+    array_field: {
+      type: 'array',
+      items: { type: 'string' },
+      additionalItems: false,
+    },
+    timestamp_array_field: {
+      type: 'array',
+      items: {
         type: 'string',
         format: 'date-time',
       },
-      obj_field: {
+      additionalItems: false,
+    },
+    timestamp_field: {
+      type: 'string',
+      format: 'date-time',
+    },
+    obj_field: {
+      type: 'object',
+      properties: {
+        sub1: {
+          type: 'string',
+        },
+        sub2: {
+          type: 'string',
+        },
+      },
+      additionalProperties: false,
+    },
+    struct_field: {
+      type: 'array',
+      items: {
         type: 'object',
         properties: {
-          sub1: {
-            type: 'string',
+          sub3: { type: 'string' },
+          sub4: { type: 'string' },
+          sub5: {
+            type: 'object',
+            properties: {
+              sub6: { type: 'string' },
+              sub7: { type: 'string' },
+            },
+            additionalProperties: false,
           },
-          sub2: {
-            type: 'string',
+          sub8: {
+            type: 'array',
+            items: { type: 'string' },
           },
         },
         additionalProperties: false,
       },
-      struct_field: {
-        type: 'array',
-        items: {
-          type: 'object',
-          properties: {
-            sub3: { type: 'string' },
-            sub4: { type: 'string' },
-            sub5: {
-              type: 'object',
-              properties: {
-                sub6: { type: 'string' },
-                sub7: { type: 'string' },
-              },
-              additionalProperties: false,
-            },
-            sub8: {
-              type: 'array',
-              items: { type: 'string' },
-            },
-          },
-          additionalProperties: false,
-        },
-        additionalItems: false,
-      },
+      additionalItems: false,
     },
-    additionalProperties: false,
-  });
+  },
+  additionalProperties: false,
+});
 
+describe('Json Schema Conversion Test File', function () {
   const row1 = {
     string_field: 'string value',
     int_field: 10n,
@@ -171,7 +171,7 @@ describe('Json Schema Conversion Test File', async function () {
 
   it('schema is encoded correctly', async function () {
     const schema = reader.metadata?.schema;
-    checkSnapshot(reader.metadata?.schema, './test-files/json-schema-test-file.result.json', update);
+    checkSnapshot(schema, './test-files/json-schema-test-file.result.json', update);
   });
 
   it('output matches input', async function () {

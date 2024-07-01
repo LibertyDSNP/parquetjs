@@ -13,7 +13,7 @@ export interface Options {
   column?: ParquetField;
   rawStatistics?: Statistics;
   cache?: unknown;
-  dictionary?: Array<number>;
+  dictionary?: number[];
   num_values?: number;
   rLevelMax?: number;
   dLevelMax?: number;

@@ -35,8 +35,8 @@ export interface RecordBuffer {
 
 export const shredRecord = function (schema: ParquetSchema, record: Record<string, unknown>, buffer: RecordBuffer) {
   /* shred the record, this may raise an exception */
-  var recordShredded: Record<string, PageData> = {};
-  for (let field of schema.fieldList) {
+  const recordShredded: Record<string, PageData> = {};
+  for (const field of schema.fieldList) {
     recordShredded[field.path.join(',')] = {
       dlevels: [],
       rlevels: [],
@@ -55,8 +55,8 @@ export const shredRecord = function (schema: ParquetSchema, record: Record<strin
     buffer.columnData = {};
     buffer.pages = {};
 
-    for (let field of schema.fieldList) {
-      let path = field.path.join(',');
+    for (const field of schema.fieldList) {
+      const path = field.path.join(',');
       buffer.columnData[path] = {
         dlevels: [],
         rlevels: [],
@@ -70,10 +70,10 @@ export const shredRecord = function (schema: ParquetSchema, record: Record<strin
 
   (buffer.rowCount as number) += 1;
   (buffer.pageRowCount as number) += 1;
-  for (let field of schema.fieldList) {
-    let path = field.path.join(',');
-    let record = recordShredded[path];
-    let column = buffer.columnData![path];
+  for (const field of schema.fieldList) {
+    const path = field.path.join(',');
+    const record = recordShredded[path];
+    const column = buffer.columnData![path];
 
     for (let i = 0; i < record.rlevels!.length; i++) {
       column.rlevels!.push(record.rlevels![i]);
@@ -96,16 +96,16 @@ function shredRecordInternal(
   rlvl: number,
   dlvl: number
 ) {
-  for (let fieldName in fields) {
+  for (const fieldName in fields) {
     const field = fields[fieldName];
     const fieldType = field.originalType || field.primitiveType;
     const path = field.path.join(',');
 
     // fetch values
-    let values: Array<unknown> = [];
+    let values: unknown[] = [];
     if (record && fieldName in record && record[fieldName] !== undefined && record[fieldName] !== null) {
       if (Array.isArray(record[fieldName])) {
-        values = record[fieldName] as Array<unknown>;
+        values = record[fieldName] as unknown[];
       } else if (ArrayBuffer.isView(record[fieldName])) {
         // checks if any typed array
         if (record[fieldName] instanceof Uint8Array) {
@@ -181,18 +181,18 @@ function shredRecordInternal(
 export const materializeRecords = function (
   schema: ParquetSchema,
   buffer: RecordBuffer,
-  records?: Array<Record<string, unknown>>
+  records?: Record<string, unknown>[]
 ) {
   if (!records) {
     records = [];
   }
 
-  for (let k in buffer.columnData) {
+  for (const k in buffer.columnData) {
     const field = schema.findField(k);
     const fieldBranch = schema.findFieldBranch(k);
-    let values = buffer.columnData[k].values![Symbol.iterator]();
+    const values = buffer.columnData[k].values![Symbol.iterator]();
 
-    let rLevels = new Array(field.rLevelMax + 1);
+    const rLevels = new Array(field.rLevelMax + 1);
     rLevels.fill(0);
 
     for (let i = 0; i < buffer.columnData[k].count!; ++i) {
@@ -224,8 +224,8 @@ export const materializeRecords = function (
 
 function materializeRecordField(
   record: Record<string, unknown>,
-  branch: Array<ParquetField>,
-  rLevels: Array<number>,
+  branch: ParquetField[],
+  rLevels: number[],
   dLevel: number,
   value: Record<string, unknown>
 ) {
@@ -242,7 +242,7 @@ function materializeRecordField(
       if (!(node.name in record)) {
         record[node.name] = [];
       }
-      const recordValue = record[node.name] as Array<Record<string, unknown>>;
+      const recordValue = record[node.name] as Record<string, unknown>[];
 
       while (recordValue.length < rLevels[0] + 1) {
         recordValue.push({});
@@ -260,7 +260,7 @@ function materializeRecordField(
       if (!(node.name in record)) {
         record[node.name] = [];
       }
-      const recordValue = record[node.name] as Array<Record<string, unknown> | null>;
+      const recordValue = record[node.name] as (Record<string, unknown> | null)[];
 
       while (recordValue.length < rLevels[0] + 1) {
         recordValue.push(null);

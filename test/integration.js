@@ -1,7 +1,9 @@
 'use strict';
+
+/* eslint mocha/no-setup-in-describe: 'off', @typescript-eslint/no-empty-function: 'off' */
+
 const chai = require('chai');
 const fs = require('fs');
-const os = require('os');
 const assert = chai.assert;
 const parquet = require('../parquet');
 const parquet_thrift = require('../gen-nodejs/parquet_types');
@@ -34,7 +36,7 @@ function mkTestSchema(opts) {
   });
 }
 
-function mkTestRows(opts) {
+function mkTestRows(_opts) {
   let rows = [];
 
   for (let i = 0; i < TEST_NUM_ROWS; ++i) {
@@ -120,7 +122,7 @@ async function writeTestStream(opts) {
 
   var out = new stream.PassThrough();
   let writer = await parquet.ParquetWriter.openStream(schema, out, opts);
-  out.on('data', function (d) {});
+  out.on('data', function (_d) {});
   out.on('end', function () {});
 
   writer.setMetadata('myuid', '420');
@@ -195,7 +197,7 @@ async function verifyStatistics() {
   assert.equal(colStats.null_count, 0);
   assert.equal(colStats.distinct_count, 4);
 
-  column.pages.forEach((d, i) => {
+  column.pages.forEach((d, _i) => {
     let header = d.data_page_header || d.data_page_header_v2;
     let pageStats = header.statistics;
     assert.equal(pageStats.null_count, 0);

@@ -3,9 +3,9 @@ import { assert } from 'chai';
 
 const buffer = require('buffer');
 
-describe('Browser tests', () => {
-  describe('reader', () => {
-    it('can read snappy compressed data', async () => {
+describe('Browser tests', function () {
+  describe('reader', function () {
+    it('can read snappy compressed data', async function () {
       // Data from test/test-files/snappy-compressed.parquet
       const uint8Array = [
         80, 65, 82, 49, 21, 6, 21, 80, 21, 82, 92, 21, 8, 21, 0, 21, 8, 21, 0, 21, 0, 21, 0, 17, 28, 24, 5, 119, 111,
@@ -32,7 +32,7 @@ describe('Browser tests', () => {
       }
       assert.equal(data.length, 4);
 
-      after(async () => {
+      after(async function () {
         await reader.close();
       });
     });

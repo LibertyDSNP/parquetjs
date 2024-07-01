@@ -2,12 +2,13 @@ import zlib from 'zlib';
 import snappy from 'snappyjs';
 import { compress as brotliCompress, decompress as brotliDecompress } from 'brotli-wasm';
 
-interface PARQUET_COMPRESSION_METHODS {
-  [key: string]: {
+type PARQUET_COMPRESSION_METHODS = Record<
+  string,
+  {
     deflate: (value: any) => Buffer | Promise<Buffer>;
     inflate: (value: any) => Buffer | Promise<Buffer>;
-  };
-}
+  }
+>;
 // LZO compression is disabled. See: https://github.com/LibertyDSNP/parquetjs/issues/18
 export const PARQUET_COMPRESSION_METHODS: PARQUET_COMPRESSION_METHODS = {
   UNCOMPRESSED: {

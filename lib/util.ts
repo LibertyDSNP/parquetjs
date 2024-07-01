@@ -47,10 +47,10 @@ type ThriftObject =
  */
 
 const getterSetter = (index: number) => ({
-  get: function (this: Array<number>): number {
+  get: function (this: number[]): number {
     return this[index];
   },
-  set: function (this: Array<number>, value: number): number {
+  set: function (this: number[], value: number): number {
     return (this[index] = value);
   },
 });
@@ -63,16 +63,16 @@ Object.defineProperty(parquet_thrift.PageLocation.prototype, 'first_row_index', 
  * Helper function that serializes a thrift object into a buffer
  */
 export const serializeThrift = function (obj: ThriftObject) {
-  let output: Array<Uint8Array> = [];
+  const output: Uint8Array[] = [];
 
   const callBack: TTransportCallback = function (buf: Buffer | undefined) {
     output.push(buf as Buffer);
   };
 
-  let transport = new thrift.TBufferedTransport(undefined, callBack);
+  const transport = new thrift.TBufferedTransport(undefined, callBack);
 
-  let protocol = new thrift.TCompactProtocol(transport);
-  //@ts-ignore, https://issues.apache.org/jira/browse/THRIFT-3872
+  const protocol = new thrift.TCompactProtocol(transport);
+  //@ts-expect-error, https://issues.apache.org/jira/browse/THRIFT-3872
   obj.write(protocol);
   transport.flush();
 
@@ -84,10 +84,10 @@ export const decodeThrift = function (obj: ThriftObject, buf: Buffer, offset?: n
     offset = 0;
   }
 
-  var transport = new fixedTFramedTransport(buf);
+  const transport = new fixedTFramedTransport(buf);
   transport.readPos = offset;
-  var protocol = new thrift.TCompactProtocol(transport);
-  //@ts-ignore, https://issues.apache.org/jira/browse/THRIFT-3872
+  const protocol = new thrift.TCompactProtocol(transport);
+  //@ts-expect-error, https://issues.apache.org/jira/browse/THRIFT-3872
   obj.read(protocol);
   return transport.readPos - offset;
 };
@@ -107,7 +107,7 @@ export const getBitWidth = function (val: number) {
  * FIXME not ideal that this is linear
  */
 export const getThriftEnum = function (klass: Enums, value: unknown) {
-  for (let k in klass) {
+  for (const k in klass) {
     if (klass[k] === value) {
       return k;
     }
@@ -141,7 +141,7 @@ export const fstat = function (filePath: string | Buffer | URL): Promise<fs.Stat
 };
 
 export const fread = function (fd: number, position: number | null, length: number): Promise<Buffer> {
-  let buffer = Buffer.alloc(length);
+  const buffer = Buffer.alloc(length);
 
   return new Promise((resolve, reject) => {
     fs.read(fd, buffer, 0, length, position, (err, bytesRead, buf) => {
@@ -192,9 +192,9 @@ export const osend = function (os: WriteStreamMinimal) {
 
 export const osopen = function (path: string | Buffer | URL, opts?: WriterOptions): Promise<WriteStream> {
   return new Promise((resolve, reject) => {
-    let outputStream = fs.createWriteStream(path, opts);
+    const outputStream = fs.createWriteStream(path, opts);
 
-    outputStream.on('open', function (fd) {
+    outputStream.on('open', function (_fd) {
       resolve(outputStream);
     });
 
@@ -204,7 +204,7 @@ export const osopen = function (path: string | Buffer | URL, opts?: WriterOption
   });
 };
 
-export const fieldIndexOf = function (arr: Array<Array<unknown>>, elem: Array<unknown>) {
+export const fieldIndexOf = function (arr: unknown[][], elem: unknown[]) {
   for (let j = 0; j < arr.length; ++j) {
     if (arr[j].length !== elem.length) {
       continue;

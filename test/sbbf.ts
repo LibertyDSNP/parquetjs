@@ -5,7 +5,7 @@ import { Done } from 'mocha';
 
 import SplitBlockBloomFilter from '../lib/bloom/sbbf';
 
-const times = (n: number, fn: Function) => {
+const times = (n: number, fn: () => void) => {
   return Array(n).map(() => fn());
 };
 const random = (min: number, max: number) => {
@@ -14,7 +14,7 @@ const random = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1) + min);
 };
 
-describe('Split Block Bloom Filters', () => {
+describe('Split Block Bloom Filters', function () {
   const expectedDefaultBytes = 29920;
 
   it('Mask works', function () {
@@ -27,11 +27,12 @@ describe('Split Block Bloom Filters', () => {
       expect(testMaskRes[i]).to.eq(expectedVals[i]);
     }
   });
+
   it('block insert + check works', function () {
-    let blk = SplitBlockBloomFilter.initBlock();
-    let isInsertedX: Long = Long.fromString('6f6f6f6f6', true, 16);
-    let isInsertedY: Long = Long.fromString('deadbeef', true, 16);
-    let notInsertedZ: Long = Long.fromNumber(3);
+    const blk = SplitBlockBloomFilter.initBlock();
+    const isInsertedX: Long = Long.fromString('6f6f6f6f6', true, 16);
+    const isInsertedY: Long = Long.fromString('deadbeef', true, 16);
+    const notInsertedZ: Long = Long.fromNumber(3);
 
     SplitBlockBloomFilter.blockInsert(blk, isInsertedX);
 
@@ -59,6 +60,7 @@ describe('Split Block Bloom Filters', () => {
     new Long(0x0, 0x1, true),
     new Long(793516929, -2061372197, true), // regression test; this one was failing get blockIndex
   ];
+  // eslint-disable-next-line mocha/no-setup-in-describe
   const badVal = Long.fromNumber(0xfafafafa, true);
 
   it('filter insert + check works', function () {
@@ -76,6 +78,7 @@ describe('Split Block Bloom Filters', () => {
     });
     filter.check(badVal).then((isPresent) => expect(isPresent).to.eq(false));
   });
+
   it('number of filter bytes is set to defaults on init', async function () {
     const filter = new SplitBlockBloomFilter().init();
     expect(filter.getNumFilterBytes()).to.eq(expectedDefaultBytes);
@@ -95,6 +98,7 @@ describe('Split Block Bloom Filters', () => {
         spy.restore();
       });
     });
+
     it('sets filter bytes to next power of 2', function () {
       let filter = new SplitBlockBloomFilter().init();
       expect(filter.getNumFilterBytes()).to.eq(expectedDefaultBytes);
@@ -109,6 +113,7 @@ describe('Split Block Bloom Filters', () => {
       filter = new SplitBlockBloomFilter().setOptionNumFilterBytes(below2).init();
       expect(filter.getNumFilterBytes()).to.eq(2 ** 12);
     });
+
     it("can't be set twice after initializing", function () {
       const spy = sinon.spy(console, 'error');
       const filter = new SplitBlockBloomFilter()
@@ -128,6 +133,7 @@ describe('Split Block Bloom Filters', () => {
       const filter = new SplitBlockBloomFilter().setOptionFalsePositiveRate(0.00101);
       expect(filter.getFalsePositiveRate()).to.eq(0.00101);
     });
+
     it("can't be set twice after initializing", function () {
       const spy = sinon.spy(console, 'error');
       const filter = new SplitBlockBloomFilter()
@@ -147,6 +153,7 @@ describe('Split Block Bloom Filters', () => {
       const filter = new SplitBlockBloomFilter().setOptionNumDistinct(10000);
       expect(filter.getNumDistinct()).to.eq(10000);
     });
+
     it("can't be set twice after initializing", function () {
       const spy = sinon.spy(console, 'error');
       const filter = new SplitBlockBloomFilter().setOptionNumDistinct(10000).setOptionNumDistinct(9999);
@@ -165,12 +172,14 @@ describe('Split Block Bloom Filters', () => {
       expect(spy.calledOnce);
       spy.restore();
     });
+
     it('allocates the filter', function () {
       const filter = new SplitBlockBloomFilter().setOptionNumFilterBytes(1024).init();
       expect(filter.getNumFilterBlocks()).to.eq(32);
       expect(filter.getFilter().length).to.eq(32);
     });
   });
+
   describe('optimal number of blocks', function () {
     // Some general ideas of what size filters are needed for different parameters
     // Note there is a small but non-negligible difference between this and what
@@ -230,9 +239,13 @@ describe('Split Block Bloom Filters', () => {
     url: 'http://placekitten.com/800/600',
   };
 
+  /* eslint mocha/no-setup-in-describe: 'off' */
   describe('insert, check', function () {
-    type testCase = { name: string; val: any };
-    const testCases: Array<testCase> = [
+    interface testCase {
+      name: string;
+      val: any;
+    }
+    const testCases: testCase[] = [
       { name: 'boolean', val: true },
       { name: 'int number', val: 23423 },
       { name: 'float number', val: 23334.23 },
@@ -254,7 +267,7 @@ describe('Split Block Bloom Filters', () => {
     });
   });
 
-  describe('insert throws on unsupported type', async function () {
+  describe('insert throws on unsupported type', function () {
     const throwCases = [
       { name: 'POJO', val: pojo },
       { name: 'Array', val: [383838, 222, 5898, 1, 0] },

@@ -11,21 +11,23 @@ const { sdkStreamMixin } = require('@smithy/util-stream');
 const { createReadStream } = require('fs');
 const { ParquetReader } = require('../parquet');
 
-describe('ParquetReader', () => {
-  describe('#openUrl', () => {
-    before(() => {
+const s3Mock = mockClient(S3Client);
+
+describe('ParquetReader', function () {
+  describe('#openUrl', function () {
+    before(function () {
       server.listen();
     });
 
-    afterEach(() => {
+    afterEach(function () {
       server.resetHandlers();
     });
 
-    after(() => {
+    after(function () {
       server.close();
     });
 
-    it('reads parquet files via http', async () => {
+    it('reads parquet files via http', async function () {
       const reader = await parquet.ParquetReader.openUrl('http://fruits-bloomfilter.parquet');
 
       const cursor = await reader.getCursor();
@@ -86,12 +88,12 @@ describe('ParquetReader', () => {
     });
   });
 
-  describe('#asyncIterator', () => {
-    it('responds to for await', async () => {
+  describe('#asyncIterator', function () {
+    it('responds to for await', async function () {
       const reader = await parquet.ParquetReader.openFile(path.join(__dirname, 'test-files', 'fruits.parquet'));
 
       let counter = 0;
-      for await (const record of reader) {
+      for await (const _record of reader) {
         counter++;
       }
 
@@ -99,8 +101,8 @@ describe('ParquetReader', () => {
     });
   });
 
-  describe('#handleDecimal', () => {
-    it('loads parquet with columns configured as DECIMAL', async () => {
+  describe('#handleDecimal', function () {
+    it('loads parquet with columns configured as DECIMAL', async function () {
       const reader = await parquet.ParquetReader.openFile(
         path.join(__dirname, 'test-files', 'valid-decimal-columns.parquet')
       );
@@ -118,11 +120,10 @@ describe('ParquetReader', () => {
       assert.equal(data[2].under_9_digits, undefined);
     });
   });
-  describe('ParquetReader with S3', () => {
-    describe('V3', () => {
-      const s3Mock = mockClient(S3Client);
 
-      it('works', async () => {
+  describe('ParquetReader with S3', function () {
+    describe('V3', function () {
+      it('works', async function () {
         let srcFile = 'test/test-files/nation.dict.parquet';
 
         const headStream = new Readable();

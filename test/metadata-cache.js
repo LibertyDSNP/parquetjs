@@ -24,7 +24,9 @@ describe('metadata-cache', function () {
           column.offset_index_length = undefined;
           column.column_index_offset = undefined;
           column.column_index_length = undefined;
-        } catch (e) {}
+        } catch (e) {
+          console.error(e);
+        }
       }
     }
     const metaDataTxt = await reader.exportMetadata();

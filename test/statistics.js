@@ -24,7 +24,7 @@ const schema = new parquet.ParquetSchema({
   meta_json: { type: 'BSON', optional: true, statistics: false },
 });
 
-describe('statistics', async function () {
+describe('statistics', function () {
   let row, reader;
 
   before(async function () {

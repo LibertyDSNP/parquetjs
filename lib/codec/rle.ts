@@ -5,12 +5,12 @@
 import varint from 'varint';
 import { Cursor } from './types';
 
-function encodeRunBitpacked(values: Array<number>, opts: { bitWidth: number }) {
+function encodeRunBitpacked(values: number[], opts: { bitWidth: number }) {
   for (let i = 0; i < values.length % 8; i++) {
     values.push(0);
   }
 
-  let buf = Buffer.alloc(Math.ceil(opts.bitWidth * (values.length / 8)));
+  const buf = Buffer.alloc(Math.ceil(opts.bitWidth * (values.length / 8)));
   for (let b = 0; b < opts.bitWidth * values.length; ++b) {
     if ((values[Math.floor(b / opts.bitWidth)] & (1 << b % opts.bitWidth)) > 0) {
       buf[Math.floor(b / 8)] |= 1 << b % 8;
@@ -21,7 +21,7 @@ function encodeRunBitpacked(values: Array<number>, opts: { bitWidth: number }) {
 }
 
 function encodeRunRepeated(value: number, count: number, opts: { bitWidth: number }) {
-  let buf = Buffer.alloc(Math.ceil(opts.bitWidth / 8));
+  const buf = Buffer.alloc(Math.ceil(opts.bitWidth / 8));
   let remainingValue = value;
 
   // This is encoded LSB to MSB, so we pick off the least
@@ -44,7 +44,7 @@ function unknownToParsedInt(value: string | number) {
 
 export const encodeValues = function (
   type: string,
-  values: Array<number>,
+  values: number[],
   opts: { bitWidth: number; disableEnvelope?: boolean }
 ) {
   if (!('bitWidth' in opts)) {
@@ -98,7 +98,7 @@ export const encodeValues = function (
     return buf;
   }
 
-  let envelope = Buffer.alloc(buf.length + 4);
+  const envelope = Buffer.alloc(buf.length + 4);
   envelope.writeUInt32LE(buf.length);
   buf.copy(envelope, 4);
 
@@ -110,7 +110,7 @@ function decodeRunBitpacked(cursor: Cursor, count: number, opts: { bitWidth: num
     throw 'must be a multiple of 8';
   }
 
-  let values = new Array(count).fill(0);
+  const values = new Array(count).fill(0);
   for (let b = 0; b < opts.bitWidth * count; ++b) {
     if (cursor.buffer[cursor.offset + Math.floor(b / 8)] & (1 << b % 8)) {
       values[Math.floor(b / opts.bitWidth)] |= 1 << b % opts.bitWidth;
@@ -122,7 +122,7 @@ function decodeRunBitpacked(cursor: Cursor, count: number, opts: { bitWidth: num
 }
 
 function decodeRunRepeated(cursor: Cursor, count: number, opts: { bitWidth: number }) {
-  var bytesNeededForFixedBitWidth = Math.ceil(opts.bitWidth / 8);
+  const bytesNeededForFixedBitWidth = Math.ceil(opts.bitWidth / 8);
   let value = 0;
 
   for (let i = 0; i < bytesNeededForFixedBitWidth; ++i) {

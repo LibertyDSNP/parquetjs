@@ -5,12 +5,12 @@ import SplitBlockBloomFilter from '../bloom/sbbf';
 import { Block } from '../declare';
 import Int64 from 'node-int64';
 
-export type createSBBFParams = {
+export interface createSBBFParams {
   numFilterBytes?: number;
   falsePositiveRate?: number;
   numDistinct?: number;
   column?: any;
-};
+}
 
 export const createSBBF = (params: createSBBFParams): SplitBlockBloomFilter => {
   const { numFilterBytes, falsePositiveRate, numDistinct } = params;
@@ -30,7 +30,7 @@ export const createSBBF = (params: createSBBFParams): SplitBlockBloomFilter => {
   return bloomFilter.init();
 };
 
-const serializeFilterBlocks = (blocks: Array<Block>): Buffer =>
+const serializeFilterBlocks = (blocks: Block[]): Buffer =>
   Buffer.concat(blocks.map((block) => Buffer.from(block.buffer)));
 
 const buildFilterHeader = (numBytes: number) => {
@@ -49,10 +49,10 @@ export const serializeFilterHeaders = (numberOfBytes: number) => {
   return parquet_util.serializeThrift(bloomFilterHeader);
 };
 
-type serializeFilterDataParams = {
-  filterBlocks: Array<Block>;
+interface serializeFilterDataParams {
+  filterBlocks: Block[];
   filterByteSize: number;
-};
+}
 
 export const serializeFilterData = (params: serializeFilterDataParams) => {
   const serializedFilterBlocks = serializeFilterBlocks(params.filterBlocks);

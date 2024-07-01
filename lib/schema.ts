@@ -11,7 +11,7 @@ import { fromJsonSchema } from './jsonSchema';
 export class ParquetSchema {
   schema: SchemaDefinition;
   fields: Record<string, ParquetField>;
-  fieldList: Array<ParquetField>;
+  fieldList: ParquetField[];
 
   /**
    * Create a new schema from JSON Schema (json-schema.org)
@@ -33,7 +33,7 @@ export class ParquetSchema {
   /**
    * Retrieve a field definition
    */
-  findField(path: string | Array<string>) {
+  findField(path: string | string[]) {
     if (typeof path === 'string') {
       path = path.split(',');
     } else {
@@ -42,7 +42,7 @@ export class ParquetSchema {
 
     let n = this.fields;
     for (; path.length > 1; path.shift()) {
-      let fields = n[path[0]]?.fields;
+      const fields = n[path[0]]?.fields;
       if (isDefined(fields)) {
         n = fields;
       }
@@ -54,17 +54,17 @@ export class ParquetSchema {
   /**
    * Retrieve a field definition and all the field's ancestors
    */
-  findFieldBranch(path: string | Array<string>) {
+  findFieldBranch(path: string | string[]) {
     if (typeof path === 'string') {
       path = path.split(',');
     }
 
-    let branch = [];
+    const branch = [];
     let n = this.fields;
     for (; path.length > 0; path.shift()) {
       branch.push(n[path[0]]);
 
-      let fields = n[path[0]].fields;
+      const fields = n[path[0]].fields;
       if (path.length > 1 && isDefined(fields)) {
         n = fields;
       }
@@ -74,12 +74,7 @@ export class ParquetSchema {
   }
 }
 
-function buildFields(
-  schema: SchemaDefinition,
-  rLevelParentMax?: number,
-  dLevelParentMax?: number,
-  path?: Array<string>
-) {
+function buildFields(schema: SchemaDefinition, rLevelParentMax?: number, dLevelParentMax?: number, path?: string[]) {
   if (!rLevelParentMax) {
     rLevelParentMax = 0;
   }
@@ -92,9 +87,9 @@ function buildFields(
     path = [];
   }
 
-  let fieldList: Record<string, ParquetField> = {};
-  let fieldErrors: Array<string> = [];
-  for (let name in schema) {
+  const fieldList: Record<string, ParquetField> = {};
+  let fieldErrors: string[] = [];
+  for (const name in schema) {
     const opts = schema[name];
 
     /* field repetition type */
@@ -200,9 +195,9 @@ function buildFields(
 }
 
 function listFields(fields: Record<string, ParquetField>) {
-  let list: Array<ParquetField> = [];
+  let list: ParquetField[] = [];
 
-  for (let k in fields) {
+  for (const k in fields) {
     list.push(fields[k]);
 
     const nestedFields = fields[k].fields;

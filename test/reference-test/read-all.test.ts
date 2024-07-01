@@ -1,3 +1,4 @@
+/* eslint mocha/no-setup-in-describe: 'off' */
 import { expect } from 'chai';
 import path from 'node:path';
 import fs from 'node:fs';

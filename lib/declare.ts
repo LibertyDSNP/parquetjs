@@ -56,9 +56,7 @@ export type OriginalType =
   | 'BSON' // 20
   | 'INTERVAL'; // 21
 
-export interface SchemaDefinition {
-  [string: string]: FieldDefinition;
-}
+export type SchemaDefinition = Record<string, FieldDefinition>;
 
 export interface FieldDefinition {
   type?: ParquetType;
@@ -110,9 +108,7 @@ export interface ParquetBuffer {
   columnData?: Record<string, PageData>;
 }
 
-export interface ParquetRecord {
-  [key: string]: any;
-}
+export type ParquetRecord = Record<string, any>;
 
 export interface ColumnChunkData {
   rowGroupIndex: number;
@@ -159,7 +155,7 @@ export interface PageData {
   pageHeaders?: PageHeader[];
   pageHeader?: PageHeader;
   count?: number;
-  dictionary?: Array<unknown>;
+  dictionary?: unknown[];
   column?: parquet_thrift.ColumnChunk;
   useDictionary?: boolean;
 }
@@ -214,7 +210,7 @@ export class NewPageHeader extends parquet_thrift.PageHeader {
   headerSize?: number;
 }
 
-export type WriterOptions = {
+export interface WriterOptions {
   pageIndex?: boolean;
   pageSize?: number;
   useDataPageV2?: boolean;
@@ -229,13 +225,13 @@ export type WriterOptions = {
   emitClose?: boolean;
   start?: number;
   highWaterMark?: number;
-};
+}
 
-export type Page = {
+export interface Page {
   page: Buffer;
   statistics: parquet_thrift.Statistics;
   first_row_index: number;
   distinct_values: Set<any>;
   num_values: number;
   count?: number;
-};
+}

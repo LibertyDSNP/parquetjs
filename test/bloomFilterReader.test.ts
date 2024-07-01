@@ -26,11 +26,11 @@ const emptyMetaData = (): ColumnMetaDataExt => {
   };
 };
 
-describe('bloomFilterReader', () => {
-  describe('offsets', () => {
-    let columnChunkDataCollection: Array<ColumnChunkData>;
+describe('bloomFilterReader', function () {
+  describe('offsets', function () {
+    let columnChunkDataCollection: ColumnChunkData[];
 
-    beforeEach(() => {
+    beforeEach(function () {
       const metaData: ColumnMetaDataExt = emptyMetaData();
       metaData.path_in_schema = ['name'];
       metaData.bloom_filter_offset = new Int64(Buffer.from('000000000874', 'hex'), 0);
@@ -49,7 +49,7 @@ describe('bloomFilterReader', () => {
       ];
     });
 
-    it('returns bloom filter offsets', () => {
+    it('returns bloom filter offsets', function () {
       const result = parseBloomFilterOffsets(columnChunkDataCollection);
       const expected = [
         {
@@ -62,8 +62,9 @@ describe('bloomFilterReader', () => {
       expect(result).to.deep.equal(expected);
     });
   });
-  describe('XXHasher', async () => {
-    it('outputs hex-encoded strings', async () => {
+
+  describe('XXHasher', function () {
+    it('outputs hex-encoded strings', async function () {
       const hasher = await new XxHasher();
       assert.equal('ee7276ee58e4421c', await hasher.hash64('15'));
     });

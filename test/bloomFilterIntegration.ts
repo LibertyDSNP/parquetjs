@@ -1,52 +1,23 @@
 import { assert } from 'chai';
 import parquet from '../parquet';
-
-import parquet_thrift from '../gen-nodejs/parquet_types';
-import { decodeThrift } from '../lib/util';
 import SplitBlockBloomFilter from '../lib/bloom/sbbf';
 
 const TEST_VTIME = new Date();
 
 const TEST_FILE = 'fruits-bloomfilter.parquet';
 
-type BloomFilterColumnData = {
+interface BloomFilterColumnData {
   sbbf: SplitBlockBloomFilter;
   columnName: string;
   rowGroupIndex: number;
-};
+}
 
-const sampleColumnHeaders = async (filename: string) => {
-  let reader = await parquet.ParquetReader.openFile(filename);
-
-  let column = reader.metadata!.row_groups[0].columns[0];
-  let buffer = await reader!.envelopeReader!.read(
-    +column!.meta_data!.data_page_offset,
-    +column!.meta_data!.total_compressed_size
-  );
-
-  let cursor = {
-    buffer: buffer,
-    offset: 0,
-    size: buffer.length,
-  };
-
-  const pages = [];
-
-  while (cursor.offset < cursor.size) {
-    const pageHeader = new parquet_thrift.PageHeader();
-    cursor.offset += decodeThrift(pageHeader, cursor.buffer.subarray(cursor.offset));
-    pages.push(pageHeader);
-    cursor.offset += pageHeader.compressed_page_size;
-  }
-  return { column, pages };
-};
-
-describe('bloom filter', async function () {
-  let row: any;
+describe('bloom filter', function () {
   let reader: any;
-  let bloomFilters: Record<string, Array<BloomFilterColumnData>>;
+  let bloomFilters: Record<string, BloomFilterColumnData[]>;
 
-  describe('a nested schema', () => {
+  describe('a nested schema', function () {
+    // eslint-disable-next-line mocha/no-setup-in-describe
     const schema = new parquet.ParquetSchema({
       name: { type: 'UTF8' },
       quantity: { type: 'INT64', optional: true },
@@ -65,6 +36,7 @@ describe('bloom filter', async function () {
       colour: { type: 'UTF8', repeated: true },
       meta_json: { type: 'BSON', optional: true, statistics: false },
     });
+
     before(async function () {
       const options = {
         pageSize: 3,
@@ -84,7 +56,7 @@ describe('bloom filter', async function () {
         ],
       };
 
-      let writer = await parquet.ParquetWriter.openFile(schema, TEST_FILE, options);
+      const writer = await parquet.ParquetWriter.openFile(schema, TEST_FILE, options);
 
       await writer.appendRow({
         name: 'apples',
@@ -137,12 +109,11 @@ describe('bloom filter', async function () {
 
       await writer.close();
       reader = await parquet.ParquetReader.openFile(TEST_FILE);
-      row = reader.metadata.row_groups[0];
 
       bloomFilters = await reader.getBloomFiltersFor(['name', 'quantity', 'stock,warehouse']);
     });
 
-    it('contains name and quantity filter', () => {
+    it('contains name and quantity filter', function () {
       const columnsFilterNames = Object.keys(bloomFilters);
       assert.deepEqual(columnsFilterNames, ['name', 'quantity', 'stock,warehouse']);
     });
@@ -163,7 +134,7 @@ describe('bloom filter', async function () {
       assert.isFalse(await splitBlockBloomFilter.check(BigInt(100)), '100n is NOT included in quantity filter');
     });
 
-    it('writes bloom filters for stock,warehouse', async () => {
+    it('writes bloom filters for stock,warehouse', async function () {
       const splitBlockBloomFilter = bloomFilters['stock,warehouse'][0].sbbf;
       assert.isTrue(await splitBlockBloomFilter.check(Buffer.from('x')), 'x should be in the warehouse filter');
       assert.isTrue(await splitBlockBloomFilter.check(Buffer.from('f')), 'f should be in the warehouse filter');
@@ -173,7 +144,9 @@ describe('bloom filter', async function () {
       );
     });
   });
-  describe('a simple schema with a nested list', () => {
+
+  describe('a simple schema with a nested list', function () {
+    // eslint-disable-next-line mocha/no-setup-in-describe
     const nestedListSchema = new parquet.ParquetSchema({
       name: { type: 'UTF8' },
       querystring: {
@@ -194,7 +167,7 @@ describe('bloom filter', async function () {
       },
     });
 
-    it('can be written, read and checked', async () => {
+    it('can be written, read and checked', async function () {
       const file = '/tmp/issue-98.parquet';
       const nestedListFilterColumn = 'querystring,list,element,key';
       const writer = await parquet.ParquetWriter.openFile(nestedListSchema, file, {
@@ -213,7 +186,7 @@ describe('bloom filter', async function () {
       });
       await writer.close();
       const reader = await parquet.ParquetReader.openFile(file);
-      const bloomFilters: Record<string, Array<BloomFilterColumnData>> = await reader.getBloomFiltersFor([
+      const bloomFilters: Record<string, BloomFilterColumnData[]> = await reader.getBloomFiltersFor([
         'name',
         'querystring,list,element,key',
       ]);
