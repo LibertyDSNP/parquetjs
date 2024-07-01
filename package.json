@@ -31,8 +31,10 @@
     "xxhash-wasm": "^1.0.2"
   },
   "devDependencies": {
+    "@eslint/js": "^9.6.0",
     "@smithy/util-stream": "^3.0.0",
     "@types/chai": "^4.3.16",
+    "@types/eslint__js": "^8.42.3",
     "@types/json-schema": "^7.0.15",
     "@types/mocha": "^10.0.6",
     "@types/node": "^20.12.12",
@@ -45,10 +47,12 @@
     "chai": "4.4.1",
     "core-js": "^3.37.1",
     "esbuild": "^0.21.2",
+    "eslint": "^8.57.0",
     "events": "^3.3.0",
     "mocha": "^10.4.0",
     "msw": "^2.3.0",
     "object-stream": "^0.0.1",
+    "prettier": "3.3.2",
     "process": "^0.11.10",
     "regenerator-runtime": "^0.14.1",
     "sinon": "^17.0.2",
@@ -56,7 +60,8 @@
     "sinon-chai-in-order": "^0.1.0",
     "stream-browserify": "^3.0.0",
     "tsx": "^4.10.2",
-    "typescript": "^5.4.5"
+    "typescript": "^5.5.2",
+    "typescript-eslint": "^7.14.1"
   },
   "scripts": {
     "build": "npm run build:node && npm run build:types",
@@ -64,7 +69,9 @@
     "build:node": "tsc -b",
     "build:browser": "node esbuild.js",
     "type": "tsc --noEmit",
-    "lint": "echo 'Linting, it is on the TODO list...'",
+    "lint": "eslint && npx prettier . --check",
+    "lint:fix": "eslint --fix",
+    "format": "npx prettier . --write",
     "test": "mocha 'test/{,!(browser)/**}/*.{js,ts}'",
     "test:only": "mocha",
     "clean": "rm -Rf ./dist",
