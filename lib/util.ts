@@ -4,7 +4,6 @@ import fs, { WriteStream } from 'fs';
 import * as parquet_thrift from '../gen-nodejs/parquet_types';
 import { FileMetaDataExt, WriterOptions } from './declare';
 import { Int64 } from 'thrift';
-import { type } from 'os';
 
 // Use this so users only need to implement the minimal amount of the WriteStream interface
 export type WriteStreamMinimal = Pick<WriteStream, 'write' | 'end'>;

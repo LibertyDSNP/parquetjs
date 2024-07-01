@@ -343,7 +343,7 @@ class SplitBlockBloomFilter {
       return this;
     }
 
-    if (!this.hashStrategy.hasOwnProperty('XXHASH')) {
+    if (!Object.prototype.hasOwnProperty.call(this.hashStrategy, 'XXHASH')) {
       throw new Error('unsupported hash strategy');
     }
 
@@ -357,7 +357,7 @@ class SplitBlockBloomFilter {
   }
 
   async hash(value: any): Promise<Long> {
-    if (!this.hashStrategy.hasOwnProperty('XXHASH')) {
+    if (!Object.prototype.hasOwnProperty.call(this.hashStrategy, 'XXHASH')) {
       throw new Error('unsupported hash strategy');
     }
     const hashed = await this.hasher.hash64(value);

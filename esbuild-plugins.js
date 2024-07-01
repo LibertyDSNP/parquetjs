@@ -6,7 +6,7 @@ const compressionBrowserPlugin = {
   name: 'compressionBrowser',
   setup(build) {
     let path = require('path');
-    build.onResolve({ filter: /^\.\/compression$/ }, (args) => {
+    build.onResolve({ filter: /^\.\/compression$/ }, (_args) => {
       return {
         path: path.resolve(__dirname, 'lib', 'browser', 'compression.js'),
       };

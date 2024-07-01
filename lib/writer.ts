@@ -6,15 +6,7 @@ import * as parquet_codec from './codec';
 import * as parquet_compression from './compression';
 import * as parquet_types from './types';
 import * as bloomFilterWriter from './bloomFilterIO/bloomFilterWriter';
-import {
-  WriterOptions,
-  ParquetCodec,
-  ParquetField,
-  ColumnMetaDataExt,
-  RowGroupExt,
-  Page,
-  FieldDefinition,
-} from './declare';
+import { WriterOptions, ParquetCodec, ParquetField, ColumnMetaDataExt, RowGroupExt, Page } from './declare';
 import { Options } from './codec/types';
 import { ParquetSchema } from './schema';
 import Int64 from 'node-int64';
@@ -193,8 +185,8 @@ export class ParquetWriter {
  */
 export class ParquetEnvelopeWriter {
   schema: ParquetSchema;
-  write: Function;
-  close: Function;
+  write: (buf: Buffer) => void;
+  close: () => void;
   offset: Int64;
   rowCount: Int64;
   rowGroups: RowGroupExt[];
@@ -212,7 +204,13 @@ export class ParquetEnvelopeWriter {
     return new ParquetEnvelopeWriter(schema, writeFn, closeFn, new Int64(0), opts);
   }
 
-  constructor(schema: ParquetSchema, writeFn: Function, closeFn: Function, fileOffset: Int64, opts: WriterOptions) {
+  constructor(
+    schema: ParquetSchema,
+    writeFn: (buf: Buffer) => void,
+    closeFn: () => void,
+    fileOffset: Int64,
+    opts: WriterOptions
+  ) {
     this.schema = schema;
     this.write = writeFn;
     this.close = closeFn;
@@ -347,12 +345,20 @@ export class ParquetTransformer extends stream.Transform {
 
     this.writer = new ParquetWriter(
       schema,
-      new ParquetEnvelopeWriter(schema, writeProxy, function () {}, new Int64(0), opts),
+      new ParquetEnvelopeWriter(
+        schema,
+        writeProxy,
+        () => {
+          /* void */
+        },
+        new Int64(0),
+        opts
+      ),
       opts
     );
   }
 
-  _transform(row: Record<string, unknown>, _encoding: string, callback: Function) {
+  _transform(row: Record<string, unknown>, _encoding: string, callback: (err?: Error | null, data?: any) => void) {
     if (row) {
       this.writer.appendRow(row).then(
         (data) => callback(null, data),

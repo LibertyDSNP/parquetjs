@@ -2,11 +2,6 @@ import zlib from 'zlib';
 import snappy from 'snappyjs';
 import { compress as brotliCompress, decompress as brotliDecompress } from 'brotli-wasm';
 
-type d_identity = (value: ArrayBuffer | Buffer | Uint8Array) => ArrayBuffer | Buffer | Uint8Array;
-type d_gzip = (value: ArrayBuffer | Buffer | string) => Buffer;
-type d_snappy = (value: ArrayBuffer | Buffer | Uint8Array) => ArrayBuffer | Buffer | Uint8Array;
-type d_brotli = (value: Uint8Array) => Promise<Buffer>;
-
 interface PARQUET_COMPRESSION_METHODS {
   [key: string]: {
     deflate: (value: any) => Buffer | Promise<Buffer>;

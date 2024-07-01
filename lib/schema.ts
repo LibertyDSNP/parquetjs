@@ -5,8 +5,6 @@ import { SchemaDefinition, ParquetField, RepetitionType, FieldDefinition } from 
 import { JSONSchema4 } from 'json-schema';
 import { fromJsonSchema } from './jsonSchema';
 
-const PARQUET_COLUMN_KEY_SEPARATOR = '.';
-
 /**
  * A parquet file schema
  */

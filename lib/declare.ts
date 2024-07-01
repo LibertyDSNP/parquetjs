@@ -10,8 +10,6 @@ import {
   DataPageHeaderV2,
   DictionaryPageHeader,
   IndexPageHeader,
-  Type,
-  ColumnMetaData,
 } from '../gen-nodejs/parquet_types';
 import SplitBlockBloomFilter from './bloom/sbbf';
 import { createSBBFParams } from './bloomFilterIO/bloomFilterWriter';
@@ -214,9 +212,6 @@ export interface FileMetaDataExt extends parquet_thrift.FileMetaData {
 export class NewPageHeader extends parquet_thrift.PageHeader {
   offset?: number;
   headerSize?: number;
-  constructor() {
-    super();
-  }
 }
 
 export type WriterOptions = {

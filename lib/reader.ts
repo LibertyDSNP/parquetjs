@@ -337,10 +337,11 @@ export class ParquetReader {
       if (typeof value === 'object') {
         for (let k in value) {
           if (value[k] instanceof Date) {
-            value[k].toJSON = () => ({
-              parquetType: 'CTIME',
-              value: value[k].valueOf(),
-            });
+            value[k].toJSON = () =>
+              JSON.stringify({
+                parquetType: 'CTIME',
+                value: value[k].valueOf(),
+              });
           }
         }
       }
@@ -407,7 +408,7 @@ export class ParquetEnvelopeReader {
   readFn: (offset: number, length: number, file?: string) => Promise<Buffer>;
   close: () => unknown;
   id: number;
-  fileSize: Function | number;
+  fileSize: number | (() => Promise<number>);
   default_dictionary_size: number;
   metadata?: FileMetaDataExt;
   schema?: parquet_schema.ParquetSchema;
@@ -467,7 +468,10 @@ export class ParquetEnvelopeReader {
   static async openS3v3(client: S3Client, params: any, options: any) {
     const fileStat = async () => {
       try {
-        let headObjectCommand = await client.send(new HeadObjectCommand(params));
+        const headObjectCommand = await client.send(new HeadObjectCommand(params));
+        if (headObjectCommand.ContentLength === undefined) {
+          throw new Error('Content Length is undefined!');
+        }
         return Promise.resolve(headObjectCommand.ContentLength);
       } catch (e: any) {
         // having params match command names makes e.message clear to user
@@ -526,9 +530,9 @@ export class ParquetEnvelopeReader {
 
     let defaultHeaders = params.headers || {};
 
-    let filesize = async () => {
+    const filesize = async (): Promise<number> => {
       const { headers } = await fetch(params.url);
-      return headers.get('Content-Length');
+      return Number(headers.get('Content-Length')) || 0;
     };
 
     let readFn = async (offset: number, length: number, file?: string) => {
@@ -550,7 +554,7 @@ export class ParquetEnvelopeReader {
   constructor(
     readFn: (offset: number, length: number, file?: string) => Promise<Buffer>,
     closeFn: () => unknown,
-    fileSize: Function | number,
+    fileSize: number | (() => Promise<number>),
     options?: BufferReaderOptions,
     metadata?: FileMetaDataExt
   ) {
@@ -884,9 +888,8 @@ async function decodePage(cursor: Cursor, opts: Options): Promise<PageData> {
       page = await decodeDataPageV2(cursor, pageHeader, opts);
       break;
     case 'DICTIONARY_PAGE':
-      const dict = await decodeDictionaryPage(cursor, pageHeader, opts);
       page = {
-        dictionary: dict,
+        dictionary: await decodeDictionaryPage(cursor, pageHeader, opts),
       };
       break;
     default:

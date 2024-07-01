@@ -1,8 +1,6 @@
 import xxhash from 'xxhash-wasm';
 import Long from 'long';
 
-type HasherFunc = (input: string, seedHigh?: number, seedLow?: number) => string;
-
 /**
  * @class XxHasher
  *
