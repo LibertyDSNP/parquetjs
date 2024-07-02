@@ -11,31 +11,38 @@
 <script>
     const port = "<%= port %>"
     const readit = function (filename) {
+        const output = document.getElementById('output');
         parquetjs.ParquetReader
             .openUrl(`http://localhost:${port}/files/${filename}`)
             .then(async (reader) => {
                 let cursor = await reader.getCursor();
 
                 let record = null;
+                output.innerHTML = "";
                 while (record = await cursor.next()) {
+                    output.innerHTML += `\nRecord: ${JSON.stringify(record, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2)}`;
                     console.log("record", record);
                 }
                 return reader;
             })
             .then((reader) => reader.close())
             .catch((e) => {
+                output.innerHTML += `\nERROR: ${e}`;
                 console.log("error", e);
             })
 
     }
 
     const search = async function (filename, columnName, searchTerm) {
+        const output = document.getElementById('output');
         const rdr = await parquetjs.ParquetReader.openUrl(`http://localhost:${port}/files/${filename}`)
         const bfs = await rdr.getBloomFiltersFor([columnName])
         if (!bfs[columnName]) return false
+        output.innerHTML = "";
         Promise.all(bfs[columnName].map(async item => item.sbbf.check(searchTerm)))
             .then(values => {
                 const res = values.some((el) => (el === true));
+                output.innerHTML += `\nResponse "${searchTerm}": ${JSON.stringify(res, null, 2)}`;
                 console.log("res: ", res)
                 return res
             })
@@ -59,5 +66,8 @@
 <h3>Search fruits-bloomfilter.parquet "name" column for</h3>
 <button onclick="search('fruits-bloomfilter.parquet', 'name', 'kiwi')">Search fruits-bloomfilter.parquet for "kiwi"</button>
 <button onclick="search('fruits-bloomfilter.parquet', 'name', 'xxx')">Search fruits-bloomfilter.parquet for "xxx"</button>
+
+<h2>Output</h2>
+<pre id="output"></pre>
 </body>
 </html>
