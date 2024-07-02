@@ -1,6 +1,5 @@
 import zlib from 'zlib';
 import snappy from 'snappyjs';
-import { compress as brotliCompress, decompress as brotliDecompress } from 'brotli-wasm';
 
 type PARQUET_COMPRESSION_METHODS = Record<
   string,
@@ -54,16 +53,7 @@ function deflate_snappy(value: ArrayBuffer | Buffer | Uint8Array) {
 }
 
 async function deflate_brotli(value: Uint8Array) {
-  const compressedContent = await brotliCompress(
-    value /*, {
-    mode: 0,
-    quality: 8,
-    lgwin: 22
-  }
-  */
-  );
-
-  return Buffer.from(compressedContent);
+  return zlib.brotliCompressSync(value);
 }
 
 /**
@@ -91,8 +81,7 @@ function inflate_snappy(value: ArrayBuffer | Buffer | Uint8Array) {
 }
 
 async function inflate_brotli(value: Uint8Array) {
-  const uncompressedContent = await brotliDecompress(value);
-  return Buffer.from(uncompressedContent);
+  return zlib.brotliDecompressSync(value);
 }
 
 function buffer_from_result(result: ArrayBuffer | Buffer | Uint8Array): Buffer {
