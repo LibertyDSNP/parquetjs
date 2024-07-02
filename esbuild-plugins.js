@@ -1,6 +1,6 @@
 /**
- * this plugin resolves to a browser version of compression.js that
- * does not include LZO or Brötli comprssion.
+ * this plugin resolves to a browser version of compression.ts that
+ * does not include LZO or Brotli comprssion.
  */
 const compressionBrowserPlugin = {
   name: 'compressionBrowser',
@@ -8,7 +8,7 @@ const compressionBrowserPlugin = {
     let path = require('path');
     build.onResolve({ filter: /^\.\/compression$/ }, (_args) => {
       return {
-        path: path.resolve(__dirname, 'lib', 'browser', 'compression.js'),
+        path: path.resolve(__dirname, 'lib', 'browser', 'compression.ts'),
       };
     });
   },
