@@ -5,6 +5,7 @@
 // 3. Test the files
 'use strict';
 import snappy from 'snappyjs';
+import brotliPromise from 'brotli-wasm';
 
 type PARQUET_COMPRESSION_METHODS = Record<
   string,
@@ -26,6 +27,10 @@ export const PARQUET_COMPRESSION_METHODS: PARQUET_COMPRESSION_METHODS = {
   SNAPPY: {
     deflate: deflate_snappy,
     inflate: inflate_snappy,
+  },
+  BROTLI: {
+    deflate: deflate_brotli,
+    inflate: inflate_brotli,
   },
 };
 
@@ -55,6 +60,12 @@ function deflate_snappy(value: ArrayBuffer | Buffer | Uint8Array) {
   return buffer_from_result(compressedValue);
 }
 
+async function deflate_brotli(value: Uint8Array) {
+  // Import is async in browsers due to wasm requirements!
+  const brotli = await brotliPromise;
+  return buffer_from_result(brotli.compress(value));
+}
+
 /**
  * Inflate a value using compression method `method`
  */
@@ -79,6 +90,12 @@ async function inflate_gzip(value: Buffer | ArrayBuffer | string) {
 function inflate_snappy(value: ArrayBuffer | Buffer | Uint8Array) {
   const uncompressedValue = snappy.uncompress(value);
   return buffer_from_result(uncompressedValue);
+}
+
+async function inflate_brotli(value: Uint8Array) {
+  // Import is async in browsers due to wasm requirements!
+  const brotli = await brotliPromise;
+  return buffer_from_result(brotli.decompress(value));
 }
 
 function buffer_from_result(result: ArrayBuffer | Buffer | Uint8Array): Buffer {
