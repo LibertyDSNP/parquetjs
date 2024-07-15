@@ -8,7 +8,6 @@ import * as parquet_compression from './compression';
 import * as parquet_types from './types';
 import BufferReader, { BufferReaderOptions } from './bufferReader';
 import * as bloomFilterReader from './bloomFilterIO/bloomFilterReader';
-import fetch from 'cross-fetch';
 import {
   ParquetCodec,
   Parameter,

@@ -23,7 +23,6 @@
     "brotli-wasm": "^3.0.0",
     "browserify-zlib": "^0.2.0",
     "bson": "6.7.0",
-    "cross-fetch": "^4.0.0",
     "int53": "^1.0.0",
     "long": "^5.2.3",
     "snappyjs": "^0.7.0",
