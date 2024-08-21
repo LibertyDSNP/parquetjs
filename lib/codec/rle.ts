@@ -109,6 +109,9 @@ function decodeRunBitpacked(cursor: Cursor, count: number, opts: { bitWidth: num
   if (count % 8 !== 0) {
     throw new Error('must be a multiple of 8');
   }
+  if (!opts.bitWidth) {
+    throw new Error("bitWidth must be set")
+  }
 
   const values = new Array(count).fill(0);
   for (let b = 0; b < opts.bitWidth * count; ++b) {
@@ -146,6 +149,7 @@ export const decodeValues = function (
     throw new Error('bitWidth is required');
   }
 
+  // disableEnvelope is undefined and so is bitWidth
   if (!opts.disableEnvelope) {
     cursor.offset += 4;
   }
@@ -153,6 +157,9 @@ export const decodeValues = function (
   let values = [];
   let res;
 
+  // Buffer index 23  = 136, this is an array of bytes, why is it "decoding" the value and adding an offset??
+  // it was decoding to 7 and taking the cursor offset out decodes to 136,
+  // but I don't know that this is even correctly decoding.
   while (values.length < count) {
     const header = varint.decode(cursor.buffer, cursor.offset);
     cursor.offset += varint.encodingLength(header);
@@ -171,6 +178,5 @@ export const decodeValues = function (
   if (values.length !== count) {
     throw new Error('invalid RLE encoding');
   }
-
   return values;
 };
