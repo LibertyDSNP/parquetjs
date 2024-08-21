@@ -109,9 +109,6 @@ function decodeRunBitpacked(cursor: Cursor, count: number, opts: { bitWidth: num
   if (count % 8 !== 0) {
     throw new Error('must be a multiple of 8');
   }
-  if (!opts.bitWidth) {
-    throw new Error("bitWidth must be set")
-  }
 
   const values = new Array(count).fill(0);
   for (let b = 0; b < opts.bitWidth * count; ++b) {
