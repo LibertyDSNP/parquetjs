@@ -27,6 +27,7 @@ import { Cursor, Options } from './codec/types';
 import { GetObjectCommand, HeadObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import type { Readable } from 'stream';
 import type { Blob } from 'buffer';
+import {readDefinitionLevelsV2, readRepetitionLevelsV2} from "./datapageV2";
 
 const { getBloomFiltersFor } = bloomFilterReader;
 
@@ -162,7 +163,7 @@ export class ParquetReader {
   }
 
   /**
-   * Open the parquet file from a url using the supplied request module
+   * Open the parquet file from a URL using the supplied request module
    * params should either be a string (url) or an object that includes
    * a `url` property.
    * This function returns a new parquet reader
@@ -549,9 +550,7 @@ export class ParquetEnvelopeReader {
       const headers = Object.assign({}, defaultHeaders, { range });
       const response = await fetch(url, { headers });
       const arrayBuffer = await response.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-
-      return buffer;
+      return Buffer.from(arrayBuffer);
     };
 
     const closeFn = () => ({});
@@ -1080,27 +1079,53 @@ async function decodeDataPageV2(cursor: Cursor, header: parquet_thrift.PageHeade
   const valueEncoding = parquet_util.getThriftEnum(parquet_thrift.Encoding, dataPageHeaderV2.encoding);
 
   /* read repetition levels */
-  let rLevels = new Array(valueCount);
-  if (opts.rLevelMax! > 0) {
+  let use_old_rlevels = false;
+  let rLevels: Array<any>;
+  let reader: DataReader = {
+    view: new DataView(cursor.buffer.buffer, cursor.offset),
+    offset: 0
+  }
+
+  if (use_old_rlevels) {
+    rLevels = new Array(valueCount);
+    if (opts.rLevelMax! > 0) {
     rLevels = decodeValues(PARQUET_RDLVL_TYPE, PARQUET_RDLVL_ENCODING, cursor, valueCount, {
       bitWidth: parquet_util.getBitWidth(opts.rLevelMax!),
       disableEnvelope: true,
-    });
+        });
+    } else {
+      rLevels.fill(0);
+    }
   } else {
-    rLevels.fill(0);
+    rLevels = readRepetitionLevelsV2(reader, dataPageHeaderV2, opts.rLevelMax || 0);
+    reader.offset = dataPageHeaderV2.repetition_levels_byte_length;
+    console.log("reader offset: ", reader.offset)
   }
 
   /* read definition levels */
-  let dLevels = new Array(valueCount);
-  if (opts.dLevelMax! > 0) {
+  let dLevels: Array<number>|undefined;
+  let use_old_dlevels = false;
+  if (use_old_dlevels) {
+
+    dLevels = new Array(valueCount)
+    if (opts.dLevelMax! > 0) {
     dLevels = decodeValues(PARQUET_RDLVL_TYPE, PARQUET_RDLVL_ENCODING, cursor, valueCount, {
       bitWidth: parquet_util.getBitWidth(opts.dLevelMax!),
       disableEnvelope: true,
     });
-  } else {
-    dLevels.fill(0);
-  }
+    } else {
+      dLevels.fill(0);
+    }
 
+  } else {
+    dLevels = readDefinitionLevelsV2(reader, dataPageHeaderV2, opts.dLevelMax || 0)
+    console.log("reader offset: ", reader.offset);
+  }
+  cursor.offset += reader.offset
+  console.log("cursor.offset after reading dLevels: ", cursor.offset)
+
+
+  // by this point the cursor offset should be 13.
   /* read values */
   let valuesBufCursor = cursor;
 
