@@ -981,7 +981,7 @@ async function decodeDictionaryPage(cursor: Cursor, header: parquet_thrift.PageH
     dictCursor,
     header.dictionary_page_header!.num_values,
     opts
-  ).map((d: unknown[]) => d.toString());
+  );
 }
 
 async function decodeDataPage(cursor: Cursor, header: parquet_thrift.PageHeader, opts: Options) {

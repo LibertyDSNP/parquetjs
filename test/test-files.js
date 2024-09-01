@@ -101,16 +101,16 @@ describe('test-files', function () {
   it('mr_times.parq loads', async function () {
     const data = await readData('mr_times.parq');
     assert.deepEqual(data, [
-      { id: '1', date_added: '83281000000000' },
-      { id: '2', date_added: '83282000000000' },
-      { id: '3', date_added: '83283000000000' },
-      { id: '4', date_added: '83284000000000' },
-      { id: '5', date_added: '83284000000000' },
-      { id: '6', date_added: '83285000000000' },
-      { id: '7', date_added: '83286000000000' },
-      { id: '8', date_added: '83287000000000' },
-      { id: '9', date_added: '83288000000000' },
-      { id: '10', date_added: '83289000000000' },
+      { id: '1', date_added: 83281000000000 },
+      { id: '2', date_added: 83282000000000 },
+      { id: '3', date_added: 83283000000000 },
+      { id: '4', date_added: 83284000000000 },
+      { id: '5', date_added: 83284000000000 },
+      { id: '6', date_added: 83285000000000 },
+      { id: '7', date_added: 83286000000000 },
+      { id: '8', date_added: 83287000000000 },
+      { id: '9', date_added: 83288000000000 },
+      { id: '10', date_added: 83289000000000 },
     ]);
   });
 
@@ -226,12 +226,22 @@ describe('test-files', function () {
 
     it('rle-dict-snappy-checksum.parquet loads', async function () {
       const data = await readData('rle/rle-dict-snappy-checksum.parquet');
-      assert.deepEqual(data[0], { binary_field: 'c95e263a-f5d4-401f-8107-5ca7146a1f98', long_field: '0' });
+      for (const item of data) {
+        assert.deepEqual(item, {
+          binary_field: Buffer.from('c95e263a-f5d4-401f-8107-5ca7146a1f98'),
+          long_field: 0n,
+        });
+      }
     });
 
     it('rle-dict-uncompressed-corrupt-checksum.parquet loads', async function () {
       const data = await readData('rle/rle-dict-uncompressed-corrupt-checksum.parquet');
-      assert.deepEqual(data[0], { binary_field: '6325c32b-f417-41aa-9e02-9b8601542aff', long_field: '0' });
+      for (const item of data) {
+        assert.deepEqual(item, {
+          binary_field: Buffer.from('6325c32b-f417-41aa-9e02-9b8601542aff'),
+          long_field: 0n,
+        });
+      }
     });
   });
 });

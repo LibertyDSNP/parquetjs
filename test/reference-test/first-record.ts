@@ -12,72 +12,72 @@ export function getFirstRecord(filename: string): [true, any] | [false, null] {
       return [
         true,
         {
-          bigint_col: '0',
+          bigint_col: 0n,
           bool_col: true,
-          date_string_col: '01/01/09',
-          double_col: '0',
-          float_col: '0',
-          id: '0',
-          int_col: '0',
-          smallint_col: '0',
-          string_col: '0',
-          timestamp_col: '0',
-          tinyint_col: '0',
+          date_string_col: Buffer.from('01/01/09'),
+          double_col: 0,
+          float_col: 0,
+          id: 0,
+          int_col: 0,
+          smallint_col: 0,
+          string_col: Buffer.from('0'),
+          timestamp_col: 0,
+          tinyint_col: 0,
         },
       ];
     case 'alltypes_plain.parquet':
       return [
         true,
         {
-          bigint_col: '0',
+          bigint_col: 0n,
           bool_col: true,
-          date_string_col: '03/01/09',
-          double_col: '0',
-          float_col: '0',
-          id: '4',
-          int_col: '0',
-          smallint_col: '0',
-          string_col: '0',
-          timestamp_col: '0',
-          tinyint_col: '0',
+          date_string_col: Buffer.from('03/01/09'),
+          double_col: 0,
+          float_col: 0,
+          id: 4,
+          int_col: 0,
+          smallint_col: 0,
+          string_col: Buffer.from('0'),
+          timestamp_col: 0,
+          tinyint_col: 0,
         },
       ];
     case 'alltypes_plain.snappy.parquet':
       return [
         true,
         {
-          bigint_col: '0',
+          bigint_col: 0n,
           bool_col: true,
-          date_string_col: '04/01/09',
-          double_col: '0',
-          float_col: '0',
-          id: '6',
-          int_col: '0',
-          smallint_col: '0',
-          string_col: '0',
-          timestamp_col: '0',
-          tinyint_col: '0',
+          date_string_col: Buffer.from('04/01/09'),
+          double_col: 0,
+          float_col: 0,
+          id: 6,
+          int_col: 0,
+          smallint_col: 0,
+          string_col: Buffer.from('0'),
+          timestamp_col: 0,
+          tinyint_col: 0,
         },
       ];
     case 'nan_in_stats.parquet':
-      return [true, { x: '1' }];
+      return [true, { x: 1 }];
     case 'alltypes_tiny_pages.parquet':
       return [
         true,
         {
-          bigint_col: '20',
+          bigint_col: 20n,
           bool_col: true,
           date_string_col: '01/13/09',
-          double_col: '20.2',
-          float_col: '2.200000047683716',
+          double_col: 20.2,
+          float_col: 2.200000047683716,
           id: 122,
-          int_col: '2',
-          month: '1',
-          smallint_col: '2',
+          int_col: 2,
+          month: 1,
+          smallint_col: 2,
           string_col: '2',
-          timestamp_col: '3725410000000',
-          tinyint_col: '2',
-          year: '2009',
+          timestamp_col: 3725410000000,
+          tinyint_col: 2,
+          year: 2009,
         },
       ];
     case 'alltypes_tiny_pages_plain.parquet':
@@ -208,7 +208,7 @@ export function getFirstRecord(filename: string): [true, any] | [false, null] {
         true,
         {
           int64_list: {
-            list: [{ item: '1' }, { item: '2' }, { item: '3' }],
+            list: [{ item: 1n }, { item: 2n }, { item: 3n }],
           },
           utf8_list: {
             list: [{ item: 'abc' }, { item: 'efg' }, { item: 'hij' }],
@@ -219,8 +219,8 @@ export function getFirstRecord(filename: string): [true, any] | [false, null] {
       return [
         true,
         {
-          comment_col: ' haggle. carefully final deposits detect slyly agai',
-          name: 'ALGERIA',
+          comment_col: Buffer.from(' haggle. carefully final deposits detect slyly agai'),
+          name: Buffer.from('ALGERIA'),
           nation_key: 0,
           region_key: 0,
         },
@@ -236,11 +236,11 @@ export function getFirstRecord(filename: string): [true, any] | [false, null] {
                 value: {
                   key_value: [
                     {
-                      key: '1',
+                      key: 1,
                       value: true,
                     },
                     {
-                      key: '2',
+                      key: 2,
                       value: false,
                     },
                   ],
@@ -248,8 +248,8 @@ export function getFirstRecord(filename: string): [true, any] | [false, null] {
               },
             ],
           },
-          b: '1',
-          c: '1',
+          b: 1,
+          c: 1,
         },
       ];
     case 'nested_lists.snappy.parquet':
@@ -305,7 +305,7 @@ export function getFirstRecord(filename: string): [true, any] | [false, null] {
               },
             ],
           },
-          b: '1',
+          b: 1,
         },
       ];
     case 'nonnullable.impala.parquet':
@@ -432,7 +432,7 @@ export function getFirstRecord(filename: string): [true, any] | [false, null] {
                   map: [
                     {
                       key: 'k1',
-                      value: '1',
+                      value: 1,
                     },
                   ],
                 },
@@ -442,13 +442,13 @@ export function getFirstRecord(filename: string): [true, any] | [false, null] {
           int_array: {
             list: [
               {
-                element: '1',
+                element: 1,
               },
               {
-                element: '2',
+                element: 2,
               },
               {
-                element: '3',
+                element: 3,
               },
             ],
           },
@@ -458,10 +458,10 @@ export function getFirstRecord(filename: string): [true, any] | [false, null] {
                 element: {
                   list: [
                     {
-                      element: '1',
+                      element: 1,
                     },
                     {
-                      element: '2',
+                      element: 2,
                     },
                   ],
                 },
@@ -470,10 +470,10 @@ export function getFirstRecord(filename: string): [true, any] | [false, null] {
                 element: {
                   list: [
                     {
-                      element: '3',
+                      element: 3,
                     },
                     {
-                      element: '4',
+                      element: 4,
                     },
                   ],
                 },
@@ -502,13 +502,13 @@ export function getFirstRecord(filename: string): [true, any] | [false, null] {
                       list: [
                         {
                           element: {
-                            E: '10',
+                            E: 10,
                             F: 'aaa',
                           },
                         },
                         {
                           element: {
-                            E: '-10',
+                            E: -10,
                             F: 'bbb',
                           },
                         },
@@ -520,7 +520,7 @@ export function getFirstRecord(filename: string): [true, any] | [false, null] {
                       list: [
                         {
                           element: {
-                            E: '11',
+                            E: 11,
                             F: 'c',
                           },
                         },
@@ -546,7 +546,7 @@ export function getFirstRecord(filename: string): [true, any] | [false, null] {
                       i: {
                         list: [
                           {
-                            element: '1.1',
+                            element: 1.1,
                           },
                         ],
                       },
@@ -578,15 +578,15 @@ export function getFirstRecord(filename: string): [true, any] | [false, null] {
       return [
         true,
         {
-          binary_field: 'a655fd0e-9949-4059-bcae-fd6a002a4652',
-          long_field: '0',
+          binary_field: Buffer.from('a655fd0e-9949-4059-bcae-fd6a002a4652'),
+          long_field: 0n,
         },
       ];
     case 'repeated_no_annotation.parquet':
       return [
         true,
         {
-          id: '1',
+          id: 1,
           phoneNumbers: null,
         },
       ];
@@ -594,16 +594,16 @@ export function getFirstRecord(filename: string): [true, any] | [false, null] {
       return [
         true,
         {
-          binary_field: 'c95e263a-f5d4-401f-8107-5ca7146a1f98',
-          long_field: '0',
+          binary_field: Buffer.from('c95e263a-f5d4-401f-8107-5ca7146a1f98'),
+          long_field: 0n,
         },
       ];
     case 'rle-dict-uncompressed-corrupt-checksum.parquet':
       return [
         true,
         {
-          binary_field: '6325c32b-f417-41aa-9e02-9b8601542aff',
-          long_field: '0',
+          binary_field: Buffer.from('6325c32b-f417-41aa-9e02-9b8601542aff'),
+          long_field: 0n,
         },
       ];
     case 'single_nan.parquet':
