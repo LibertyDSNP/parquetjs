@@ -4,13 +4,15 @@ import path from 'node:path';
 import fs from 'node:fs';
 
 import parquet from '../../parquet';
+import { getFirstRecord } from './first-record';
 
 // Used for testing a single file. Example:
 // const onlyTest = 'single_nan.parquet';
 const onlyTest = null;
 
 // Test files currently unsupported / needing separate test
-const unsupported = [
+// eslint-disable-next-line mocha/no-exports
+export const unsupported = [
   'byte_stream_split.zstd.parquet', // ZSTD unsupported
   'hadoop_lz4_compressed.parquet', // LZ4 unsupported
   'hadoop_lz4_compressed_larger.parquet', // LZ4 unsupported
@@ -44,6 +46,12 @@ describe('Read Test for all files', function () {
       // Expect the same keys as top-level fields
       const expectedRecordKeys = schema.fieldList.filter((x) => x.path.length === 1).map((x) => x.name);
       expect(Object.keys(record)).to.deep.equal(expectedRecordKeys);
+
+      // validate that the first record has the expected values
+      const [shouldTest, expectedFirstRow] = getFirstRecord(filename);
+      if (shouldTest) {
+        expect(record).to.deep.equal(expectedFirstRow);
+      }
     });
   }
 });
