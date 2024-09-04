@@ -25,12 +25,11 @@ export const readRepetitionLevelsV2 = (reader: DataReader,
                                        daph2: DataPageHeaderV2,
                                        rLevelMax: number,
 ): Array<any> => {
-  if (!rLevelMax) return []
   const values = new Array(daph2.num_values)
+  if (!rLevelMax) return values.fill(0);
   const bitWidth = getBitWidth(rLevelMax)
-  readRleBitPackedHybrid(
-    reader, bitWidth, daph2.repetition_levels_byte_length, values
-  )
+  let disableEnvelope = daph2.definition_levels_byte_length === 0
+  readRleBitPackedHybrid(reader, bitWidth, daph2.repetition_levels_byte_length, values, disableEnvelope)
   return values
 }
 
@@ -49,7 +48,8 @@ export const readDefinitionLevelsV2 = (reader: DataReader,
     // V2 we know the length
     const values = new Array(daph2.num_values)
     const bitWidth = getBitWidth(dLevelMax)
-    readRleBitPackedHybrid(reader, bitWidth, daph2.definition_levels_byte_length, values)
+    let disableEnvelope = daph2.definition_levels_byte_length === 0
+    readRleBitPackedHybrid(reader, bitWidth, daph2.definition_levels_byte_length, values, disableEnvelope)
     return values
   }
 }

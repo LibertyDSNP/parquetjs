@@ -54,11 +54,12 @@ export function bitWidth(value: number): number {
  * @param {number} length - length of the encoded data, in bytes (?)
  * @param {DecodedArray} output
  */
-export function readRleBitPackedHybrid(reader: DataReader, width: number, length: number, output: DecodedArray) {
-  if (!length) {
-    // length = reader.view.getUint32(reader.offset, true)
+export function readRleBitPackedHybrid(reader: DataReader, width: number, length: number, output: DecodedArray, disableEnvelope?: boolean) {
+
+  if (!disableEnvelope) {
     reader.offset += 4
   }
+  const startOffset = reader.offset;
   let seen = 0
   while (seen < output.length) {
     const header = readVarInt(reader)
@@ -72,7 +73,7 @@ export function readRleBitPackedHybrid(reader: DataReader, width: number, length
       seen += count
     }
   }
-  // assert(reader.offset - startOffset === length)
+  console.assert(reader.offset - startOffset === length)
 }
 
 /**
@@ -120,7 +121,7 @@ export function readBitPacked(reader: DataReader,
                               seen: number): number {
   let count = header >> 1 << 3 // values to read
   const mask = (1 << bitWidth) - 1
-
+  // when reading definition levels v2 on readColumnChunk, ArrayBuffer len is 69 only
   let data = 0
   if (reader.offset < reader.view.byteLength) {
     data = reader.view.getUint8(reader.offset++)

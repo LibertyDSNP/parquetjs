@@ -12,7 +12,6 @@ describe('RLE Codec', function () {
       };
       const values = decodeRunBitpacked(cursor, 24, { bitWidth: 1 });
       expect(values.length).equals(24);
-      console.log(values)
     });
 
     // use the example from the documentation for RLE/Bitpacked hybrid,

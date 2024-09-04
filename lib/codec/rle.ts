@@ -4,7 +4,7 @@
 
 import varint from 'varint';
 import { Cursor } from './types';
-import {readBitPacked, readRle, readVarInt} from "./encoding";
+import {readBitPacked, readRle, readRleBitPackedHybrid, readVarInt} from "./encoding";
 
 function encodeRunBitpacked(values: number[], opts: { bitWidth: number }) {
   for (let i = 0; i < values.length % 8; i++) {
@@ -45,9 +45,11 @@ function unknownToParsedInt(value: string | number) {
 
 export const encodeValues = function (
   type: string,
-  values: number[],
-  opts: { bitWidth: number; disableEnvelope?: boolean }
-) {
+  values: Array<number>,
+  opts: {
+    bitWidth: number,
+    disableEnvelope?: boolean
+  }) {
   if (!('bitWidth' in opts)) {
     throw new Error('bitWidth is required');
   }
@@ -109,8 +111,8 @@ export const encodeValues = function (
 // opts.bitWidth is undefined when the boolean values are being passed
 // decode a bitpacked value
 // setting old code to true here only results in the RLE/bitpacked hybrid test failing, so we know that code is bad.
-export function decodeRunBitpacked(cursor : Cursor, count: number, opts: { bitWidth: number }): Array<number> {
-  const run_old_code = false;
+export function decodeRunBitpacked(cursor: Cursor, count: number, opts: { bitWidth: number }): Array<number> {
+  const run_old_code = true;
   let output = new Array(count).fill(0);
   if (run_old_code) {
     if (count % 8 !== 0) {
@@ -126,12 +128,12 @@ export function decodeRunBitpacked(cursor : Cursor, count: number, opts: { bitWi
 
     cursor.offset += opts.bitWidth * (count / 8);
   } else {
-    const view = new DataView(cursor.buffer.buffer);
-    const reader = { view, offset: cursor.offset }
+    let arrayBuf = cursor.buffer.buffer.slice(0, count);
+    const view = new DataView(arrayBuf, cursor.offset, count);
+    const reader = {view, offset: 0}
     const header = readVarInt(reader);
     readBitPacked(reader, header, opts.bitWidth, output, 0)
   }
-  console.log({output})
   return output;
 }
 
@@ -145,51 +147,38 @@ export function decodeRunBitpacked(cursor : Cursor, count: number, opts: { bitWi
 // setting this to run old code lets the RLE/bitpacked hybrid documentation example still pass.
 // So maybe this code is fine.
 export function decodeRunRepeated(cursor: Cursor, count: number, opts: { bitWidth: number }): Array<number> {
-  const run_old_code = true;
   let output = new Array(count).fill(0);
-  if (run_old_code) {
-    var bytesNeededForFixedBitWidth = Math.ceil(opts.bitWidth / 8);
-    let value = 0;
+  var bytesNeededForFixedBitWidth = Math.ceil(opts.bitWidth / 8);
+  let value = 0;
 
-    for (let i = 0; i < bytesNeededForFixedBitWidth; ++i) {
+  for (let i = 0; i < bytesNeededForFixedBitWidth; ++i) {
     const byte = cursor.buffer[cursor.offset];
-      // Bytes are stored LSB to MSB, so we need to shift
-      // each new byte appropriately.
-      value += byte << (i * 8);
-      cursor.offset += 1;
-    }
-
-    output = new Array(count).fill(value);
-  } else {
-    const view = new DataView(cursor.buffer.buffer);
-    const reader = { view, offset: cursor.offset};
-    readRle(reader, count, opts.bitWidth, output, 0);
+    // Bytes are stored LSB to MSB, so we need to shift
+    // each new byte appropriately.
+    value += byte << (i * 8);
+    cursor.offset += 1;
   }
-  console.log({output});
+
+  output = new Array(count).fill(value);
   return output;
 }
 
-export const decodeValues = function (
-  _: string,
-  cursor: Cursor,
-  count: number,
-  opts: { bitWidth: number; disableEnvelope?: boolean }
-) {
+// cursor:  contains buffer + offset for data
+// count:  the number of items expected to decode
+// opts:  must include bitWidth, disableEnvelope is optional, specify true to use all bytes, false to skip first four
+//        bytes
+export const decodeValues = function (_: string, cursor: Cursor, count: number, opts: {
+  bitWidth: number,
+  disableEnvelope?: boolean
+}) {
   if (!('bitWidth' in opts)) {
     throw new Error('bitWidth is required');
   }
-
-  // disableEnvelope is undefined and so is bitWidth
+  let values = [];
+  let res;
   if (!opts.disableEnvelope) {
     cursor.offset += 4;
   }
-
-  let values = [];
-  let res;
-
-  // Buffer index 23  = 136, this is an array of bytes, why is it "decoding" the value and adding an offset??
-  // it was decoding to 7 and taking the cursor offset out decodes to 136,
-  // but I don't know that this is even correctly decoding.
   while (values.length < count) {
     const header = varint.decode(cursor.buffer, cursor.offset);
     cursor.offset += varint.encodingLength(header);
@@ -208,5 +197,6 @@ export const decodeValues = function (
   if (values.length !== count) {
     throw new Error('invalid RLE encoding');
   }
+
   return values;
 };
