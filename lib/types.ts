@@ -3,6 +3,7 @@
 import { PrimitiveType, OriginalType, ParquetType, FieldDefinition, ParquetField } from './declare';
 import { Options } from './codec/types';
 import type { Document as BsonDocument } from 'bson';
+import { TimeType, TimeUnit } from '../gen-nodejs/parquet_types';
 // BSON uses top level awaits, so use require for now
 const bsonSerialize = require('bson').serialize;
 const bsonDeserialize = require('bson').deserialize;
@@ -19,6 +20,11 @@ interface INTERVAL {
   months: number;
   days: number;
   milliseconds: number;
+}
+
+interface TIME {
+  type: TimeType;
+  value: number | bigint;
 }
 
 export function getParquetTypeDataObject(
@@ -82,6 +88,7 @@ const PARQUET_LOGICAL_TYPES = new Set<string>([
   'INTERVAL',
   'MAP',
   'LIST',
+  'TIME',
 ] satisfies ParquetType[]);
 
 const PARQUET_LOGICAL_TYPE_DATA: Record<string, ParquetTypeDataObject> = {
@@ -224,6 +231,10 @@ const PARQUET_LOGICAL_TYPE_DATA: Record<string, ParquetTypeDataObject> = {
   LIST: {
     originalType: 'LIST',
     toPrimitive: toPrimitive_LIST,
+  },
+  TIME: {
+    originalType: 'TIME',
+    toPrimitive: toPrimitive_TIME,
   },
 };
 
@@ -558,5 +569,61 @@ function fromPrimitive_INTERVAL(value: string) {
 function checkValidValue(lowerRange: number | bigint, upperRange: number | bigint, v: number | bigint) {
   if (v < lowerRange || v > upperRange) {
     throw 'invalid value';
+  }
+}
+
+/**
+ * Convert a TIME value to its internal representation.
+ * @param value The TIME object containing the value and the time type information.
+ * @returns The converted time value as bigint or number based on the unit.
+ */
+function toPrimitive_TIME(value: TIME): bigint | number {
+  const { type, value: timeValue } = value;
+  const { unit, isAdjustedToUTC } = type;
+
+  let epochTime: number | bigint = 0;
+
+  if (typeof timeValue === 'number') {
+    if (unit.MILLIS) {
+      epochTime = timeValue;
+    } else if (unit.MICROS) {
+      epochTime = BigInt(timeValue) * 1000n;
+    } else if (unit.NANOS) {
+      epochTime = BigInt(timeValue) * 1000000n;
+    }
+  } else if (typeof timeValue === 'bigint') {
+    epochTime = timeValue;
+  } else {
+    throw new Error('Invalid value for TIME type');
+  }
+
+  if (!isAdjustedToUTC) {
+    return adjustToLocalTimestamp(epochTime, unit);
+  }
+
+  return epochTime;
+}
+
+/**
+ * Adjust the timestamp to local time.
+ * @param timestamp The timestamp to adjust.
+ * @param unit The unit of the timestamp (MILLIS, MICROS, NANOS).
+ * @returns The adjusted timestamp.
+ */
+function adjustToLocalTimestamp(timestamp: bigint | number, unit: TimeUnit): bigint {
+  try {
+    const localOffset = BigInt(new Date().getTimezoneOffset()) * 60n * 1000n;
+    timestamp = BigInt(timestamp);
+    if (unit.MILLIS) {
+      return timestamp - localOffset;
+    } else if (unit.MICROS) {
+      return timestamp - localOffset * 1000n;
+    } else if (unit.NANOS) {
+      return timestamp - localOffset * 1000000n;
+    }
+
+    throw new Error('Unsupported unit for TIME');
+  } catch (e) {
+    throw new Error('Invalid timestamp for TIME');
   }
 }
