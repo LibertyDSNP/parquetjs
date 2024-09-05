@@ -19,7 +19,7 @@
     "@types/long": "^4.0.2",
     "@types/node-int64": "^0.4.32",
     "@types/thrift": "^0.10.17",
-    "@zenfs/core": "^0.14.0",
+    "@zenfs/core": "^0.16.0",
     "brotli-wasm": "^3.0.0",
     "browserify-zlib": "^0.2.0",
     "bson": "6.7.0",
