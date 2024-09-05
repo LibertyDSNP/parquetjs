@@ -571,9 +571,9 @@ function checkValidValue(lowerRange: number | bigint, upperRange: number | bigin
     throw 'invalid value';
   }
 }
-
 /**
  * Convert a TIME value to its internal representation.
+ * This handles both `isAdjustedToUTC` and the correct `unit` (MILLIS, MICROS, NANOS).
  * @param value The TIME object containing the value and the time type information.
  * @returns The converted time value as bigint or number based on the unit.
  */
@@ -581,15 +581,17 @@ function toPrimitive_TIME(value: TIME): bigint | number {
   const { type, value: timeValue } = value;
   const { unit, isAdjustedToUTC } = type;
 
-  let epochTime: number | bigint = 0;
+  let epochTime: number | bigint;
 
   if (typeof timeValue === 'number') {
     if (unit.MILLIS) {
       epochTime = timeValue;
     } else if (unit.MICROS) {
-      epochTime = BigInt(timeValue) * 1000n;
+      epochTime = BigInt(timeValue) * 1000n; // Convert from microseconds to nanoseconds
     } else if (unit.NANOS) {
-      epochTime = BigInt(timeValue) * 1000000n;
+      epochTime = BigInt(timeValue) * 1000000n; // Convert from nanoseconds
+    } else {
+      throw new Error('Unsupported time unit');
     }
   } else if (typeof timeValue === 'bigint') {
     epochTime = timeValue;
@@ -605,7 +607,7 @@ function toPrimitive_TIME(value: TIME): bigint | number {
 }
 
 /**
- * Adjust the timestamp to local time.
+ * Adjust the timestamp to local time if the time is not adjusted to UTC.
  * @param timestamp The timestamp to adjust.
  * @param unit The unit of the timestamp (MILLIS, MICROS, NANOS).
  * @returns The adjusted timestamp.
@@ -621,9 +623,8 @@ function adjustToLocalTimestamp(timestamp: bigint | number, unit: TimeUnit): big
     } else if (unit.NANOS) {
       return timestamp - localOffset * 1000000n;
     }
-
-    throw new Error('Unsupported unit for TIME');
+    throw new Error('Unsupported time unit');
   } catch (e) {
-    throw new Error('Invalid timestamp for TIME');
+    throw new Error('Invalid value for TIME type');
   }
 }
