@@ -234,6 +234,7 @@ const PARQUET_LOGICAL_TYPE_DATA: Record<string, ParquetTypeDataObject> = {
   },
   TIME: {
     originalType: 'TIME',
+    primitiveType: 'INT64',
     toPrimitive: toPrimitive_TIME,
   },
 };
