@@ -113,6 +113,21 @@ const fromJsonSchemaField =
       case 'array':
         return fromJsonSchemaArray(fieldValue, optional);
       case 'object':
+        if (fieldValue.properties && fieldValue.properties.type && fieldValue.properties.value) {
+          const unit = fieldValue.properties.type.properties?.unit?.default?.toString();
+          let defaultUnit: 'MILLIS' | 'MICROS' | 'NANOS' = 'MILLIS'; // Restrict to allowed values
+
+          if (unit === 'MICROS') {
+            defaultUnit = 'MICROS';
+          } else if (unit === 'NANOS') {
+            defaultUnit = 'NANOS';
+          } else if (unit !== 'MILLIS') {
+            throw new UnsupportedJsonSchemaError(`Unit type ${unit} is unsupported.`);
+          }
+
+          const isAdjustedToUTC = !!fieldValue.properties.type.properties?.isAdjustedToUTC?.default;
+          return fields.createTimeField(defaultUnit, isAdjustedToUTC, optional);
+        }
         return fields.createStructField(fromJsonSchema(fieldValue), optional);
       default:
         throw new UnsupportedJsonSchemaError(
