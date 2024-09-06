@@ -588,9 +588,9 @@ function toPrimitive_TIME(value: TIME): bigint | number {
     if (unit.MILLIS) {
       epochTime = timeValue;
     } else if (unit.MICROS) {
-      epochTime = BigInt(timeValue) * 1000n;
+      epochTime = BigInt(timeValue);
     } else if (unit.NANOS) {
-      epochTime = BigInt(timeValue) * 1000000n;
+      epochTime = BigInt(timeValue);
     } else {
       throw new Error('Unsupported time unit');
     }
