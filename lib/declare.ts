@@ -94,6 +94,8 @@ export interface ParquetField {
   fieldCount?: number;
   fields?: Record<string, ParquetField>;
   disableEnvelope?: boolean;
+  unit?: 'MILLIS' | 'MICROS' | 'NANOS';
+  isAdjustedToUTC?: boolean;
 }
 
 interface ParentField {

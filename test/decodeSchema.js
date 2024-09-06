@@ -222,6 +222,21 @@ describe('ParquetSchema', function () {
     };
 
     const reader = new parquet.ParquetReader(metadata, {});
-    assert.deepEqual(reader.schema.fields, expected);
+    const removeUndefinedFields = (obj) => {
+      Object.keys(obj).forEach((key) => {
+        if (obj[key] === undefined || obj[key] === null || (Array.isArray(obj[key]) && obj[key].length === 0)) {
+          // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+          delete obj[key];
+        } else if (typeof obj[key] === 'object') {
+          removeUndefinedFields(obj[key]);
+        }
+      });
+      return obj;
+    };
+
+    const sanitizedExpected = removeUndefinedFields(expected);
+    const sanitizedActual = removeUndefinedFields(reader.schema.fields);
+
+    assert.deepEqual(sanitizedActual, sanitizedExpected);
   });
 });

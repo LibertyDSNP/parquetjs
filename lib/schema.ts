@@ -126,6 +126,8 @@ function buildFields(schema: SchemaDefinition, rLevelParentMax?: number, dLevelP
         statistics: opts.statistics,
         fieldCount: Object.keys(opts.fields).length,
         fields: buildFields(opts.fields, rLevelMax, dLevelMax, path.concat(name)),
+        unit: opts.unit,
+        isAdjustedToUTC: opts.isAdjustedToUTC,
       };
 
       if (opts.type == 'LIST' || opts.type == 'MAP') fieldList[name].originalType = opts.type;
@@ -169,6 +171,12 @@ function buildFields(schema: SchemaDefinition, rLevelParentMax?: number, dLevelP
       );
     }
 
+    if (typeDef.originalType === 'TIME') {
+      if (!opts.unit) {
+        fieldErrors.push(`Time type requires a unit, for Column: ${nameWithPath}`);
+      }
+    }
+
     /* add to schema */
     fieldList[name] = {
       name: name,
@@ -184,6 +192,8 @@ function buildFields(schema: SchemaDefinition, rLevelParentMax?: number, dLevelP
       typeLength: opts.typeLength || typeDef.typeLength,
       rLevelMax: rLevelMax,
       dLevelMax: dLevelMax,
+      unit: opts.unit,
+      isAdjustedToUTC: opts.isAdjustedToUTC,
     };
   }
 
