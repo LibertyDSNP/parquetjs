@@ -209,6 +209,66 @@ describe('Field Builders: Structs and Struct List', function () {
     assert.equal(!!c.isNested, true);
     assert.equal(c.fieldCount, 1);
   });
+
+  it('Can use primitive field types: Time with default MILLIS', function () {
+    const schema = new ParquetSchema({
+      timeField: fields.createTimeField('MILLIS'),
+    });
+    const c = schema.fields.timeField;
+    assert.equal(c.name, 'timeField');
+    assert.equal(c.primitiveType, 'INT64');
+    assert.equal(c.originalType, 'TIME');
+    assert.equal(c.unit, 'MILLIS');
+    assert.equal(c.isAdjustedToUTC, true);
+    assert.deepEqual(c.path, ['timeField']);
+    assert.equal(c.repetitionType, 'OPTIONAL');
+    assert.equal(c.encoding, 'PLAIN');
+    assert.equal(c.compression, 'UNCOMPRESSED');
+    assert.equal(c.rLevelMax, 0);
+    assert.equal(c.dLevelMax, 1);
+    assert.equal(!!c.isNested, false);
+    assert.equal(c.fieldCount, undefined);
+  });
+
+  it('Can use primitive field types: Time with MICROS', function () {
+    const schema = new ParquetSchema({
+      timeField: fields.createTimeField('MICROS', false),
+    });
+    const c = schema.fields.timeField;
+    assert.equal(c.name, 'timeField');
+    assert.equal(c.primitiveType, 'INT64');
+    assert.equal(c.originalType, 'TIME');
+    assert.equal(c.unit, 'MICROS');
+    assert.equal(c.isAdjustedToUTC, false);
+    assert.deepEqual(c.path, ['timeField']);
+    assert.equal(c.repetitionType, 'OPTIONAL');
+    assert.equal(c.encoding, 'PLAIN');
+    assert.equal(c.compression, 'UNCOMPRESSED');
+    assert.equal(c.rLevelMax, 0);
+    assert.equal(c.dLevelMax, 1);
+    assert.equal(!!c.isNested, false);
+    assert.equal(c.fieldCount, undefined);
+  });
+
+  it('Can use primitive field types: Time with NANOS', function () {
+    const schema = new ParquetSchema({
+      timeField: fields.createTimeField('NANOS', true, true, { compression: 'GZIP' }),
+    });
+    const c = schema.fields.timeField;
+    assert.equal(c.name, 'timeField');
+    assert.equal(c.primitiveType, 'INT64');
+    assert.equal(c.originalType, 'TIME');
+    assert.equal(c.unit, 'NANOS');
+    assert.equal(c.isAdjustedToUTC, true);
+    assert.equal(c.compression, 'GZIP');
+    assert.deepEqual(c.path, ['timeField']);
+    assert.equal(c.repetitionType, 'OPTIONAL');
+    assert.equal(c.encoding, 'PLAIN');
+    assert.equal(c.rLevelMax, 0);
+    assert.equal(c.dLevelMax, 1);
+    assert.equal(!!c.isNested, false);
+    assert.equal(c.fieldCount, undefined);
+  });
 });
 
 describe('Field Builders: Lists', function () {
