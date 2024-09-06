@@ -72,6 +72,8 @@ export interface FieldDefinition {
   num_children?: NumChildrenField;
   precision?: number;
   scale?: number;
+  unit?: 'MILLIS' | 'MICROS' | 'NANOS';
+  isAdjustedToUTC?: boolean;
 }
 
 export interface ParquetField {

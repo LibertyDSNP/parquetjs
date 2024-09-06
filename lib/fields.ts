@@ -80,3 +80,18 @@ export function createListField(
     },
   };
 }
+
+export function createTimeField(
+  unit: 'MILLIS' | 'MICROS' | 'NANOS',
+  isAdjustedToUTC = true,
+  optional = true,
+  fieldOptions: FieldDefinition = {}
+): FieldDefinition {
+  return {
+    ...fieldOptions,
+    optional,
+    type: 'TIME',
+    unit,
+    isAdjustedToUTC,
+  };
+}
