@@ -1,6 +1,9 @@
-// NOTICE: This is the NodeJS implementation.
-// The browser implementation is ./browser/compression.ts
-import zlib from 'zlib';
+// NOTICE: This is NOT tested by the normal unit tests as this is the browser version
+// Needs to be tested manually for now by:
+// 1. Load up the example server
+// 2. examples/service/README.md
+// 3. Test the files
+'use strict';
 import snappy from 'snappyjs';
 
 type PARQUET_COMPRESSION_METHODS = Record<
@@ -24,10 +27,6 @@ export const PARQUET_COMPRESSION_METHODS: PARQUET_COMPRESSION_METHODS = {
     deflate: deflate_snappy,
     inflate: inflate_snappy,
   },
-  BROTLI: {
-    deflate: deflate_brotli,
-    inflate: inflate_brotli,
-  },
 };
 
 /**
@@ -45,17 +44,15 @@ function deflate_identity(value: ArrayBuffer | Buffer | Uint8Array) {
   return buffer_from_result(value);
 }
 
-function deflate_gzip(value: ArrayBuffer | Buffer | string) {
-  return zlib.gzipSync(value);
+async function deflate_gzip(value: ArrayBuffer | Buffer | string) {
+  const cs = new CompressionStream('gzip');
+  const pipedCs = new Response(value).body?.pipeThrough(cs);
+  return buffer_from_result(await new Response(pipedCs).arrayBuffer());
 }
 
 function deflate_snappy(value: ArrayBuffer | Buffer | Uint8Array) {
   const compressedValue = snappy.compress(value);
   return buffer_from_result(compressedValue);
-}
-
-async function deflate_brotli(value: Uint8Array) {
-  return zlib.brotliCompressSync(value);
 }
 
 /**
@@ -74,16 +71,14 @@ async function inflate_identity(value: ArrayBuffer | Buffer | Uint8Array): Promi
 }
 
 async function inflate_gzip(value: Buffer | ArrayBuffer | string) {
-  return zlib.gunzipSync(value);
+  const ds = new DecompressionStream('gzip');
+  const pipedDs = new Response(value).body?.pipeThrough(ds);
+  return buffer_from_result(await new Response(pipedDs).arrayBuffer());
 }
 
 function inflate_snappy(value: ArrayBuffer | Buffer | Uint8Array) {
   const uncompressedValue = snappy.uncompress(value);
   return buffer_from_result(uncompressedValue);
-}
-
-async function inflate_brotli(value: Uint8Array) {
-  return zlib.brotliDecompressSync(value);
 }
 
 function buffer_from_result(result: ArrayBuffer | Buffer | Uint8Array): Buffer {
