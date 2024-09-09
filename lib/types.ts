@@ -52,12 +52,14 @@ export function getParquetTypeDataObject(
 
     if (unit.MILLIS) {
       return {
+        originalType: 'TIME_MILLIS',
         primitiveType: 'INT32',
         toPrimitive: isAdjustedToUTC ? toPrimitive_TIME_MILLIS_UTC : toPrimitive_TIME_MILLIS_LOCAL,
       };
     }
     if (unit.MICROS) {
       return {
+        originalType: 'TIME_MICROS',
         primitiveType: 'INT64',
         toPrimitive: isAdjustedToUTC ? toPrimitive_TIME_MICROS_UTC : toPrimitive_TIME_MICROS_LOCAL,
       };
