@@ -46,7 +46,7 @@ export function getParquetTypeDataObject(
         toPrimitive: toPrimitive_INT64,
       };
     }
-  } else if (field?.logicalType?.TIME) {
+  } else if (field?.logicalType?.TIME && (type === 'INT64' || type === 'INT32')) {
     const isAdjustedToUTC = field.logicalType.TIME.isAdjustedToUTC;
     const unit = field.logicalType.TIME.unit;
 

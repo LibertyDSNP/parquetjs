@@ -214,14 +214,14 @@ describe('Field Builders: Structs and Struct List', function () {
   it('Can use primitive field types: Time with default MILLIS', function () {
     const schema = new ParquetSchema({
       timeField: fields.createTimeField(
-        new TimeType({ isAdjustedToUTC: true, unit: new TimeUnit(new MilliSeconds()) }),
+        new TimeType({ isAdjustedToUTC: true, unit: new TimeUnit({ MILLIS: new MilliSeconds() }) }),
         true
       ),
     });
     const c = schema.fields.timeField;
     assert.equal(c.name, 'timeField');
     assert.equal(c.primitiveType, 'INT32');
-    assert.equal(c.originalType, 'TIME');
+    assert.equal(c.originalType, 'TIME_MILLIS');
     assert.deepEqual(c.path, ['timeField']);
     assert.equal(c.repetitionType, 'OPTIONAL');
     assert.equal(c.encoding, 'PLAIN');
@@ -235,14 +235,14 @@ describe('Field Builders: Structs and Struct List', function () {
   it('Can use primitive field types: Time with MICROS', function () {
     const schema = new ParquetSchema({
       timeField: fields.createTimeField(
-        new TimeType({ isAdjustedToUTC: false, unit: new TimeUnit(new MicroSeconds()) }),
+        new TimeType({ isAdjustedToUTC: false, unit: new TimeUnit({ MICROS: new MicroSeconds() }) }),
         true
       ),
     });
     const c = schema.fields.timeField;
     assert.equal(c.name, 'timeField');
     assert.equal(c.primitiveType, 'INT64');
-    assert.equal(c.originalType, 'TIME');
+    assert.equal(c.originalType, 'TIME_MICROS');
     assert.deepEqual(c.path, ['timeField']);
     assert.equal(c.repetitionType, 'OPTIONAL');
     assert.equal(c.encoding, 'PLAIN');
@@ -256,7 +256,7 @@ describe('Field Builders: Structs and Struct List', function () {
   it('Can use primitive field types: Time with NANOS', function () {
     const schema = new ParquetSchema({
       timeField: fields.createTimeField(
-        new TimeType({ isAdjustedToUTC: true, unit: new TimeUnit(new NanoSeconds()) }),
+        new TimeType({ isAdjustedToUTC: true, unit: new TimeUnit({ NANOS: new NanoSeconds() }) }),
         true,
         { compression: 'GZIP' }
       ),
@@ -264,7 +264,7 @@ describe('Field Builders: Structs and Struct List', function () {
     const c = schema.fields.timeField;
     assert.equal(c.name, 'timeField');
     assert.equal(c.primitiveType, 'INT64');
-    assert.equal(c.originalType, 'TIME');
+    assert.equal(c.originalType, undefined);
     assert.equal(c.compression, 'GZIP');
     assert.deepEqual(c.path, ['timeField']);
     assert.equal(c.repetitionType, 'OPTIONAL');
