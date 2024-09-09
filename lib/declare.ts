@@ -54,8 +54,7 @@ export type OriginalType =
   | 'INT_64' // 18
   | 'JSON' // 19
   | 'BSON' // 20
-  | 'INTERVAL' // 21
-  | 'TIME'; // 22
+  | 'INTERVAL'; // 21
 
 export type SchemaDefinition = Record<string, FieldDefinition>;
 

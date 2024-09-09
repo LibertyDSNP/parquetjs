@@ -90,7 +90,6 @@ export function createTimeField(
   return {
     ...fieldOptions,
     optional,
-    type: 'TIME',
     logicalType: new LogicalType({ TIME: logicalType }),
   };
 }

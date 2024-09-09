@@ -46,36 +46,29 @@ export function getParquetTypeDataObject(
         toPrimitive: toPrimitive_INT64,
       };
     }
-  } else if (type === 'TIME') {
-    if (field?.logicalType?.TIME) {
-      const isAdjustedToUTC = field.logicalType.TIME.isAdjustedToUTC;
-      const unit = field.logicalType.TIME.unit;
+  } else if (field?.logicalType?.TIME) {
+    const isAdjustedToUTC = field.logicalType.TIME.isAdjustedToUTC;
+    const unit = field.logicalType.TIME.unit;
 
-      if (unit.MILLIS) {
-        return {
-          primitiveType: 'INT32',
-          originalType: 'TIME',
-          toPrimitive: isAdjustedToUTC ? toPrimitive_TIME_MILLIS_UTC : toPrimitive_TIME_MILLIS_LOCAL,
-        };
-      }
-      if (unit.MICROS) {
-        return {
-          primitiveType: 'INT64',
-          originalType: 'TIME',
-          toPrimitive: isAdjustedToUTC ? toPrimitive_TIME_MICROS_UTC : toPrimitive_TIME_MICROS_LOCAL,
-        };
-      }
-      if (unit.NANOS) {
-        return {
-          primitiveType: 'INT64',
-          originalType: 'TIME',
-          toPrimitive: isAdjustedToUTC ? toPrimitive_TIME_NANOS_UTC : toPrimitive_TIME_NANOS_LOCAL,
-        };
-      }
-      throw new Error('TIME type must have a valid unit (MILLIS, MICROS, NANOS).');
-    } else {
-      throw new Error('TIME type must have a logical type.');
+    if (unit.MILLIS) {
+      return {
+        primitiveType: 'INT32',
+        toPrimitive: isAdjustedToUTC ? toPrimitive_TIME_MILLIS_UTC : toPrimitive_TIME_MILLIS_LOCAL,
+      };
     }
+    if (unit.MICROS) {
+      return {
+        primitiveType: 'INT64',
+        toPrimitive: isAdjustedToUTC ? toPrimitive_TIME_MICROS_UTC : toPrimitive_TIME_MICROS_LOCAL,
+      };
+    }
+    if (unit.NANOS) {
+      return {
+        primitiveType: 'INT64',
+        toPrimitive: isAdjustedToUTC ? toPrimitive_TIME_NANOS_UTC : toPrimitive_TIME_NANOS_LOCAL,
+      };
+    }
+    throw new Error('TIME type must have a valid unit (MILLIS, MICROS, NANOS).');
   } else {
     return PARQUET_LOGICAL_TYPE_DATA[type];
   }
