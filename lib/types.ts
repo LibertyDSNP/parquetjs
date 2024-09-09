@@ -26,18 +26,17 @@ export function getParquetTypeDataObject(
   field?: ParquetField | Options | FieldDefinition
 ): ParquetTypeDataObject {
   if (type === 'DECIMAL') {
-    if (field?.typeLength !== undefined && field?.typeLength !== null) {
+    if (field?.typeLength !== undefined) {
       return {
         primitiveType: 'FIXED_LEN_BYTE_ARRAY',
         originalType: 'DECIMAL',
         typeLength: field.typeLength,
         toPrimitive: toPrimitive_FIXED_LEN_BYTE_ARRAY_DECIMAL,
       };
-    } else if (field?.precision !== undefined && field?.precision !== null && field.precision > 18) {
+    } else if (field?.precision && field.precision > 18) {
       return {
         primitiveType: 'BYTE_ARRAY',
         originalType: 'DECIMAL',
-        typeLength: field.typeLength,
         toPrimitive: toPrimitive_BYTE_ARRAY_DECIMAL,
       };
     } else {
@@ -49,30 +48,33 @@ export function getParquetTypeDataObject(
     }
   } else if (type === 'TIME') {
     if (field?.logicalType?.TIME) {
-      if (field.logicalType.TIME.unit.MILLIS) {
+      const isAdjustedToUTC = field.logicalType.TIME.isAdjustedToUTC;
+      const unit = field.logicalType.TIME.unit;
+
+      if (unit.MILLIS) {
         return {
           primitiveType: 'INT32',
           originalType: 'TIME',
-          toPrimitive: field.logicalType.TIME.isAdjustedToUTC? toPrimitive_TIME_UTC : toPrimitive_TIME_LOCAL,
+          toPrimitive: isAdjustedToUTC ? toPrimitive_TIME_MILLIS_UTC : toPrimitive_TIME_MILLIS_LOCAL,
         };
       }
-      if (field.logicalType.TIME.unit.MICROS) {
+      if (unit.MICROS) {
         return {
           primitiveType: 'INT64',
           originalType: 'TIME',
-          toPrimitive: field.logicalType.TIME.isAdjustedToUTC? toPrimitive_TIME_UTC : toPrimitive_TIME_LOCAL,
+          toPrimitive: isAdjustedToUTC ? toPrimitive_TIME_MICROS_UTC : toPrimitive_TIME_MICROS_LOCAL,
         };
       }
-      if (field.logicalType.TIME.unit.NANOS) {
+      if (unit.NANOS) {
         return {
           primitiveType: 'INT64',
           originalType: 'TIME',
-          toPrimitive: field.logicalType.TIME.isAdjustedToUTC? toPrimitive_TIME_UTC : toPrimitive_TIME_LOCAL,
+          toPrimitive: isAdjustedToUTC ? toPrimitive_TIME_NANOS_UTC : toPrimitive_TIME_NANOS_LOCAL,
         };
       }
-      throw new Error('TIME type must have a unit');
+      throw new Error('TIME type must have a valid unit (MILLIS, MICROS, NANOS).');
     } else {
-      throw new Error('TIME type must have a logical type');
+      throw new Error('TIME type must have a logical type.');
     }
   } else {
     return PARQUET_LOGICAL_TYPE_DATA[type];
@@ -586,4 +588,78 @@ function checkValidValue(lowerRange: number | bigint, upperRange: number | bigin
   if (v < lowerRange || v > upperRange) {
     throw 'invalid value';
   }
+}
+
+/**
+ * Convert a TIME value in MILLIS to its UTC representation.
+ * @param value The time value.
+ */
+function toPrimitive_TIME_MILLIS_UTC(value: number | string): number {
+  return typeof value === 'string' ? Number(value) : value;
+}
+
+/**
+ * Convert a TIME value in MILLIS to its local time representation.
+ * @param value The time value.
+ */
+function toPrimitive_TIME_MILLIS_LOCAL(value: number | string): number {
+  const millis = typeof value === 'string' ? Number(value) : value;
+  return Number(adjustToLocalTimestamp(BigInt(millis), { MILLIS: true }));
+}
+
+/**
+ * Convert a TIME value in MICROS to its UTC representation.
+ * @param value The time value.
+ */
+function toPrimitive_TIME_MICROS_UTC(value: bigint | string): bigint {
+  return BigInt(value);
+}
+
+/**
+ * Convert a TIME value in MICROS to its local time representation.
+ * @param value The time value.
+ */
+function toPrimitive_TIME_MICROS_LOCAL(value: bigint | string): bigint {
+  const micros = BigInt(value);
+  return adjustToLocalTimestamp(micros, { MICROS: true });
+}
+
+/**
+ * Convert a TIME value in NANOS to its UTC representation.
+ * @param value The time value.
+ */
+function toPrimitive_TIME_NANOS_UTC(value: bigint | string): bigint {
+  return BigInt(value);
+}
+
+/**
+ * Convert a TIME value in NANOS to its local time representation.
+ * @param value The time value.
+ */
+function toPrimitive_TIME_NANOS_LOCAL(value: bigint | string): bigint {
+  const nanos = BigInt(value);
+  return adjustToLocalTimestamp(nanos, { NANOS: true });
+}
+
+/**
+ * Adjust the timestamp to local time based on the unit (MILLIS, MICROS, NANOS).
+ * @param timestamp The timestamp to adjust.
+ * @param unit The unit of the timestamp.
+ * @returns The adjusted timestamp.
+ */
+function adjustToLocalTimestamp(
+  timestamp: bigint,
+  unit: { MILLIS?: boolean; MICROS?: boolean; NANOS?: boolean }
+): bigint {
+  const localOffset = BigInt(new Date().getTimezoneOffset()) * 60n * 1000n; // Offset in milliseconds
+
+  if (unit.MILLIS) {
+    return timestamp - localOffset;
+  } else if (unit.MICROS) {
+    return timestamp - localOffset * 1000n;
+  } else if (unit.NANOS) {
+    return timestamp - localOffset * 1000000n;
+  }
+
+  throw new Error('Unsupported time unit');
 }
