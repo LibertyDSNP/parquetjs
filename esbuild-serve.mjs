@@ -3,7 +3,8 @@
  * It attaches the parquet.js exports to a "parquetjs" global variable.
  * See the example server for how to use it.
  */
-const { compressionBrowserPlugin, wasmPlugin } = require('./esbuild-plugins');
+import { compressionBrowserPlugin } from './esbuild-plugins.mjs';
+import watPlugin from 'esbuild-plugin-wat';
 // esbuild has TypeScript support by default. It will use .tsconfig
 require('esbuild')
   .context({
@@ -11,11 +12,12 @@ require('esbuild')
     outfile: 'main.js',
     define: { 'process.env.NODE_DEBUG': 'false', 'process.env.NODE_ENV': '"production"', global: 'window' },
     platform: 'browser',
-    plugins: [compressionBrowserPlugin, wasmPlugin],
+    plugins: [compressionBrowserPlugin, watPlugin()],
     sourcemap: 'external',
     bundle: true,
+    minify: false,
     globalName: 'parquetjs',
-    inject: ['./esbuild-shims.js'],
+    inject: ['./esbuild-shims.mjs'],
   })
   .then((context) => {
     context
