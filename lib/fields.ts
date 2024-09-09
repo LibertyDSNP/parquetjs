@@ -1,5 +1,6 @@
 // Helper functions for creating fields
 
+import { LogicalType, TimeType } from '../gen-nodejs/parquet_types';
 import { FieldDefinition, ParquetType, SchemaDefinition } from './declare';
 
 export function createStringField(optional = true, fieldOptions: FieldDefinition = {}): FieldDefinition {
@@ -82,8 +83,7 @@ export function createListField(
 }
 
 export function createTimeField(
-  unit: 'MILLIS' | 'MICROS' | 'NANOS',
-  isAdjustedToUTC = true,
+  logicalType: TimeType,
   optional = true,
   fieldOptions: FieldDefinition = {}
 ): FieldDefinition {
@@ -91,7 +91,6 @@ export function createTimeField(
     ...fieldOptions,
     optional,
     type: 'TIME',
-    unit,
-    isAdjustedToUTC,
+    logicalType: new LogicalType({ TIME: logicalType }),
   };
 }

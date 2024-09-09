@@ -2,6 +2,9 @@
 import { JSONSchema4 } from 'json-schema';
 import { FieldDefinition, SchemaDefinition } from './declare';
 import * as fields from './fields';
+import { MilliSeconds, TimeUnit } from '../gen-nodejs/parquet_types';
+import { TimeType } from '../gen-nodejs/parquet_types';
+import { MicroSeconds } from '../gen-nodejs/parquet_types';
 
 type SupportedJSONSchema4 = Omit<
   JSONSchema4,
@@ -115,18 +118,18 @@ const fromJsonSchemaField =
       case 'object':
         if (fieldValue.properties && fieldValue.properties.type && fieldValue.properties.value) {
           const unit = fieldValue.properties.type.properties?.unit?.default?.toString();
-          let defaultUnit: 'MILLIS' | 'MICROS' | 'NANOS' = 'MILLIS'; // Restrict to allowed values
+          let defaultUnit: TimeUnit = new TimeUnit({ MILLIS: MilliSeconds });
 
           if (unit === 'MICROS') {
-            defaultUnit = 'MICROS';
+            defaultUnit = new TimeUnit({ MILLIS: MilliSeconds });
           } else if (unit === 'NANOS') {
-            defaultUnit = 'NANOS';
-          } else if (unit !== 'MILLIS') {
-            throw new UnsupportedJsonSchemaError(`Unit type ${unit} is unsupported.`);
+            defaultUnit = new TimeUnit({ MICROS: MicroSeconds });
+          } else {
+            defaultUnit = new TimeUnit({ MILLIS: MilliSeconds });
           }
-
           const isAdjustedToUTC = !!fieldValue.properties.type.properties?.isAdjustedToUTC?.default;
-          return fields.createTimeField(defaultUnit, isAdjustedToUTC, optional);
+          const timeLogicalType = new TimeType({ isAdjustedToUTC, unit: defaultUnit });
+          return fields.createTimeField(timeLogicalType, optional);
         }
         return fields.createStructField(fromJsonSchema(fieldValue), optional);
       default:

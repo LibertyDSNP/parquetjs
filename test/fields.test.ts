@@ -1,6 +1,7 @@
 import { assert } from 'chai';
 import { ParquetSchema } from '../parquet';
 import * as fields from '../lib/fields';
+import { MicroSeconds, MilliSeconds, NanoSeconds, TimeType, TimeUnit } from '../gen-nodejs/parquet_types';
 
 describe('Field Builders: Primitive Types', function () {
   it('Can use primitive field types: String', function () {
@@ -212,14 +213,15 @@ describe('Field Builders: Structs and Struct List', function () {
 
   it('Can use primitive field types: Time with default MILLIS', function () {
     const schema = new ParquetSchema({
-      timeField: fields.createTimeField('MILLIS'),
+      timeField: fields.createTimeField(
+        new TimeType({ isAdjustedToUTC: true, unit: new TimeUnit(new MilliSeconds()) }),
+        true
+      ),
     });
     const c = schema.fields.timeField;
     assert.equal(c.name, 'timeField');
-    assert.equal(c.primitiveType, 'INT64');
+    assert.equal(c.primitiveType, 'INT32');
     assert.equal(c.originalType, 'TIME');
-    assert.equal(c.unit, 'MILLIS');
-    assert.equal(c.isAdjustedToUTC, true);
     assert.deepEqual(c.path, ['timeField']);
     assert.equal(c.repetitionType, 'OPTIONAL');
     assert.equal(c.encoding, 'PLAIN');
@@ -232,14 +234,15 @@ describe('Field Builders: Structs and Struct List', function () {
 
   it('Can use primitive field types: Time with MICROS', function () {
     const schema = new ParquetSchema({
-      timeField: fields.createTimeField('MICROS', false),
+      timeField: fields.createTimeField(
+        new TimeType({ isAdjustedToUTC: false, unit: new TimeUnit(new MicroSeconds()) }),
+        true
+      ),
     });
     const c = schema.fields.timeField;
     assert.equal(c.name, 'timeField');
     assert.equal(c.primitiveType, 'INT64');
     assert.equal(c.originalType, 'TIME');
-    assert.equal(c.unit, 'MICROS');
-    assert.equal(c.isAdjustedToUTC, false);
     assert.deepEqual(c.path, ['timeField']);
     assert.equal(c.repetitionType, 'OPTIONAL');
     assert.equal(c.encoding, 'PLAIN');
@@ -252,14 +255,16 @@ describe('Field Builders: Structs and Struct List', function () {
 
   it('Can use primitive field types: Time with NANOS', function () {
     const schema = new ParquetSchema({
-      timeField: fields.createTimeField('NANOS', true, true, { compression: 'GZIP' }),
+      timeField: fields.createTimeField(
+        new TimeType({ isAdjustedToUTC: true, unit: new TimeUnit(new NanoSeconds()) }),
+        true,
+        { compression: 'GZIP' }
+      ),
     });
     const c = schema.fields.timeField;
     assert.equal(c.name, 'timeField');
     assert.equal(c.primitiveType, 'INT64');
     assert.equal(c.originalType, 'TIME');
-    assert.equal(c.unit, 'NANOS');
-    assert.equal(c.isAdjustedToUTC, true);
     assert.equal(c.compression, 'GZIP');
     assert.deepEqual(c.path, ['timeField']);
     assert.equal(c.repetitionType, 'OPTIONAL');

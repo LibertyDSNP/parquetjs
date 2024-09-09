@@ -3,7 +3,6 @@
 import { PrimitiveType, OriginalType, ParquetType, FieldDefinition, ParquetField } from './declare';
 import { Options } from './codec/types';
 import type { Document as BsonDocument } from 'bson';
-import { TimeType, TimeUnit } from '../gen-nodejs/parquet_types';
 // BSON uses top level awaits, so use require for now
 const bsonSerialize = require('bson').serialize;
 const bsonDeserialize = require('bson').deserialize;
@@ -20,11 +19,6 @@ interface INTERVAL {
   months: number;
   days: number;
   milliseconds: number;
-}
-
-interface TIME {
-  type: TimeType;
-  value: number | bigint;
 }
 
 export function getParquetTypeDataObject(
@@ -52,6 +46,33 @@ export function getParquetTypeDataObject(
         originalType: 'DECIMAL',
         toPrimitive: toPrimitive_INT64,
       };
+    }
+  } else if (type === 'TIME') {
+    if (field?.logicalType?.TIME) {
+      if (field.logicalType.TIME.unit.MILLIS) {
+        return {
+          primitiveType: 'INT32',
+          originalType: 'TIME',
+          toPrimitive: field.logicalType.TIME.isAdjustedToUTC? toPrimitive_TIME_UTC : toPrimitive_TIME_LOCAL,
+        };
+      }
+      if (field.logicalType.TIME.unit.MICROS) {
+        return {
+          primitiveType: 'INT64',
+          originalType: 'TIME',
+          toPrimitive: field.logicalType.TIME.isAdjustedToUTC? toPrimitive_TIME_UTC : toPrimitive_TIME_LOCAL,
+        };
+      }
+      if (field.logicalType.TIME.unit.NANOS) {
+        return {
+          primitiveType: 'INT64',
+          originalType: 'TIME',
+          toPrimitive: field.logicalType.TIME.isAdjustedToUTC? toPrimitive_TIME_UTC : toPrimitive_TIME_LOCAL,
+        };
+      }
+      throw new Error('TIME type must have a unit');
+    } else {
+      throw new Error('TIME type must have a logical type');
     }
   } else {
     return PARQUET_LOGICAL_TYPE_DATA[type];
@@ -88,7 +109,6 @@ const PARQUET_LOGICAL_TYPES = new Set<string>([
   'INTERVAL',
   'MAP',
   'LIST',
-  'TIME',
 ] satisfies ParquetType[]);
 
 const PARQUET_LOGICAL_TYPE_DATA: Record<string, ParquetTypeDataObject> = {
@@ -231,11 +251,6 @@ const PARQUET_LOGICAL_TYPE_DATA: Record<string, ParquetTypeDataObject> = {
   LIST: {
     originalType: 'LIST',
     toPrimitive: toPrimitive_LIST,
-  },
-  TIME: {
-    originalType: 'TIME',
-    primitiveType: 'INT64',
-    toPrimitive: toPrimitive_TIME,
   },
 };
 
@@ -570,62 +585,5 @@ function fromPrimitive_INTERVAL(value: string) {
 function checkValidValue(lowerRange: number | bigint, upperRange: number | bigint, v: number | bigint) {
   if (v < lowerRange || v > upperRange) {
     throw 'invalid value';
-  }
-}
-/**
- * Convert a TIME value to its internal representation.
- * This handles both `isAdjustedToUTC` and the correct `unit` (MILLIS, MICROS, NANOS).
- * @param value The TIME object containing the value and the time type information.
- * @returns The converted time value as bigint or number based on the unit.
- */
-function toPrimitive_TIME(value: TIME): bigint | number {
-  const { type, value: timeValue } = value;
-  const { unit, isAdjustedToUTC } = type;
-
-  let epochTime: number | bigint;
-
-  if (typeof timeValue === 'number') {
-    if (unit.MILLIS) {
-      epochTime = timeValue;
-    } else if (unit.MICROS) {
-      epochTime = BigInt(timeValue);
-    } else if (unit.NANOS) {
-      epochTime = BigInt(timeValue);
-    } else {
-      throw new Error('Unsupported time unit');
-    }
-  } else if (typeof timeValue === 'bigint') {
-    epochTime = timeValue;
-  } else {
-    throw new Error('Invalid value for TIME type');
-  }
-
-  if (!isAdjustedToUTC) {
-    return adjustToLocalTimestamp(epochTime, unit);
-  }
-
-  return epochTime;
-}
-
-/**
- * Adjust the timestamp to local time if the time is not adjusted to UTC.
- * @param timestamp The timestamp to adjust.
- * @param unit The unit of the timestamp (MILLIS, MICROS, NANOS).
- * @returns The adjusted timestamp.
- */
-function adjustToLocalTimestamp(timestamp: bigint | number, unit: TimeUnit): bigint {
-  try {
-    const localOffset = BigInt(new Date().getTimezoneOffset()) * 60n * 1000n;
-    timestamp = BigInt(timestamp);
-    if (unit.MILLIS) {
-      return timestamp - localOffset;
-    } else if (unit.MICROS) {
-      return timestamp - localOffset * 1000n;
-    } else if (unit.NANOS) {
-      return timestamp - localOffset * 1000000n;
-    }
-    throw new Error('Unsupported time unit');
-  } catch (e) {
-    throw new Error('Invalid value for TIME type');
   }
 }
