@@ -27,62 +27,6 @@
       },
       "encoding": "PLAIN",
       "compression": "UNCOMPRESSED"
-    },
-    "time_micros_field": {
-      "optional": false,
-      "type": "INT32",
-      "logicalType": {
-        "STRING": null,
-        "MAP": null,
-        "LIST": null,
-        "ENUM": null,
-        "DECIMAL": null,
-        "DATE": null,
-        "TIME": {
-          "isAdjustedToUTC": false,
-          "unit": {
-            "MILLIS": {},
-            "MICROS": null,
-            "NANOS": null
-          }
-        },
-        "TIMESTAMP": null,
-        "INTEGER": null,
-        "UNKNOWN": null,
-        "JSON": null,
-        "BSON": null,
-        "UUID": null
-      },
-      "encoding": "PLAIN",
-      "compression": "UNCOMPRESSED"
-    },
-    "time_nanos_field": {
-      "optional": false,
-      "type": "INT32",
-      "logicalType": {
-        "STRING": null,
-        "MAP": null,
-        "LIST": null,
-        "ENUM": null,
-        "DECIMAL": null,
-        "DATE": null,
-        "TIME": {
-          "isAdjustedToUTC": false,
-          "unit": {
-            "MILLIS": {},
-            "MICROS": null,
-            "NANOS": null
-          }
-        },
-        "TIMESTAMP": null,
-        "INTEGER": null,
-        "UNKNOWN": null,
-        "JSON": null,
-        "BSON": null,
-        "UUID": null
-      },
-      "encoding": "PLAIN",
-      "compression": "UNCOMPRESSED"
     }
   },
   "fields": {
@@ -118,72 +62,6 @@
       "compression": "UNCOMPRESSED",
       "rLevelMax": 0,
       "dLevelMax": 0
-    },
-    "time_micros_field": {
-      "name": "time_micros_field",
-      "primitiveType": "INT32",
-      "originalType": "TIME_MILLIS",
-      "logicalType": {
-        "STRING": null,
-        "MAP": null,
-        "LIST": null,
-        "ENUM": null,
-        "DECIMAL": null,
-        "DATE": null,
-        "TIME": {
-          "isAdjustedToUTC": false,
-          "unit": {
-            "MILLIS": {},
-            "MICROS": null,
-            "NANOS": null
-          }
-        },
-        "TIMESTAMP": null,
-        "INTEGER": null,
-        "UNKNOWN": null,
-        "JSON": null,
-        "BSON": null,
-        "UUID": null
-      },
-      "path": ["time_micros_field"],
-      "repetitionType": "REQUIRED",
-      "encoding": "PLAIN",
-      "compression": "UNCOMPRESSED",
-      "rLevelMax": 0,
-      "dLevelMax": 0
-    },
-    "time_nanos_field": {
-      "name": "time_nanos_field",
-      "primitiveType": "INT32",
-      "originalType": "TIME_MILLIS",
-      "logicalType": {
-        "STRING": null,
-        "MAP": null,
-        "LIST": null,
-        "ENUM": null,
-        "DECIMAL": null,
-        "DATE": null,
-        "TIME": {
-          "isAdjustedToUTC": false,
-          "unit": {
-            "MILLIS": {},
-            "MICROS": null,
-            "NANOS": null
-          }
-        },
-        "TIMESTAMP": null,
-        "INTEGER": null,
-        "UNKNOWN": null,
-        "JSON": null,
-        "BSON": null,
-        "UUID": null
-      },
-      "path": ["time_nanos_field"],
-      "repetitionType": "REQUIRED",
-      "encoding": "PLAIN",
-      "compression": "UNCOMPRESSED",
-      "rLevelMax": 0,
-      "dLevelMax": 0
     }
   },
   "fieldList": [
@@ -214,72 +92,6 @@
         "UUID": null
       },
       "path": ["time_millis_field"],
-      "repetitionType": "REQUIRED",
-      "encoding": "PLAIN",
-      "compression": "UNCOMPRESSED",
-      "rLevelMax": 0,
-      "dLevelMax": 0
-    },
-    {
-      "name": "time_micros_field",
-      "primitiveType": "INT32",
-      "originalType": "TIME_MILLIS",
-      "logicalType": {
-        "STRING": null,
-        "MAP": null,
-        "LIST": null,
-        "ENUM": null,
-        "DECIMAL": null,
-        "DATE": null,
-        "TIME": {
-          "isAdjustedToUTC": false,
-          "unit": {
-            "MILLIS": {},
-            "MICROS": null,
-            "NANOS": null
-          }
-        },
-        "TIMESTAMP": null,
-        "INTEGER": null,
-        "UNKNOWN": null,
-        "JSON": null,
-        "BSON": null,
-        "UUID": null
-      },
-      "path": ["time_micros_field"],
-      "repetitionType": "REQUIRED",
-      "encoding": "PLAIN",
-      "compression": "UNCOMPRESSED",
-      "rLevelMax": 0,
-      "dLevelMax": 0
-    },
-    {
-      "name": "time_nanos_field",
-      "primitiveType": "INT32",
-      "originalType": "TIME_MILLIS",
-      "logicalType": {
-        "STRING": null,
-        "MAP": null,
-        "LIST": null,
-        "ENUM": null,
-        "DECIMAL": null,
-        "DATE": null,
-        "TIME": {
-          "isAdjustedToUTC": false,
-          "unit": {
-            "MILLIS": {},
-            "MICROS": null,
-            "NANOS": null
-          }
-        },
-        "TIMESTAMP": null,
-        "INTEGER": null,
-        "UNKNOWN": null,
-        "JSON": null,
-        "BSON": null,
-        "UUID": null
-      },
-      "path": ["time_nanos_field"],
       "repetitionType": "REQUIRED",
       "encoding": "PLAIN",
       "compression": "UNCOMPRESSED",
