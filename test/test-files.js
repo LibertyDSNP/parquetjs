@@ -220,8 +220,8 @@ describe('test-files', function () {
     // The browser test is separate: in test/browser/main.ts
     it('works for Node', async function () {
       const data = await readData('sample_brotli_compressed.parquet');
-      assert.deepEqual(data[0], { id: '1', name: 'Alice', age: '25' });
-      assert.deepEqual(data[1], { id: '2', name: 'Bob', age: '30' });
+      assert.deepEqual(data[0], { id: 1n, name: 'Alice', age: 25n });
+      assert.deepEqual(data[1], { id: 2n, name: 'Bob', age: 30n });
     });
   });
 
