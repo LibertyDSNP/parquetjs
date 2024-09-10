@@ -491,7 +491,7 @@ To run the browser tests (folder: `test/browser`) in a specific browser:
 1. `npm i`
 2. `npm run build:browser`
 3. `npx serve .`
-4. `open http://localhost:3000/test/browser/` in your preferred browser
+4. `open http://localhost:3000/test/browser/` in your preferred browser (Trailing `/` is required)
 
 ## Dependencies
 
