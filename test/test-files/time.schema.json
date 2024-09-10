@@ -25,5 +25,5 @@
       "required": ["value", "unit", "isAdjustedToUTC"]
     }
   },
-  "required": ["time_millis_field", "time_micros_field", "time_nanos_field"]
+  "required": ["time_millis_field"]
 }
