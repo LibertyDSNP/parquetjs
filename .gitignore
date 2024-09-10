@@ -8,3 +8,5 @@ dist
 !test/reference-test/files/*.parquet
 examples/server/package-lock.json
 test/browser/*.js
+main.js
+main.js.map
