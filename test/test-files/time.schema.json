@@ -1,0 +1,69 @@
+{
+  "$id": "https://example.com/time.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A schema to test the TIME logical types in Parquet",
+  "type": "object",
+  "properties": {
+    "time_millis_field": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Time field represented as a string with date-time format"
+        },
+        "unit": {
+          "type": "string",
+          "enum": ["MILLIS", "MICROS", "NANOS"],
+          "description": "The unit for the time value"
+        },
+        "isAdjustedToUTC": {
+          "type": "boolean",
+          "description": "Whether the time is adjusted to UTC"
+        }
+      },
+      "required": ["value", "unit", "isAdjustedToUTC"]
+    },
+    "time_micros_field": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Time field represented as a string with date-time format"
+        },
+        "unit": {
+          "type": "string",
+          "enum": ["MILLIS", "MICROS", "NANOS"],
+          "description": "The unit for the time value"
+        },
+        "isAdjustedToUTC": {
+          "type": "boolean",
+          "description": "Whether the time is adjusted to UTC"
+        }
+      },
+      "required": ["value", "unit", "isAdjustedToUTC"]
+    },
+    "time_nanos_field": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Time field represented as a string with date-time format"
+        },
+        "unit": {
+          "type": "string",
+          "enum": ["MILLIS", "MICROS", "NANOS"],
+          "description": "The unit for the time value"
+        },
+        "isAdjustedToUTC": {
+          "type": "boolean",
+          "description": "Whether the time is adjusted to UTC"
+        }
+      },
+      "required": ["value", "unit", "isAdjustedToUTC"]
+    }
+  },
+  "required": ["time_millis_field", "time_micros_field", "time_nanos_field"]
+}
