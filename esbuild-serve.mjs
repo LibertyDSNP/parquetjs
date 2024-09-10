@@ -5,8 +5,9 @@
  */
 import { compressionBrowserPlugin } from './esbuild-plugins.mjs';
 import watPlugin from 'esbuild-plugin-wat';
+import esbuild from 'esbuild';
 // esbuild has TypeScript support by default. It will use .tsconfig
-require('esbuild')
+esbuild
   .context({
     entryPoints: ['parquet.ts'],
     outfile: 'main.js',
@@ -22,7 +23,7 @@ require('esbuild')
   .then((context) => {
     context
       .serve({
-        servedir: __dirname,
+        servedir: './',
       })
       .then((server) => {
         console.log('serving parquetjs', server);
