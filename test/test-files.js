@@ -216,6 +216,15 @@ describe('test-files', function () {
     }
   });
 
+  describe('Brotli compression', function () {
+    // The browser test is separate: in test/browser/main.ts
+    it('works for Node', async function () {
+      const data = await readData('sample_brotli_compressed.parquet');
+      assert.deepEqual(data[0], { id: '1', name: 'Alice', age: '25' });
+      assert.deepEqual(data[1], { id: '2', name: 'Bob', age: '30' });
+    });
+  });
+
   describe('RLE', function () {
     // Tracked in https://github.com/LibertyDSNP/parquetjs/issues/113
     it.skip('rle_boolean_encoding.parquet loads', async function () {

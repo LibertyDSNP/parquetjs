@@ -13,11 +13,10 @@
       mocha.setup('bdd');
     </script>
 
-    <!-- load code you want to test here -->
-    <script src="./main.js"></script>
-    <!-- load your test files here -->
-
-    <script>
+    <script type="module">
+      // <!-- load code you want to test here -->
+      import * as btest from './main.js';
+      // <!-- load your test files here -->
       mocha.run();
     </script>
   </body>
