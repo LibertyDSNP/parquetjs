@@ -1,7 +1,6 @@
 import path from 'node:path';
 /**
- * this plugin resolves to a browser version of compression.ts that
- * does not include LZO comprssion.
+ * this plugin resolves to a browser version of compression.ts that uses different code for browsers
  */
 export const compressionBrowserPlugin = {
   name: 'compressionBrowser',
