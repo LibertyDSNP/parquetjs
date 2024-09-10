@@ -91,7 +91,6 @@ function inflate_snappy(value: ArrayBuffer | Buffer | Uint8Array) {
 }
 
 async function inflate_brotli(value: Uint8Array) {
-  // //testing
   return buffer_from_result(await brotli.inflate(value));
 }
 
