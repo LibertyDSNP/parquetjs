@@ -6,6 +6,7 @@ import addressSchema from './test-files/address.schema.json';
 import arraySchema from './test-files/array.schema.json';
 import objectSchema from './test-files/object.schema.json';
 import objectNestedSchema from './test-files/object-nested.schema.json';
+import timeSchema from './test-files/time.schema.json';
 
 import { ParquetSchema, ParquetWriter, ParquetReader } from '../parquet';
 
@@ -51,6 +52,12 @@ describe('Json Schema Conversion', function () {
 
     const ps = ParquetSchema.fromJsonSchema(js);
     checkSnapshot(ps, './test-files/object-nested.schema.result.json', update);
+  });
+
+  it('Time Schema', function () {
+    const js = timeSchema as JSONSchema4;
+    const ps = ParquetSchema.fromJsonSchema(js);
+    checkSnapshot(ps, './test-files/time.schema.result.json', update);
   });
 });
 
