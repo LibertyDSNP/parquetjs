@@ -14,12 +14,10 @@ function mergeUint8Arrays(arrs: Uint8Array[], totalLength: number): Uint8Array {
     output.set(arr, priorLength);
     priorLength += arr.length;
   }
-  console.log('output Length', output.length);
   return output;
 }
 
 export async function compress(input: Uint8Array): Promise<Uint8Array> {
-  console.log('Compress Input Length: ', input.length);
   // Get a stream for your input:
   const inputStream = new ReadableStream<Uint8Array>({
     start(controller) {
@@ -81,7 +79,6 @@ export async function compress(input: Uint8Array): Promise<Uint8Array> {
 }
 
 export async function inflate(input: Uint8Array): Promise<Uint8Array> {
-  console.log('Inflate Input Length: ', input.length);
   // Get a stream for your input:
   const inputStream = new ReadableStream({
     start(controller) {
