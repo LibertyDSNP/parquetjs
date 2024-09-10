@@ -5,6 +5,12 @@ const buffer = require('buffer');
 
 describe('Browser tests', function () {
   describe('reader', function () {
+    let reader;
+
+    after(async function () {
+      if (reader) await reader.close();
+    });
+
     it('can read snappy compressed data', async function () {
       // Data from test/test-files/snappy-compressed.parquet
       const uint8Array = [
@@ -25,16 +31,12 @@ describe('Browser tests', function () {
         101, 116, 106, 115, 0, 163, 0, 0, 0, 80, 65, 82, 49,
       ];
       const snappyCompressedBuffer = buffer.Buffer.from(uint8Array);
-      const reader = await parquetjs.ParquetReader.openBuffer(snappyCompressedBuffer);
+      reader = await parquetjs.ParquetReader.openBuffer(snappyCompressedBuffer);
       const data: any[] = [];
       for await (const record of reader) {
         data.push(record);
       }
       assert.equal(data.length, 4);
-
-      after(async function () {
-        await reader.close();
-      });
     });
 
     it('can read gzip compressed data', async function () {
@@ -110,16 +112,12 @@ describe('Browser tests', function () {
         57, 100, 53, 53, 97, 51, 41, 0, 71, 1, 0, 0, 80, 65, 82, 49,
       ];
       const gzipCompressedBuffer = buffer.Buffer.from(uint8Array);
-      const reader = await parquetjs.ParquetReader.openBuffer(gzipCompressedBuffer);
+      reader = await parquetjs.ParquetReader.openBuffer(gzipCompressedBuffer);
       const data: any[] = [];
       for await (const record of reader) {
         data.push(record);
       }
       assert.equal(data.length, 25);
-
-      after(async function () {
-        await reader.close();
-      });
     });
 
     it('can read brotli compressed data', async function () {
@@ -233,15 +231,12 @@ describe('Browser tests', function () {
         80, 65, 82, 49,
       ];
       const brotliCompressedBuffer = buffer.Buffer.from(uint8Array);
-      const reader = await parquetjs.ParquetReader.openBuffer(brotliCompressedBuffer);
+      reader = await parquetjs.ParquetReader.openBuffer(brotliCompressedBuffer);
       const data: any[] = [];
       for await (const record of reader) {
         data.push(record);
       }
       assert.equal(data.length, 5);
-      after(async function () {
-        await reader.close();
-      });
     });
   });
 });

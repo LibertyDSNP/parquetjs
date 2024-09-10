@@ -11,6 +11,9 @@ export default tseslint.config(
   ...tseslint.configs.strict,
   ...tseslint.configs.stylistic,
   {
+    ignores: ['dist/*', 'test/browser/main.js'],
+  },
+  {
     rules: {
       // TODO: Fix/ignore in tests and remove
       '@typescript-eslint/no-loss-of-precision': 'warn',
