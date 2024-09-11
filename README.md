@@ -484,6 +484,15 @@ var writer = await parquet.ParquetWriter.openFile(schema, 'fruits.parquet');
 writer.setRowGroupSize(8192);
 ```
 
+## Browser Tests
+
+To run the browser tests (folder: `test/browser`) in a specific browser:
+
+1. `npm i`
+2. `npm run build:browser`
+3. `npx serve .`
+4. `open http://localhost:3000/test/browser/` in your preferred browser (Trailing `/` is required)
+
 ## Dependencies
 
 Parquet uses [thrift](https://thrift.apache.org/) to encode the schema and other

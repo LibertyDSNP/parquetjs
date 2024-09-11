@@ -27,7 +27,7 @@ export const unsupported = [
   'delta_encoding_optional_column.parquet', // DELTA_BINARY_PACKED unsupported
   'delta_encoding_required_column.parquet', // DELTA_BINARY_PACKED unsupported
   'delta_length_byte_array.parquet', // ZSTD unsupported, DELTA_BINARY_PACKED unsupported
-  'large_string_map.brotli.parquet', // BUG?
+  'large_string_map.brotli.parquet', // Fails as the large string is > 1 GB
 ];
 
 describe('Read Test for all files', function () {

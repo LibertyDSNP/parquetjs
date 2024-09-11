@@ -1,6 +1,6 @@
-const esbuild = require('esbuild');
-const path = require('path');
-const { compressionBrowserPlugin, wasmPlugin } = require('./esbuild-plugins');
+import esbuild from 'esbuild';
+import watPlugin from 'esbuild-plugin-wat';
+import { compressionBrowserPlugin } from './esbuild-plugins.mjs';
 // esbuild has TypeScript support by default
 const baseConfig = {
   bundle: true,
@@ -10,11 +10,11 @@ const baseConfig = {
     'process.env.NODE_ENV': '"production"',
     global: 'window',
   },
-  inject: ['./esbuild-shims.js'],
+  inject: ['./esbuild-shims.mjs'],
   minify: true,
   mainFields: ['browser', 'module', 'main'],
   platform: 'browser', // default
-  plugins: [compressionBrowserPlugin, wasmPlugin],
+  plugins: [compressionBrowserPlugin, watPlugin()],
   target: 'es2020', // default
 };
 // configuration for generating test code in browser
@@ -26,39 +26,53 @@ const testConfig = {
     'process.env.NODE_ENV': '"production"',
     global: 'window',
   },
-  inject: ['./esbuild-shims.js'],
+  inject: ['./esbuild-shims.mjs'],
   minify: false,
   mainFields: ['browser', 'module', 'main'],
   platform: 'browser', // default
-  plugins: [compressionBrowserPlugin, wasmPlugin],
+  plugins: [compressionBrowserPlugin, watPlugin()],
   target: 'es2020', // default
 };
 const targets = [
   {
     ...baseConfig,
     globalName: 'parquetjs',
-    outdir: path.resolve(__dirname, 'dist', 'browser'),
+    outdir: './dist/browser',
   },
   {
     ...baseConfig,
     format: 'esm',
-    outfile: path.resolve(__dirname, 'dist', 'browser', 'parquet.esm.js'),
+    outfile: 'dist/browser/parquet.esm.js',
   },
   {
     ...baseConfig,
     format: 'cjs',
-    outfile: path.resolve(__dirname, 'dist', 'browser', 'parquet.cjs.js'),
-  },
-  // Browser test code below
-  {
-    ...testConfig,
-    outfile: path.resolve(__dirname, 'test', 'browser', 'main.js'),
+    outfile: 'dist/browser/parquet.cjs.js',
   },
 ];
+
+// Browser test code below is only in ESM
+const testTargets = [
+  {
+    ...testConfig,
+    format: 'esm',
+    mainFields: ['module', 'main'],
+    outfile: 'test/browser/main.js',
+  },
+];
+
 Promise.all(targets.map(esbuild.build))
   .then((results) => {
     if (results.reduce((m, r) => m && !r.warnings.length, true)) {
-      console.log('built with no errors or warnings');
+      console.log('built dist targets with no errors or warnings');
+    }
+  })
+  .then(() => {
+    return Promise.all(testTargets.map(esbuild.build));
+  })
+  .then((results) => {
+    if (results.reduce((m, r) => m && !r.warnings.length, true)) {
+      console.log('built test targets with no errors or warnings');
     }
   })
   .catch((e) => {
