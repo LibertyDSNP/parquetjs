@@ -21,6 +21,12 @@ interface INTERVAL {
   milliseconds: number;
 }
 
+interface TIME {
+  value: string | bigint | number;
+  unit: 'MILLIS' | 'MICROS' | 'NANOS';
+  isAdjustedToUTC: boolean;
+}
+
 export function getParquetTypeDataObject(
   type: ParquetType,
   field?: ParquetField | Options | FieldDefinition
@@ -46,28 +52,26 @@ export function getParquetTypeDataObject(
         toPrimitive: toPrimitive_INT64,
       };
     }
-  } else if (field?.logicalType?.TIME && (type === 'INT64' || type === 'INT32')) {
-    const isAdjustedToUTC = field.logicalType.TIME.isAdjustedToUTC;
+  } else if (field?.logicalType?.TIME) {
     const unit = field.logicalType.TIME.unit;
-
     if (unit.MILLIS) {
       return {
         originalType: 'TIME_MILLIS',
         primitiveType: 'INT32',
-        toPrimitive: isAdjustedToUTC ? toPrimitive_TIME_MILLIS_UTC : toPrimitive_TIME_MILLIS_LOCAL,
+        toPrimitive: toPrimitive_TIME,
       };
     }
     if (unit.MICROS) {
       return {
         originalType: 'TIME_MICROS',
         primitiveType: 'INT64',
-        toPrimitive: isAdjustedToUTC ? toPrimitive_TIME_MICROS_UTC : toPrimitive_TIME_MICROS_LOCAL,
+        toPrimitive: toPrimitive_TIME,
       };
     }
     if (unit.NANOS) {
       return {
         primitiveType: 'INT64',
-        toPrimitive: isAdjustedToUTC ? toPrimitive_TIME_NANOS_UTC : toPrimitive_TIME_NANOS_LOCAL,
+        toPrimitive: toPrimitive_TIME,
       };
     }
     throw new Error('TIME type must have a valid unit (MILLIS, MICROS, NANOS).');
@@ -585,63 +589,27 @@ function checkValidValue(lowerRange: number | bigint, upperRange: number | bigin
   }
 }
 
-/**
- * Convert a TIME value in MILLIS to its UTC representation.
- * @param value The time value.
- */
-function toPrimitive_TIME_MILLIS_UTC(value: number | string): number {
-  return typeof value === 'string' ? Number(value) : value;
+function toPrimitive_TIME(time: TIME): bigint | number {
+  const { value, unit, isAdjustedToUTC } = time;
+
+  const timeValue = typeof value === 'string' ? BigInt(value) : BigInt(value);
+
+  if (isAdjustedToUTC) {
+    return unit === 'MILLIS' ? Number(timeValue) : timeValue;
+  } else {
+    switch (unit) {
+      case 'MILLIS':
+        return Number(adjustToLocalTimestamp(timeValue, { MILLIS: true }));
+      case 'MICROS':
+        return adjustToLocalTimestamp(timeValue, { MICROS: true });
+      case 'NANOS':
+        return adjustToLocalTimestamp(timeValue, { NANOS: true });
+      default:
+        throw new Error(`Unsupported time unit: ${unit}`);
+    }
+  }
 }
 
-/**
- * Convert a TIME value in MILLIS to its local time representation.
- * @param value The time value.
- */
-function toPrimitive_TIME_MILLIS_LOCAL(value: number | string): number {
-  const millis = typeof value === 'string' ? Number(value) : value;
-  return Number(adjustToLocalTimestamp(BigInt(millis), { MILLIS: true }));
-}
-
-/**
- * Convert a TIME value in MICROS to its UTC representation.
- * @param value The time value.
- */
-function toPrimitive_TIME_MICROS_UTC(value: bigint | string): bigint {
-  return BigInt(value);
-}
-
-/**
- * Convert a TIME value in MICROS to its local time representation.
- * @param value The time value.
- */
-function toPrimitive_TIME_MICROS_LOCAL(value: bigint | string): bigint {
-  const micros = BigInt(value);
-  return adjustToLocalTimestamp(micros, { MICROS: true });
-}
-
-/**
- * Convert a TIME value in NANOS to its UTC representation.
- * @param value The time value.
- */
-function toPrimitive_TIME_NANOS_UTC(value: bigint | string): bigint {
-  return BigInt(value);
-}
-
-/**
- * Convert a TIME value in NANOS to its local time representation.
- * @param value The time value.
- */
-function toPrimitive_TIME_NANOS_LOCAL(value: bigint | string): bigint {
-  const nanos = BigInt(value);
-  return adjustToLocalTimestamp(nanos, { NANOS: true });
-}
-
-/**
- * Adjust the timestamp to local time based on the unit (MILLIS, MICROS, NANOS).
- * @param timestamp The timestamp to adjust.
- * @param unit The unit of the timestamp.
- * @returns The adjusted timestamp.
- */
 function adjustToLocalTimestamp(
   timestamp: bigint,
   unit: { MILLIS?: boolean; MICROS?: boolean; NANOS?: boolean }
