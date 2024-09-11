@@ -590,7 +590,6 @@ function checkValidValue(lowerRange: number | bigint, upperRange: number | bigin
 }
 
 function toPrimitive_TIME(time: TIME): bigint | number {
-  console.log('time', time);
   const { value, unit, isAdjustedToUTC } = time;
 
   const timeValue = typeof value === 'string' ? BigInt(value) : BigInt(value);
