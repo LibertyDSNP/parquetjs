@@ -96,7 +96,7 @@ const fromJsonSchemaArray = (fieldValue: SupportedJSONSchema4, optionalFieldList
         if (!fieldValue.items.properties.unit.enum) {
           throw new UnsupportedJsonSchemaError('Unit enum is not defined');
         }
-        const unit = fieldValue.items.properties.unit.enum[0];
+        const unit = fieldValue.items.properties.unit.default || fieldValue.items.properties.unit.enum[0];
         const isAdjustedToUTC = !!fieldValue.items.properties.isAdjustedToUTC.default;
         let timeUnit: TimeUnit;
 
