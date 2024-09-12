@@ -4,7 +4,7 @@ const assert = chai.assert;
 const parquet = require('../parquet');
 
 describe('ParquetSchema', function () {
-  it('should handle complex nesting with logicalType as undefined', function () {
+  it('should handle complex nesting', function () {
     var metadata = {
       version: 1,
       schema: [
