@@ -8,9 +8,7 @@
       "type": "object",
       "properties": {
         "value": {
-          "type": "string",
-          "format": "date-time",
-          "description": "Time field represented as a string with date-time format"
+          "type": "number | string"
         },
         "unit": {
           "type": "string",
