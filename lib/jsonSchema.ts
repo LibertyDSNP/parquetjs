@@ -158,7 +158,7 @@ const fromJsonSchemaField =
           if (!fieldValue.properties.unit.enum) {
             throw new UnsupportedJsonSchemaError('Unit enum is not defined');
           }
-          const unit = fieldValue.properties.unit.enum[0];
+          const unit = fieldValue.properties.unit.default || fieldValue.properties.unit.enum[0];
           const isAdjustedToUTC = !!fieldValue.properties.isAdjustedToUTC.default;
           let timeUnit: TimeUnit;
           switch (unit) {
