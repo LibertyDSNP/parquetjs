@@ -13,7 +13,8 @@
         },
         "unit": {
           "type": "string",
-          "enum": ["NANOS"],
+          "enum": ["MILLIS", "MICROS", "NANOS"],
+          "default": "NANOS",
           "description": "The unit is fixed to NANOS"
         },
         "isAdjustedToUTC": {
