@@ -4,7 +4,7 @@ const assert = chai.assert;
 const parquet = require('../parquet');
 
 describe('ParquetSchema', function () {
-  it('should handle complex nesting', function () {
+  it('should handle complex nesting with logicalType as undefined', function () {
     var metadata = {
       version: 1,
       schema: [
@@ -120,6 +120,7 @@ describe('ParquetSchema', function () {
         dLevelMax: 0,
         isNested: true,
         fieldCount: 2,
+        logicalType: undefined,
         fields: {
           b: {
             name: 'b',
@@ -130,6 +131,7 @@ describe('ParquetSchema', function () {
             dLevelMax: 0,
             isNested: true,
             fieldCount: 2,
+            logicalType: undefined,
             fields: {
               c: {
                 name: 'c',
@@ -140,6 +142,7 @@ describe('ParquetSchema', function () {
                 dLevelMax: 0,
                 isNested: true,
                 fieldCount: 1,
+                logicalType: undefined,
                 fields: {
                   d: {
                     name: 'd',
@@ -150,6 +153,7 @@ describe('ParquetSchema', function () {
                     statistics: undefined,
                     typeLength: undefined,
                     encoding: 'PLAIN',
+                    logicalType: undefined,
                     compression: 'UNCOMPRESSED',
                     rLevelMax: 0,
                     dLevelMax: 0,
@@ -167,6 +171,7 @@ describe('ParquetSchema', function () {
                 dLevelMax: 0,
                 isNested: true,
                 fieldCount: 2,
+                logicalType: undefined,
                 fields: {
                   f: {
                     name: 'f',
@@ -177,6 +182,7 @@ describe('ParquetSchema', function () {
                     statistics: undefined,
                     typeLength: undefined,
                     encoding: 'PLAIN',
+                    logicalType: undefined,
                     compression: 'UNCOMPRESSED',
                     rLevelMax: 0,
                     dLevelMax: 0,
@@ -192,6 +198,7 @@ describe('ParquetSchema', function () {
                     statistics: undefined,
                     typeLength: undefined,
                     encoding: 'PLAIN',
+                    logicalType: undefined,
                     compression: 'UNCOMPRESSED',
                     rLevelMax: 0,
                     dLevelMax: 0,
@@ -211,6 +218,7 @@ describe('ParquetSchema', function () {
             statistics: undefined,
             typeLength: undefined,
             encoding: 'PLAIN',
+            logicalType: undefined,
             compression: 'UNCOMPRESSED',
             rLevelMax: 0,
             dLevelMax: 0,
@@ -222,21 +230,6 @@ describe('ParquetSchema', function () {
     };
 
     const reader = new parquet.ParquetReader(metadata, {});
-    const removeUndefinedFields = (obj) => {
-      Object.keys(obj).forEach((key) => {
-        if (obj[key] === undefined || obj[key] === null || (Array.isArray(obj[key]) && obj[key].length === 0)) {
-          // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-          delete obj[key];
-        } else if (typeof obj[key] === 'object') {
-          removeUndefinedFields(obj[key]);
-        }
-      });
-      return obj;
-    };
-
-    const sanitizedExpected = removeUndefinedFields(expected);
-    const sanitizedActual = removeUndefinedFields(reader.schema.fields);
-
-    assert.deepEqual(sanitizedActual, sanitizedExpected);
+    assert.deepEqual(reader.schema.fields, expected);
   });
 });
