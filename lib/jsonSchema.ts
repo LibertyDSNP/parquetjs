@@ -93,7 +93,10 @@ const fromJsonSchemaArray = (fieldValue: SupportedJSONSchema4, optionalFieldList
         fieldValue.items.properties.unit &&
         fieldValue.items.properties.isAdjustedToUTC
       ) {
-        const unit = fieldValue.items.properties.unit.default?.toString() || 'MILLIS';
+        if (!fieldValue.items.properties.unit.enum) {
+          throw new UnsupportedJsonSchemaError('Unit enum is not defined');
+        }
+        const unit = fieldValue.items.properties.unit.enum[0];
         const isAdjustedToUTC = !!fieldValue.items.properties.isAdjustedToUTC.default;
         let timeUnit: TimeUnit;
 
@@ -152,10 +155,12 @@ const fromJsonSchemaField =
 
       case 'object':
         if (fieldValue.properties && fieldValue.properties.unit && fieldValue.properties.isAdjustedToUTC) {
-          const unit = fieldValue.properties.unit.default?.toString() || 'MILLIS';
+          if (!fieldValue.properties.unit.enum) {
+            throw new UnsupportedJsonSchemaError('Unit enum is not defined');
+          }
+          const unit = fieldValue.properties.unit.enum[0];
           const isAdjustedToUTC = !!fieldValue.properties.isAdjustedToUTC.default;
           let timeUnit: TimeUnit;
-
           switch (unit) {
             case 'MICROS':
               timeUnit = new TimeUnit({ MICROS: true });

@@ -7,7 +7,9 @@ import arraySchema from './test-files/array.schema.json';
 import objectSchema from './test-files/object.schema.json';
 import objectNestedSchema from './test-files/object-nested.schema.json';
 import timeSchema from './test-files/time.schema.json';
-
+import timeSchemaMillis from './test-files/time.schema_millis.json';
+import timeSchemaMicros from './test-files/time.schema_micros.json';
+import timeSchemaNanos from './test-files/time.schema_nanos.json';
 import { ParquetSchema, ParquetWriter, ParquetReader } from '../parquet';
 
 const update = false;
@@ -54,10 +56,28 @@ describe('Json Schema Conversion', function () {
     checkSnapshot(ps, './test-files/object-nested.schema.result.json', update);
   });
 
-  it('Time Schema', function () {
+  it('Time Schema Generic', function () {
     const js = timeSchema as JSONSchema4;
     const ps = ParquetSchema.fromJsonSchema(js);
     checkSnapshot(ps, './test-files/time.schema.result.json', update);
+  });
+
+  it('Time Schema MILLIS', function () {
+    const js = timeSchemaMillis as JSONSchema4;
+    const ps = ParquetSchema.fromJsonSchema(js);
+    checkSnapshot(ps, './test-files/time.schema_millis.result.json', update);
+  });
+
+  it('Time Schema MICROS', function () {
+    const js = timeSchemaMicros as JSONSchema4;
+    const ps = ParquetSchema.fromJsonSchema(js);
+    checkSnapshot(ps, './test-files/time.schema_micros.result.json', update);
+  });
+
+  it('Time Schema NANOS', function () {
+    const js = timeSchemaNanos as JSONSchema4;
+    const ps = ParquetSchema.fromJsonSchema(js);
+    checkSnapshot(ps, './test-files/time.schema_nanos.result.json', update);
   });
 });
 
@@ -128,6 +148,7 @@ const parquetSchema = ParquetSchema.fromJsonSchema({
         },
         unit: {
           type: 'string',
+          enum: ['MILLIS', 'MICROS', 'NANOS'], // Define enum for time units
         },
         isAdjustedToUTC: {
           type: 'boolean',

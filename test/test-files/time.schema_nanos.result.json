@@ -1,0 +1,100 @@
+{
+  "schema": {
+    "time_field": {
+      "optional": false,
+      "type": "INT64",
+      "logicalType": {
+        "STRING": null,
+        "MAP": null,
+        "LIST": null,
+        "ENUM": null,
+        "DECIMAL": null,
+        "DATE": null,
+        "TIME": {
+          "isAdjustedToUTC": false,
+          "unit": {
+            "MILLIS": null,
+            "MICROS": null,
+            "NANOS": {}
+          }
+        },
+        "TIMESTAMP": null,
+        "INTEGER": null,
+        "UNKNOWN": null,
+        "JSON": null,
+        "BSON": null,
+        "UUID": null
+      },
+      "encoding": "PLAIN",
+      "compression": "UNCOMPRESSED"
+    }
+  },
+  "fields": {
+    "time_field": {
+      "name": "time_field",
+      "primitiveType": "INT64",
+      "logicalType": {
+        "STRING": null,
+        "MAP": null,
+        "LIST": null,
+        "ENUM": null,
+        "DECIMAL": null,
+        "DATE": null,
+        "TIME": {
+          "isAdjustedToUTC": false,
+          "unit": {
+            "MILLIS": null,
+            "MICROS": null,
+            "NANOS": {}
+          }
+        },
+        "TIMESTAMP": null,
+        "INTEGER": null,
+        "UNKNOWN": null,
+        "JSON": null,
+        "BSON": null,
+        "UUID": null
+      },
+      "path": ["time_field"],
+      "repetitionType": "REQUIRED",
+      "encoding": "PLAIN",
+      "compression": "UNCOMPRESSED",
+      "rLevelMax": 0,
+      "dLevelMax": 0
+    }
+  },
+  "fieldList": [
+    {
+      "name": "time_field",
+      "primitiveType": "INT64",
+      "logicalType": {
+        "STRING": null,
+        "MAP": null,
+        "LIST": null,
+        "ENUM": null,
+        "DECIMAL": null,
+        "DATE": null,
+        "TIME": {
+          "isAdjustedToUTC": false,
+          "unit": {
+            "MILLIS": null,
+            "MICROS": null,
+            "NANOS": {}
+          }
+        },
+        "TIMESTAMP": null,
+        "INTEGER": null,
+        "UNKNOWN": null,
+        "JSON": null,
+        "BSON": null,
+        "UUID": null
+      },
+      "path": ["time_field"],
+      "repetitionType": "REQUIRED",
+      "encoding": "PLAIN",
+      "compression": "UNCOMPRESSED",
+      "rLevelMax": 0,
+      "dLevelMax": 0
+    }
+  ]
+}
