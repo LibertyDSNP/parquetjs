@@ -8,7 +8,7 @@ function dataViewFromArray(data) {
   const ab =  new ArrayBuffer(data.length,{ maxByteLength: data.length });
   let view = new DataView(ab, 0);
   data.forEach((val,idx) => view.setUint8(idx, val));
-  return view;
+  return view
 }
 
 describe('ParquetCodec::RLE', function () {

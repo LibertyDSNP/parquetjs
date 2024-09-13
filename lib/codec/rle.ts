@@ -3,7 +3,7 @@
 // https://github.com/apache/parquet-format/blob/master/Encodings.md
 
 import varint from 'varint';
-import { Cursor } from './types';
+import {Cursor} from './types';
 import {readBitPacked, readRle, readRleBitPackedHybrid, readVarInt} from "./encoding";
 
 function encodeRunBitpacked(values: number[], opts: { bitWidth: number }) {
@@ -111,6 +111,10 @@ export const encodeValues = function (
 // opts.bitWidth is undefined when the boolean values are being passed
 // decode a bitpacked value
 // setting old code to true here only results in the RLE/bitpacked hybrid test failing, so we know that code is bad.
+// cursor:  Cursor containing the data to be decoded
+// count: the number of values expected to result from the decoding
+// opts:  bitWidth is required.
+// returns: a DecodedArray
 export function decodeRunBitpacked(cursor: Cursor, count: number, opts: { bitWidth: number }): Array<number> {
   const run_old_code = true;
   let output = new Array(count).fill(0);
@@ -128,8 +132,7 @@ export function decodeRunBitpacked(cursor: Cursor, count: number, opts: { bitWid
 
     cursor.offset += opts.bitWidth * (count / 8);
   } else {
-    let arrayBuf = cursor.buffer.buffer.slice(0, count);
-    const view = new DataView(arrayBuf, cursor.offset, count);
+    const view = new DataView(cursor.buffer.buffer, cursor.offset);
     const reader = {view, offset: 0}
     const header = readVarInt(reader);
     readBitPacked(reader, header, opts.bitWidth, output, 0)

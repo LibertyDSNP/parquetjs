@@ -28,6 +28,7 @@ import { GetObjectCommand, HeadObjectCommand, S3Client } from '@aws-sdk/client-s
 import type { Readable } from 'stream';
 import type { Blob } from 'buffer';
 import {readDefinitionLevelsV2, readRepetitionLevelsV2} from "./datapageV2";
+import {dataReaderFromCursor} from "./util";
 
 const { getBloomFiltersFor } = bloomFilterReader;
 
@@ -96,7 +97,6 @@ class ParquetCursor {
         this.columnList
       );
 
-      // now this one is *@($&ing up, it's dematerializing records
       this.rowGroup = parquet_shredder.materializeRecords(this.schema, rowBuffer);
       this.rowGroupIndex++;
       this.cursorIndex = 0;
@@ -943,7 +943,7 @@ async function decodePages(buffer: Buffer, opts: Options) {
       pageData.values = pageData.values!.map((d) => opts.dictionary![d]);
     }
 
-    const length = pageData.rlevels !== undefined ?  pageData.dlevels?.length : 0;
+    const length = pageData.rlevels !== undefined ?  pageData.rlevels?.length : 0;
 
     if (pageData.rlevels?.length) {
       data.rlevels = pageData.rlevels;
@@ -1073,12 +1073,6 @@ async function decodeDataPage(cursor: Cursor, header: parquet_thrift.PageHeader,
   };
 }
 
-// ensures minimum allocation of ArrayBuffer for the DataView.
-function dataViewFromCursor(cursor: Cursor, offset?: number): DataView {
-  // @ts-ignore
-  return new DataView(cursor.buffer.buffer, cursor.offset);
-}
-
 async function decodeDataPageV2(cursor: Cursor, header: parquet_thrift.PageHeader, opts: Options): Promise<Record<string, any>> {
   const cursorEnd = cursor.offset + header.compressed_page_size;
   const dataPageHeaderV2 = header.data_page_header_v2!;
@@ -1088,12 +1082,8 @@ async function decodeDataPageV2(cursor: Cursor, header: parquet_thrift.PageHeade
   const valueEncoding = parquet_util.getThriftEnum(parquet_thrift.Encoding, dataPageHeaderV2.encoding);
 
   /* read repetition levels */
-  const use_old_rlevels = false;
   let rLevels: Array<any>;
-  let reader: DataReader = {
-    view: dataViewFromCursor(cursor),
-    offset: 0
-  }
+  let reader = dataReaderFromCursor(cursor, 0)
 
   rLevels = readRepetitionLevelsV2(reader, dataPageHeaderV2, opts.rLevelMax || 0);
   reader.offset = dataPageHeaderV2.repetition_levels_byte_length;

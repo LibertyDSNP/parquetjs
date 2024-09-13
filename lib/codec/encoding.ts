@@ -53,6 +53,7 @@ export function bitWidth(value: number): number {
  * @param {number} width - width of each bit-packed group
  * @param {number} length - length of the encoded data, in bytes (?)
  * @param {DecodedArray} output
+ * @param {disableEnvelope} - set to true to consume entire buffer, false to assume (and therefore skip) a 4 byte header
  */
 export function readRleBitPackedHybrid(reader: DataReader, width: number, length: number, output: DecodedArray, disableEnvelope?: boolean) {
 
@@ -121,7 +122,7 @@ export function readBitPacked(reader: DataReader,
                               seen: number): number {
   let count = header >> 1 << 3 // values to read
   const mask = (1 << bitWidth) - 1
-  // when reading definition levels v2 on readColumnChunk, ArrayBuffer len is 69 only
+
   let data = 0
   if (reader.offset < reader.view.byteLength) {
     data = reader.view.getUint8(reader.offset++)

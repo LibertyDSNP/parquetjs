@@ -48,7 +48,7 @@ export const readDefinitionLevelsV2 = (reader: DataReader,
     // V2 we know the length
     const values = new Array(daph2.num_values)
     const bitWidth = getBitWidth(dLevelMax)
-    let disableEnvelope = daph2.definition_levels_byte_length === 0
+    const disableEnvelope = true
     readRleBitPackedHybrid(reader, bitWidth, daph2.definition_levels_byte_length, values, disableEnvelope)
     return values
   }
