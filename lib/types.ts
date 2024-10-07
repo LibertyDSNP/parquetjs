@@ -4,7 +4,9 @@ import { PrimitiveType, OriginalType, ParquetType, FieldDefinition, ParquetField
 import { Options } from './codec/types';
 import type { Document as BsonDocument } from 'bson';
 // BSON uses top level awaits, so use require for now
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const bsonSerialize = require('bson').serialize;
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const bsonDeserialize = require('bson').deserialize;
 
 interface ParquetTypeDataObject {
@@ -552,7 +554,7 @@ function toPrimitive_TIMESTAMP_MICROS(value: Date | string | number | bigint) {
     }
 
     return v;
-  } catch (e) {
+  } catch (_e) {
     throw 'TIMESTAMP_MICROS value is out of bounds: ' + value;
   }
 }
