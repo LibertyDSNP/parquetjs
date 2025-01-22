@@ -4,6 +4,7 @@ import fs, { WriteStream } from 'fs';
 import * as parquet_thrift from '../gen-nodejs/parquet_types';
 import { FileMetaDataExt, WriterOptions } from './declare';
 import { Int64 } from 'thrift';
+import {Cursor, DataReader} from "./codec/types";
 
 // Use this so users only need to implement the minimal amount of the WriteStream interface
 export type WriteStreamMinimal = Pick<WriteStream, 'write' | 'end'>;
@@ -113,8 +114,8 @@ export const getThriftEnum = function (klass: Enums, value: unknown) {
     }
   }
 
-  throw 'Invalid ENUM value';
-};
+  throw `Invalid ENUM value: ${value}`;
+}
 
 export const fopen = function (filePath: string | Buffer | URL): Promise<number> {
   return new Promise((resolve, reject) => {
@@ -229,3 +230,9 @@ export const fieldIndexOf = function (arr: unknown[][], elem: unknown[]) {
 export const cloneInteger = (int: Int64) => {
   return new Int64(int.valueOf());
 };
+
+
+export function dataReaderFromCursor(data: Cursor, offset?: number): DataReader {
+  let view = new DataView(data.buffer.buffer, data.offset);
+  return  { view , offset:  offset || 0};
+}

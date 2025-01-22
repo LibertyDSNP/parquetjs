@@ -1,6 +1,10 @@
 Copyright for portions of the project are (c) 2017 ironSource Ltd. https://github.com/ironSource/parquetjs
-Copyright for portions of the project are https://github.com/ZJONSSON/parquetjs
-Copyright for portions of the project are https://github.com/LibertyDSNP/parquetjs
+
+Copyright for portions of the project are (c) https://github.com/ZJONSSON/parquetjs
+
+Copyright for portions of the project are (c) https://github.com/LibertyDSNP/parquetjs
+
+Copyright for portions of the project are (c) https://github.com/hyparam/hyparquet
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in the

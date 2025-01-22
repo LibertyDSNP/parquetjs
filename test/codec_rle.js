@@ -2,6 +2,14 @@
 const chai = require('chai');
 const assert = chai.assert;
 const parquet_codec_rle = require('../lib/codec/rle');
+const {readRleBitPackedHybrid} = require("../lib/codec/encoding");
+
+function dataViewFromArray(data) {
+  const ab =  new ArrayBuffer(data.length,{ maxByteLength: data.length });
+  let view = new DataView(ab, 0);
+  data.forEach((val,idx) => view.setUint8(idx, val));
+  return view
+}
 
 describe('ParquetCodec::RLE', function () {
   it('should encode bitpacked values', function () {
@@ -72,20 +80,30 @@ describe('ParquetCodec::RLE', function () {
   });
 
   it('should decode repeated values', function () {
+    const data = [0x10, 0x87, 0xd6, 0x12];
+    let cursor = {
+      buffer: Buffer.from(data),
+      offset: 0,
+    };
+    const expectedDecoded = [1234567, 1234567, 1234567, 1234567, 1234567, 1234567, 1234567, 1234567]
+    const bitWidth = 21;
+    const disableEnvelope = true;
     let vals = parquet_codec_rle.decodeValues(
-      'INT32',
-      {
-        buffer: Buffer.from([0x10, 0x87, 0xd6, 0x12]),
-        offset: 0,
-      },
-      8,
-      {
-        disableEnvelope: true,
-        bitWidth: 21,
-      }
+      'UNUSED',
+      cursor,
+      expectedDecoded.length,
+      { disableEnvelope, bitWidth}
     );
 
-    assert.deepEqual(vals, [1234567, 1234567, 1234567, 1234567, 1234567, 1234567, 1234567, 1234567]);
+    assert.deepEqual(vals, expectedDecoded);
+
+    let view = dataViewFromArray(data);
+    const reader =  { view , offset: 0 };
+    let output = new Array(expectedDecoded.length);
+    readRleBitPackedHybrid(reader, bitWidth, data.length, output, disableEnvelope)
+
+    assert.deepEqual(output, expectedDecoded);
+
   });
 
   it('should encode mixed runs', function () {
@@ -102,19 +120,28 @@ describe('ParquetCodec::RLE', function () {
   });
 
   it('should decode mixed runs', function () {
+    const expectedDecoded = [0, 1, 2, 3, 4, 5, 6, 7, 4, 4, 4, 4, 4, 4, 4, 4, 0, 1, 2, 3, 4, 5, 6, 7];
+    const data = [0x03, 0x88, 0xc6, 0xfa, 0x10, 0x04, 0x03, 0x88, 0xc6, 0xfa];
+    const disableEnvelope = true;
+    const bitWidth = 3;
+
     let vals = parquet_codec_rle.decodeValues(
-      'INT32',
+      'UNUSED',
       {
-        buffer: Buffer.from([0x03, 0x88, 0xc6, 0xfa, 0x10, 0x04, 0x03, 0x88, 0xc6, 0xfa]),
+        buffer: Buffer.from(data),
         offset: 0,
       },
-      24,
-      {
-        disableEnvelope: true,
-        bitWidth: 3,
-      }
-    );
+      expectedDecoded.length,
+      { disableEnvelope, bitWidth });
 
-    assert.deepEqual(vals, [0, 1, 2, 3, 4, 5, 6, 7, 4, 4, 4, 4, 4, 4, 4, 4, 0, 1, 2, 3, 4, 5, 6, 7]);
+    assert.deepEqual(vals,expectedDecoded);
+
+    let view = dataViewFromArray(data);
+    const reader =  { view , offset: 0 };
+    let output = new Array(expectedDecoded.length);
+    readRleBitPackedHybrid(reader, bitWidth, data.length, output, disableEnvelope)
+
+    assert.deepEqual(output, expectedDecoded);
+
   });
 });
