@@ -60,7 +60,7 @@ describe('Split Block Bloom Filters', function () {
     new Long(0x0, 0x1, true),
     new Long(793516929, -2061372197, true), // regression test; this one was failing get blockIndex
   ];
-   
+
   const badVal = Long.fromNumber(0xfafafafa, true);
 
   it('filter insert + check works', function () {
