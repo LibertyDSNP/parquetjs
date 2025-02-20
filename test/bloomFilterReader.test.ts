@@ -1,9 +1,8 @@
-import chai, { expect } from 'chai';
+import { expect, assert } from 'chai';
 import { Int64 } from 'thrift';
 import { parseBloomFilterOffsets } from '../lib/bloomFilterIO/bloomFilterReader';
 import { ColumnChunkData, ColumnChunkExt, ColumnMetaDataExt } from '../lib/declare';
 import XxHasher from '../lib/bloom/xxhasher';
-const assert = chai.assert;
 
 const emptyOffset = () => new Int64(Buffer.from(''), 0);
 
