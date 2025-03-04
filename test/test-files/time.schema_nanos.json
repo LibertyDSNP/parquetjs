@@ -1,0 +1,30 @@
+{
+  "$id": "https://example.com/time-nanos.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A schema to test the TIME logical type in Parquet with NANOS unit",
+  "type": "object",
+  "properties": {
+    "time_field": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "number",
+          "description": "Time value in NANOS"
+        },
+        "unit": {
+          "type": "string",
+          "enum": ["MILLIS", "MICROS", "NANOS"],
+          "default": "NANOS",
+          "description": "The unit is fixed to NANOS"
+        },
+        "isAdjustedToUTC": {
+          "type": "boolean",
+          "description": "Whether the time is adjusted to UTC"
+        }
+      },
+      "required": ["value", "isAdjustedToUTC"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["time_field"]
+}

@@ -1,6 +1,7 @@
 // Helper functions for creating fields
 
-import { FieldDefinition, ParquetType, SchemaDefinition } from './declare';
+import { LogicalType, TimeType } from '../gen-nodejs/parquet_types';
+import { FieldDefinition, ParquetType, PrimitiveType, SchemaDefinition } from './declare';
 
 export function createStringField(optional = true, fieldOptions: FieldDefinition = {}): FieldDefinition {
   return { ...fieldOptions, optional, type: 'UTF8' };
@@ -78,5 +79,26 @@ export function createListField(
         },
       },
     },
+  };
+}
+
+export function createTimeField(
+  logicalType: TimeType,
+  optional = true,
+  fieldOptions: FieldDefinition = {}
+): FieldDefinition {
+  let primitiveType: PrimitiveType;
+  if (logicalType.unit.MILLIS) {
+    primitiveType = 'INT32'; // TIME_MILLIS uses INT32
+  } else if (logicalType.unit.MICROS || logicalType.unit.NANOS) {
+    primitiveType = 'INT64'; // TIME_MICROS and TIME_NANOS use INT64
+  } else {
+    throw new Error('Unsupported time unit in logicalType');
+  }
+  return {
+    ...fieldOptions,
+    optional,
+    type: primitiveType,
+    logicalType: new LogicalType({ TIME: logicalType }),
   };
 }

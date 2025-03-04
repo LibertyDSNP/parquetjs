@@ -4,7 +4,9 @@ import { PrimitiveType, OriginalType, ParquetType, FieldDefinition, ParquetField
 import { Options } from './codec/types';
 import type { Document as BsonDocument } from 'bson';
 // BSON uses top level awaits, so use require for now
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const bsonSerialize = require('bson').serialize;
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const bsonDeserialize = require('bson').deserialize;
 
 interface ParquetTypeDataObject {
@@ -21,23 +23,28 @@ interface INTERVAL {
   milliseconds: number;
 }
 
+interface TIME {
+  value: string | bigint | number;
+  unit: 'MILLIS' | 'MICROS' | 'NANOS';
+  isAdjustedToUTC: boolean;
+}
+
 export function getParquetTypeDataObject(
   type: ParquetType,
   field?: ParquetField | Options | FieldDefinition
 ): ParquetTypeDataObject {
   if (type === 'DECIMAL') {
-    if (field?.typeLength !== undefined && field?.typeLength !== null) {
+    if (field?.typeLength !== undefined) {
       return {
         primitiveType: 'FIXED_LEN_BYTE_ARRAY',
         originalType: 'DECIMAL',
         typeLength: field.typeLength,
         toPrimitive: toPrimitive_FIXED_LEN_BYTE_ARRAY_DECIMAL,
       };
-    } else if (field?.precision !== undefined && field?.precision !== null && field.precision > 18) {
+    } else if (field?.precision && field.precision > 18) {
       return {
         primitiveType: 'BYTE_ARRAY',
         originalType: 'DECIMAL',
-        typeLength: field.typeLength,
         toPrimitive: toPrimitive_BYTE_ARRAY_DECIMAL,
       };
     } else {
@@ -47,6 +54,29 @@ export function getParquetTypeDataObject(
         toPrimitive: toPrimitive_INT64,
       };
     }
+  } else if (field?.logicalType?.TIME) {
+    const unit = field.logicalType.TIME.unit;
+    if (unit.MILLIS) {
+      return {
+        originalType: 'TIME_MILLIS',
+        primitiveType: 'INT32',
+        toPrimitive: toPrimitive_TIME,
+      };
+    }
+    if (unit.MICROS) {
+      return {
+        originalType: 'TIME_MICROS',
+        primitiveType: 'INT64',
+        toPrimitive: toPrimitive_TIME,
+      };
+    }
+    if (unit.NANOS) {
+      return {
+        primitiveType: 'INT64',
+        toPrimitive: toPrimitive_TIME,
+      };
+    }
+    throw new Error('TIME type must have a valid unit (MILLIS, MICROS, NANOS).');
   } else {
     return PARQUET_LOGICAL_TYPE_DATA[type];
   }
@@ -525,7 +555,7 @@ function toPrimitive_TIMESTAMP_MICROS(value: Date | string | number | bigint) {
     }
 
     return v;
-  } catch (e) {
+  } catch (_e) {
     throw 'TIMESTAMP_MICROS value is out of bounds: ' + value;
   }
 }
@@ -560,4 +590,42 @@ function checkValidValue(lowerRange: number | bigint, upperRange: number | bigin
   if (v < lowerRange || v > upperRange) {
     throw 'invalid value';
   }
+}
+
+function toPrimitive_TIME(time: TIME): bigint | number {
+  const { value, unit, isAdjustedToUTC } = time;
+
+  const timeValue = typeof value === 'string' ? BigInt(value) : BigInt(value);
+
+  if (isAdjustedToUTC) {
+    return unit === 'MILLIS' ? Number(timeValue) : timeValue;
+  } else {
+    switch (unit) {
+      case 'MILLIS':
+        return Number(adjustToLocalTimestamp(timeValue, { MILLIS: true }));
+      case 'MICROS':
+        return adjustToLocalTimestamp(timeValue, { MICROS: true });
+      case 'NANOS':
+        return adjustToLocalTimestamp(timeValue, { NANOS: true });
+      default:
+        throw new Error(`Unsupported time unit: ${unit}`);
+    }
+  }
+}
+
+function adjustToLocalTimestamp(
+  timestamp: bigint,
+  unit: { MILLIS?: boolean; MICROS?: boolean; NANOS?: boolean }
+): bigint {
+  const localOffset = BigInt(new Date().getTimezoneOffset()) * 60n * 1000n; // Offset in milliseconds
+
+  if (unit.MILLIS) {
+    return timestamp - localOffset;
+  } else if (unit.MICROS) {
+    return timestamp - localOffset * 1000n;
+  } else if (unit.NANOS) {
+    return timestamp - localOffset * 1000000n;
+  }
+
+  throw new Error('Unsupported time unit');
 }

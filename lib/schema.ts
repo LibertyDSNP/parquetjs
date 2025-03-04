@@ -126,6 +126,7 @@ function buildFields(schema: SchemaDefinition, rLevelParentMax?: number, dLevelP
         statistics: opts.statistics,
         fieldCount: Object.keys(opts.fields).length,
         fields: buildFields(opts.fields, rLevelMax, dLevelMax, path.concat(name)),
+        logicalType: opts.logicalType,
       };
 
       if (opts.type == 'LIST' || opts.type == 'MAP') fieldList[name].originalType = opts.type;
@@ -174,6 +175,7 @@ function buildFields(schema: SchemaDefinition, rLevelParentMax?: number, dLevelP
       name: name,
       primitiveType: typeDef.primitiveType,
       originalType: typeDef.originalType,
+      logicalType: opts.logicalType,
       path: path.concat([name]),
       repetitionType: repetitionType,
       encoding: opts.encoding,

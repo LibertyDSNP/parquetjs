@@ -2,6 +2,8 @@
 import { JSONSchema4 } from 'json-schema';
 import { FieldDefinition, SchemaDefinition } from './declare';
 import * as fields from './fields';
+import { TimeUnit } from '../gen-nodejs/parquet_types';
+import { TimeType } from '../gen-nodejs/parquet_types';
 
 type SupportedJSONSchema4 = Omit<
   JSONSchema4,
@@ -70,18 +72,52 @@ const fromJsonSchemaArray = (fieldValue: SupportedJSONSchema4, optionalFieldList
 
   switch (fieldValue.items.type) {
     case 'string':
-      if (fieldValue.items.format && fieldValue.items.format == 'date-time') {
+      if (fieldValue.items.format && fieldValue.items.format === 'date-time') {
         return fields.createListField('TIMESTAMP_MILLIS', optionalFieldList);
       }
       return fields.createListField('UTF8', optionalFieldList);
+
     case 'integer':
       return fields.createListField('INT64', optionalFieldList);
+
     case 'number':
       return fields.createListField('DOUBLE', optionalFieldList);
+
     case 'boolean':
       return fields.createListField('BOOLEAN', optionalFieldList);
+
     case 'object':
+      // Handle array of time fields
+      if (
+        fieldValue.items.properties &&
+        fieldValue.items.properties.unit &&
+        fieldValue.items.properties.isAdjustedToUTC
+      ) {
+        if (!fieldValue.items.properties.unit.enum) {
+          throw new UnsupportedJsonSchemaError('Unit enum is not defined');
+        }
+        const unit = fieldValue.items.properties.unit.default || fieldValue.items.properties.unit.enum[0];
+        const isAdjustedToUTC = !!fieldValue.items.properties.isAdjustedToUTC.default;
+        let timeUnit: TimeUnit;
+
+        switch (unit) {
+          case 'MICROS':
+            timeUnit = new TimeUnit({ MICROS: true });
+            break;
+          case 'NANOS':
+            timeUnit = new TimeUnit({ NANOS: true });
+            break;
+          default:
+            timeUnit = new TimeUnit({ MILLIS: true });
+            break;
+        }
+
+        const timeLogicalType = new TimeType({ isAdjustedToUTC, unit: timeUnit });
+        return fields.createTimeField(timeLogicalType, optionalFieldList);
+      }
+
       return fields.createStructListField(fromJsonSchema(fieldValue.items), optionalFieldList);
+
     default:
       throw new UnsupportedJsonSchemaError(`Array field type ${JSON.stringify(fieldValue.items)} is unsupported.`);
   }
@@ -100,20 +136,49 @@ const fromJsonSchemaField =
 
     switch (fieldValue.type) {
       case 'string':
-        if (fieldValue.format && fieldValue.format == 'date-time') {
+        if (fieldValue.format && fieldValue.format === 'date-time') {
           return fields.createTimestampField(optional);
         }
         return fields.createStringField(optional);
+
       case 'integer':
         return fields.createIntField(64, optional);
+
       case 'number':
         return fields.createDoubleField(optional);
+
       case 'boolean':
         return fields.createBooleanField(optional);
+
       case 'array':
         return fromJsonSchemaArray(fieldValue, optional);
+
       case 'object':
+        if (fieldValue.properties && fieldValue.properties.unit && fieldValue.properties.isAdjustedToUTC) {
+          if (!fieldValue.properties.unit.enum) {
+            throw new UnsupportedJsonSchemaError('Unit enum is not defined');
+          }
+          const unit = fieldValue.properties.unit.default || fieldValue.properties.unit.enum[0];
+          const isAdjustedToUTC = !!fieldValue.properties.isAdjustedToUTC.default;
+          let timeUnit: TimeUnit;
+          switch (unit) {
+            case 'MICROS':
+              timeUnit = new TimeUnit({ MICROS: true });
+              break;
+            case 'NANOS':
+              timeUnit = new TimeUnit({ NANOS: true });
+              break;
+            default:
+              timeUnit = new TimeUnit({ MILLIS: true });
+              break;
+          }
+
+          const timeLogicalType = new TimeType({ isAdjustedToUTC, unit: timeUnit });
+          return fields.createTimeField(timeLogicalType, optional);
+        }
+
         return fields.createStructField(fromJsonSchema(fieldValue), optional);
+
       default:
         throw new UnsupportedJsonSchemaError(
           `Unable to convert "${fieldName}" with JSON Schema type "${fieldValue.type}" to a Parquet Schema.`

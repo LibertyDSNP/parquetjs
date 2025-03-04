@@ -1,0 +1,30 @@
+{
+  "$id": "https://example.com/time-micros.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A schema to test the TIME logical type in Parquet with MICROS unit",
+  "type": "object",
+  "properties": {
+    "time_field": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "number",
+          "description": "Time value in MICROS"
+        },
+        "unit": {
+          "type": "string",
+          "enum": ["MILLIS", "MICROS", "NANOS"],
+          "default": "MICROS",
+          "description": "The unit is fixed to MICROS"
+        },
+        "isAdjustedToUTC": {
+          "type": "boolean",
+          "description": "Whether the time is adjusted to UTC"
+        }
+      },
+      "required": ["value", "isAdjustedToUTC"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["time_field"]
+}

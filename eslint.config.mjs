@@ -11,10 +11,11 @@ export default tseslint.config(
   ...tseslint.configs.strict,
   ...tseslint.configs.stylistic,
   {
-    ignores: ['dist/*', 'test/browser/main.js'],
+    ignores: ['gen-nodejs/*', 'dist/**/*', 'dist/*', 'test/browser/main.js'],
   },
   {
     rules: {
+      'no-loss-of-precision': 'off',
       // TODO: Fix/ignore in tests and remove
       '@typescript-eslint/no-loss-of-precision': 'warn',
       // TODO: Fix and remove
@@ -44,6 +45,15 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ['gen-nodejs/*', 'dist/**/*'],
+    files: ['**/*.test.ts', 'test/**/*', 'examples/**/*'],
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/no-unused-expressions': 'off',
+      'no-loss-of-precision': 'off',
+      '@typescript-eslint/no-loss-of-precision': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+    },
   }
 );

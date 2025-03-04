@@ -1,6 +1,6 @@
 import { PrimitiveType } from '../declare';
 import { ParquetCodec, OriginalType, ParquetField } from '../declare';
-import { Statistics } from '../../gen-nodejs/parquet_types';
+import { LogicalType, Statistics } from '../../gen-nodejs/parquet_types';
 
 export interface Options {
   typeLength: number;
@@ -8,6 +8,7 @@ export interface Options {
   disableEnvelope?: boolean;
   primitiveType?: PrimitiveType;
   originalType?: OriginalType;
+  logicalType?: LogicalType;
   encoding?: ParquetCodec;
   compression?: string;
   column?: ParquetField;

@@ -6,7 +6,10 @@ import addressSchema from './test-files/address.schema.json';
 import arraySchema from './test-files/array.schema.json';
 import objectSchema from './test-files/object.schema.json';
 import objectNestedSchema from './test-files/object-nested.schema.json';
-
+import timeSchema from './test-files/time.schema.json';
+import timeSchemaMillis from './test-files/time.schema_millis.json';
+import timeSchemaMicros from './test-files/time.schema_micros.json';
+import timeSchemaNanos from './test-files/time.schema_nanos.json';
 import { ParquetSchema, ParquetWriter, ParquetReader } from '../parquet';
 
 const update = false;
@@ -51,6 +54,30 @@ describe('Json Schema Conversion', function () {
 
     const ps = ParquetSchema.fromJsonSchema(js);
     checkSnapshot(ps, './test-files/object-nested.schema.result.json', update);
+  });
+
+  it('Time Schema Generic', function () {
+    const js = timeSchema as JSONSchema4;
+    const ps = ParquetSchema.fromJsonSchema(js);
+    checkSnapshot(ps, './test-files/time.schema.result.json', update);
+  });
+
+  it('Time Schema MILLIS', function () {
+    const js = timeSchemaMillis as JSONSchema4;
+    const ps = ParquetSchema.fromJsonSchema(js);
+    checkSnapshot(ps, './test-files/time.schema_millis.result.json', update);
+  });
+
+  it('Time Schema MICROS', function () {
+    const js = timeSchemaMicros as JSONSchema4;
+    const ps = ParquetSchema.fromJsonSchema(js);
+    checkSnapshot(ps, './test-files/time.schema_micros.result.json', update);
+  });
+
+  it('Time Schema NANOS', function () {
+    const js = timeSchemaNanos as JSONSchema4;
+    const ps = ParquetSchema.fromJsonSchema(js);
+    checkSnapshot(ps, './test-files/time.schema_nanos.result.json', update);
   });
 });
 
@@ -113,6 +140,22 @@ const parquetSchema = ParquetSchema.fromJsonSchema({
       },
       additionalItems: false,
     },
+    time_field: {
+      type: 'object',
+      properties: {
+        value: {
+          type: 'number',
+        },
+        unit: {
+          type: 'string',
+          enum: ['MILLIS', 'MICROS', 'NANOS'], // Define enum for time units
+        },
+        isAdjustedToUTC: {
+          type: 'boolean',
+        },
+      },
+      additionalProperties: false,
+    },
   },
   additionalProperties: false,
 });
@@ -152,6 +195,48 @@ describe('Json Schema Conversion Test File', function () {
         },
       ],
     },
+    time_field: {
+      value: 1726067527,
+      unit: 'MILLIS',
+      isAdjustedToUTC: true,
+    },
+  };
+
+  const row1FromParquetFile = {
+    string_field: 'string value',
+    int_field: 10n,
+    number_field: 2.5,
+    timestamp_array_field: { list: [{ element: new Date('2023-01-01 GMT') }] },
+
+    timestamp_field: new Date('2023-01-01 GMT'),
+
+    array_field: {
+      list: [{ element: 'array_field val1' }, { element: 'array_field val2' }],
+    },
+
+    obj_field: {
+      sub1: 'obj_field_sub1 val',
+      sub2: 'obj_field_sub2 val',
+    },
+
+    struct_field: {
+      list: [
+        {
+          element: {
+            sub8: {
+              list: [{ element: 'val1' }, { element: 'val2' }],
+            },
+            sub3: 'struct_field_string val',
+            sub4: 'struct_field_string val',
+            sub5: {
+              sub6: 'struct_field_struct_string1 val',
+              sub7: 'struct_field_struct_string2 val',
+            },
+          },
+        },
+      ],
+    },
+    time_field: 1726067527,
   };
 
   let reader: ParquetReader;
@@ -178,7 +263,7 @@ describe('Json Schema Conversion Test File', function () {
     const cursor = reader.getCursor();
     const row = await cursor.next();
     const rowData = {
-      ...row1,
+      ...row1FromParquetFile,
     };
     assert.deepEqual(row, rowData);
   });

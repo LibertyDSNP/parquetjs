@@ -522,8 +522,8 @@ async function encodeDataPage(
   }
 
   /* build page header */
-  let pageBody = Buffer.concat([rLevelsBuf, dLevelsBuf, valuesBuf]);
-  pageBody = await parquet_compression.deflate(column.compression!, pageBody);
+  const initialPageBody = Buffer.concat([rLevelsBuf, dLevelsBuf, valuesBuf]);
+  const pageBody = await parquet_compression.deflate(column.compression!, initialPageBody);
 
   const pageHeader = new parquet_thrift.PageHeader();
   pageHeader.type = parquet_thrift.PageType['DATA_PAGE'];

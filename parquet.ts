@@ -4,6 +4,8 @@ import * as schema from './lib/schema';
 import * as shredder from './lib/shred';
 import * as fields from './lib/fields';
 
+export * from './lib/declare';
+
 export type ParquetEnvelopeReader = reader.ParquetEnvelopeReader;
 export type ParquetReader = reader.ParquetReader;
 export type ParquetEnvelopeWriter = writer.ParquetEnvelopeWriter;

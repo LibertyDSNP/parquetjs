@@ -120,6 +120,7 @@ describe('ParquetSchema', function () {
         dLevelMax: 0,
         isNested: true,
         fieldCount: 2,
+        logicalType: undefined,
         fields: {
           b: {
             name: 'b',
@@ -130,6 +131,7 @@ describe('ParquetSchema', function () {
             dLevelMax: 0,
             isNested: true,
             fieldCount: 2,
+            logicalType: undefined,
             fields: {
               c: {
                 name: 'c',
@@ -140,6 +142,7 @@ describe('ParquetSchema', function () {
                 dLevelMax: 0,
                 isNested: true,
                 fieldCount: 1,
+                logicalType: undefined,
                 fields: {
                   d: {
                     name: 'd',
@@ -150,6 +153,7 @@ describe('ParquetSchema', function () {
                     statistics: undefined,
                     typeLength: undefined,
                     encoding: 'PLAIN',
+                    logicalType: undefined,
                     compression: 'UNCOMPRESSED',
                     rLevelMax: 0,
                     dLevelMax: 0,
@@ -167,6 +171,7 @@ describe('ParquetSchema', function () {
                 dLevelMax: 0,
                 isNested: true,
                 fieldCount: 2,
+                logicalType: undefined,
                 fields: {
                   f: {
                     name: 'f',
@@ -177,6 +182,7 @@ describe('ParquetSchema', function () {
                     statistics: undefined,
                     typeLength: undefined,
                     encoding: 'PLAIN',
+                    logicalType: undefined,
                     compression: 'UNCOMPRESSED',
                     rLevelMax: 0,
                     dLevelMax: 0,
@@ -192,6 +198,7 @@ describe('ParquetSchema', function () {
                     statistics: undefined,
                     typeLength: undefined,
                     encoding: 'PLAIN',
+                    logicalType: undefined,
                     compression: 'UNCOMPRESSED',
                     rLevelMax: 0,
                     dLevelMax: 0,
@@ -211,6 +218,7 @@ describe('ParquetSchema', function () {
             statistics: undefined,
             typeLength: undefined,
             encoding: 'PLAIN',
+            logicalType: undefined,
             compression: 'UNCOMPRESSED',
             rLevelMax: 0,
             dLevelMax: 0,

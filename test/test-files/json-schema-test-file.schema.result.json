@@ -135,6 +135,34 @@
           }
         }
       }
+    },
+    "time_field": {
+      "optional": true,
+      "type": "INT32",
+      "logicalType": {
+        "STRING": null,
+        "MAP": null,
+        "LIST": null,
+        "ENUM": null,
+        "DECIMAL": null,
+        "DATE": null,
+        "TIME": {
+          "isAdjustedToUTC": false,
+          "unit": {
+            "MILLIS": {},
+            "MICROS": null,
+            "NANOS": null
+          }
+        },
+        "TIMESTAMP": null,
+        "INTEGER": null,
+        "UNKNOWN": null,
+        "JSON": null,
+        "BSON": null,
+        "UUID": null
+      },
+      "encoding": "PLAIN",
+      "compression": "UNCOMPRESSED"
     }
   },
   "fields": {
@@ -403,6 +431,39 @@
         }
       },
       "originalType": "LIST"
+    },
+    "time_field": {
+      "name": "time_field",
+      "primitiveType": "INT32",
+      "originalType": "TIME_MILLIS",
+      "logicalType": {
+        "STRING": null,
+        "MAP": null,
+        "LIST": null,
+        "ENUM": null,
+        "DECIMAL": null,
+        "DATE": null,
+        "TIME": {
+          "isAdjustedToUTC": false,
+          "unit": {
+            "MILLIS": {},
+            "MICROS": null,
+            "NANOS": null
+          }
+        },
+        "TIMESTAMP": null,
+        "INTEGER": null,
+        "UNKNOWN": null,
+        "JSON": null,
+        "BSON": null,
+        "UUID": null
+      },
+      "path": ["time_field"],
+      "repetitionType": "OPTIONAL",
+      "encoding": "PLAIN",
+      "compression": "UNCOMPRESSED",
+      "rLevelMax": 0,
+      "dLevelMax": 1
     }
   },
   "fieldList": [
@@ -1114,6 +1175,39 @@
       "compression": "UNCOMPRESSED",
       "rLevelMax": 2,
       "dLevelMax": 5
+    },
+    {
+      "name": "time_field",
+      "primitiveType": "INT32",
+      "originalType": "TIME_MILLIS",
+      "logicalType": {
+        "STRING": null,
+        "MAP": null,
+        "LIST": null,
+        "ENUM": null,
+        "DECIMAL": null,
+        "DATE": null,
+        "TIME": {
+          "isAdjustedToUTC": false,
+          "unit": {
+            "MILLIS": {},
+            "MICROS": null,
+            "NANOS": null
+          }
+        },
+        "TIMESTAMP": null,
+        "INTEGER": null,
+        "UNKNOWN": null,
+        "JSON": null,
+        "BSON": null,
+        "UUID": null
+      },
+      "path": ["time_field"],
+      "repetitionType": "OPTIONAL",
+      "encoding": "PLAIN",
+      "compression": "UNCOMPRESSED",
+      "rLevelMax": 0,
+      "dLevelMax": 1
     }
   ]
 }

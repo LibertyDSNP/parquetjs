@@ -110,7 +110,7 @@ function shredRecordInternal(
         // checks if any typed array
         if (record[fieldName] instanceof Uint8Array) {
           // wrap in a buffer, since not supported by parquet_thrift
-          values.push(Buffer.from(record[fieldName] as ArrayBuffer));
+          values.push(Buffer.from(record[fieldName]));
         } else {
           throw Object.prototype.toString.call(record[fieldName]) + ' is not supported';
         }

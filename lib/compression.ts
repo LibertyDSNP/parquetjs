@@ -90,6 +90,6 @@ function buffer_from_result(result: ArrayBuffer | Buffer | Uint8Array): Buffer {
   if (Buffer.isBuffer(result)) {
     return result;
   } else {
-    return Buffer.from(result);
+    return Buffer.from(new Uint8Array(result));
   }
 }

@@ -1,0 +1,27 @@
+{
+  "$id": "https://example.com/time.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A schema to test the TIME logical types in Parquet",
+  "type": "object",
+  "properties": {
+    "time_millis_field": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "number | string"
+        },
+        "unit": {
+          "type": "string",
+          "enum": ["MILLIS", "MICROS", "NANOS"],
+          "description": "The unit for the time value"
+        },
+        "isAdjustedToUTC": {
+          "type": "boolean",
+          "description": "Whether the time is adjusted to UTC"
+        }
+      },
+      "required": ["value", "unit", "isAdjustedToUTC"]
+    }
+  },
+  "required": ["time_millis_field"]
+}

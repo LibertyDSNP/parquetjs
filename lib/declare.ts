@@ -1,6 +1,6 @@
 // Thanks to https://github.com/kbajalc/parquets
 
-import parquet_thrift from '../gen-nodejs/parquet_types';
+import parquet_thrift, { LogicalType } from '../gen-nodejs/parquet_types';
 import {
   Statistics,
   OffsetIndex,
@@ -61,6 +61,7 @@ export type SchemaDefinition = Record<string, FieldDefinition>;
 export interface FieldDefinition {
   type?: ParquetType;
   typeLength?: number;
+  logicalType?: LogicalType;
   encoding?: ParquetCodec;
   compression?: ParquetCompression;
   optional?: boolean;
@@ -80,6 +81,7 @@ export interface ParquetField {
   primitiveType?: PrimitiveType;
   originalType?: OriginalType;
   repetitionType: RepetitionType;
+  logicalType?: LogicalType;
   typeLength?: number;
   encoding?: ParquetCodec;
   compression?: ParquetCompression;
