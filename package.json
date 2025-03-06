@@ -30,6 +30,7 @@
     "xxhash-wasm": "^1.1.0"
   },
   "devDependencies": {
+    "@dsnp/schemas": "^1.3.2",
     "@eslint/js": "^9.20.0",
     "@smithy/util-stream": "^4.1.1",
     "@types/chai": "^5.0.1",
@@ -38,6 +39,7 @@
     "@types/mocha": "^10.0.10",
     "@types/node": "^22.13.4",
     "@types/sinon": "^17.0.3",
+    "@types/split2": "^4.2.3",
     "@types/varint": "^6.0.3",
     "assert": "^2.1.0",
     "aws-sdk-client-mock": "^4.1.0",
@@ -58,10 +60,12 @@
     "sinon": "^19.0.2",
     "sinon-chai": "^4.0.0",
     "sinon-chai-in-order": "^0.1.0",
+    "split2": "^4.2.0",
     "stream-browserify": "^3.0.0",
     "tsx": "^4.19.3",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.24.1"
+    "typescript-eslint": "^8.24.1",
+    "wkx": "^0.5.0"
   },
   "scripts": {
     "build": "npm run build:node && npm run build:types",
