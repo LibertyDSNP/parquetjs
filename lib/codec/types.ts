@@ -22,6 +22,7 @@ export interface Options {
   name?: string;
   precision?: number;
   scale?: number;
+  treatInt96AsTimestamp?: boolean;
 }
 
 export interface Cursor {

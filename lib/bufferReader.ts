@@ -9,6 +9,7 @@ export interface BufferReaderOptions {
   default_dictionary_size?: number;
   metadata?: FileMetaDataExt;
   rawStatistics?: Statistics;
+  treatInt96AsTimestamp?: boolean;
 }
 
 interface BufferReaderQueueRow {

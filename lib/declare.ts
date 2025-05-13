@@ -212,6 +212,17 @@ export class NewPageHeader extends parquet_thrift.PageHeader {
   headerSize?: number;
 }
 
+export interface BufferReaderOptions {
+  default_dictionary_size?: number;
+  maxLength?: number;
+  maxSpan?: number;
+  queueWait?: number;
+  metadata?: FileMetaDataExt;
+  cache?: boolean;
+  rawStatistics?: boolean;
+  treatInt96AsTimestamp?: boolean; // Default to false for backward compatibility
+}
+
 export interface WriterOptions {
   pageIndex?: boolean;
   pageSize?: number;
