@@ -27,6 +27,8 @@ import { Cursor, Options } from './codec/types';
 import { GetObjectCommand, HeadObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import type { Readable } from 'stream';
 import type { Blob } from 'buffer';
+import {readDefinitionLevelsV2, readRepetitionLevelsV2} from "./datapageV2";
+import {dataReaderFromCursor} from "./util";
 
 const { getBloomFiltersFor } = bloomFilterReader;
 
@@ -143,7 +145,7 @@ export class ParquetReader {
   /**
    * Open the parquet file from S3 using the supplied aws client [, commands] and params
    * The params have to include `Bucket` and `Key` to the file requested,
-   * If using v3 of the AWS SDK, combine the client and commands into an object wiht keys matching
+   * If using v3 of the AWS SDK, combine the client and commands into an object with keys matching
    * the original module names, and do not instantiate the commands; pass them as classes/modules.
    *
    * This function returns a new parquet reader [ or throws an Error.]
@@ -161,7 +163,7 @@ export class ParquetReader {
   }
 
   /**
-   * Open the parquet file from a url using the supplied request module
+   * Open the parquet file from a URL using the supplied request module
    * params should either be a string (url) or an object that includes
    * a `url` property.
    * This function returns a new parquet reader
@@ -545,9 +547,7 @@ export class ParquetEnvelopeReader {
       const headers = Object.assign({}, defaultHeaders, { range });
       const response = await fetch(url, { headers });
       const arrayBuffer = await response.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-
-      return buffer;
+      return Buffer.from(arrayBuffer);
     };
 
     const closeFn = () => ({});
@@ -736,7 +736,6 @@ export class ParquetEnvelopeReader {
 
       buffer.columnData![colKey.join(',')] = await this.readColumnChunk(schema, colChunk);
     }
-
     return buffer;
   }
 
@@ -941,16 +940,20 @@ async function decodePages(buffer: Buffer, opts: Options) {
       pageData.values = pageData.values!.map((d) => opts.dictionary![d]);
     }
 
-    const length = pageData.rlevels != undefined ? pageData.rlevels.length : 0;
+    const length = pageData.rlevels !== undefined ?  pageData.rlevels?.length : 0;
 
-    for (let i = 0; i < length; i++) {
-      data.rlevels!.push(pageData.rlevels![i]);
-      data.dlevels!.push(pageData.dlevels![i]);
-      const value = pageData.values![i];
-      if (value !== undefined) {
-        data.values!.push(value);
-      }
+    if (pageData.rlevels?.length) {
+      data.rlevels = pageData.rlevels;
     }
+    if (pageData.dlevels?.length) {
+      data.dlevels = pageData.dlevels;
+    }
+    if (length > 0) {
+      pageData.values?.forEach(val => {
+        if (val !== undefined) data.values!.push(val)
+      })
+    }
+
     data.count! += pageData.count!;
     data.pageHeaders!.push(pageData.pageHeader!);
   }
@@ -991,7 +994,7 @@ async function decodeDictionaryPage(cursor: Cursor, header: parquet_thrift.PageH
   );
 }
 
-async function decodeDataPage(cursor: Cursor, header: parquet_thrift.PageHeader, opts: Options) {
+async function decodeDataPage(cursor: Cursor, header: parquet_thrift.PageHeader, opts: Options): Promise<Record<string,any>> {
   const cursorEnd = cursor.offset + header.compressed_page_size;
 
   const dataPageHeader = header.data_page_header!;
@@ -1067,7 +1070,7 @@ async function decodeDataPage(cursor: Cursor, header: parquet_thrift.PageHeader,
   };
 }
 
-async function decodeDataPageV2(cursor: Cursor, header: parquet_thrift.PageHeader, opts: Options) {
+async function decodeDataPageV2(cursor: Cursor, header: parquet_thrift.PageHeader, opts: Options): Promise<Record<string, any>> {
   const cursorEnd = cursor.offset + header.compressed_page_size;
   const dataPageHeaderV2 = header.data_page_header_v2!;
 
@@ -1076,26 +1079,17 @@ async function decodeDataPageV2(cursor: Cursor, header: parquet_thrift.PageHeade
   const valueEncoding = parquet_util.getThriftEnum(parquet_thrift.Encoding, dataPageHeaderV2.encoding);
 
   /* read repetition levels */
-  let rLevels = new Array(valueCount);
-  if (opts.rLevelMax! > 0) {
-    rLevels = decodeValues(PARQUET_RDLVL_TYPE, PARQUET_RDLVL_ENCODING, cursor, valueCount, {
-      bitWidth: parquet_util.getBitWidth(opts.rLevelMax!),
-      disableEnvelope: true,
-    });
-  } else {
-    rLevels.fill(0);
-  }
+  let rLevels: Array<any>;
+  let reader = dataReaderFromCursor(cursor, 0)
+
+  rLevels = readRepetitionLevelsV2(reader, dataPageHeaderV2, opts.rLevelMax || 0);
+  reader.offset = dataPageHeaderV2.repetition_levels_byte_length;
 
   /* read definition levels */
-  let dLevels = new Array(valueCount);
-  if (opts.dLevelMax! > 0) {
-    dLevels = decodeValues(PARQUET_RDLVL_TYPE, PARQUET_RDLVL_ENCODING, cursor, valueCount, {
-      bitWidth: parquet_util.getBitWidth(opts.dLevelMax!),
-      disableEnvelope: true,
-    });
-  } else {
-    dLevels.fill(0);
-  }
+  let dLevels: Array<number>|undefined;
+  dLevels = readDefinitionLevelsV2(reader, dataPageHeaderV2, opts.dLevelMax || 0)
+  cursor.offset += reader.offset;
+
 
   /* read values */
   let valuesBufCursor = cursor;
@@ -1103,8 +1097,7 @@ async function decodeDataPageV2(cursor: Cursor, header: parquet_thrift.PageHeade
   if (dataPageHeaderV2.is_compressed) {
     const valuesBuf = await parquet_compression.inflate(
       opts.compression!,
-      cursor.buffer.subarray(cursor.offset, cursorEnd)
-    );
+      cursor.buffer.subarray(cursor.offset, cursorEnd));
 
     valuesBufCursor = {
       buffer: valuesBuf,
@@ -1115,7 +1108,12 @@ async function decodeDataPageV2(cursor: Cursor, header: parquet_thrift.PageHeade
     cursor.offset = cursorEnd;
   }
 
-  const values = decodeValues(opts.type!, valueEncoding as ParquetCodec, valuesBufCursor, valueCountNonNull, {
+  const values = decodeValues(
+      opts.type!,
+      valueEncoding as ParquetCodec,
+      valuesBufCursor,
+      valueCountNonNull,
+      {
     bitWidth: opts.column!.typeLength!,
     treatInt96AsTimestamp: opts.treatInt96AsTimestamp,
     ...opts.column!,

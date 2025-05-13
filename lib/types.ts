@@ -117,6 +117,7 @@ const PARQUET_LOGICAL_TYPES = new Set<string>([
 const PARQUET_LOGICAL_TYPE_DATA: Record<string, ParquetTypeDataObject> = {
   BOOLEAN: {
     primitiveType: 'BOOLEAN',
+    typeLength: 1,
     toPrimitive: toPrimitive_BOOLEAN,
     fromPrimitive: fromPrimitive_BOOLEAN,
   },

@@ -3,7 +3,8 @@
 // https://github.com/apache/parquet-format/blob/master/Encodings.md
 
 import varint from 'varint';
-import { Cursor } from './types';
+import {Cursor} from './types';
+import {readBitPacked, readRle, readRleBitPackedHybrid, readVarInt} from "./encoding";
 
 function encodeRunBitpacked(values: number[], opts: { bitWidth: number }) {
   for (let i = 0; i < values.length % 8; i++) {
@@ -44,9 +45,11 @@ function unknownToParsedInt(value: string | number) {
 
 export const encodeValues = function (
   type: string,
-  values: number[],
-  opts: { bitWidth: number; disableEnvelope?: boolean }
-) {
+  values: Array<number>,
+  opts: {
+    bitWidth: number,
+    disableEnvelope?: boolean
+  }) {
   if (!('bitWidth' in opts)) {
     throw 'bitWidth is required';
   }
@@ -105,24 +108,49 @@ export const encodeValues = function (
   return envelope;
 };
 
-function decodeRunBitpacked(cursor: Cursor, count: number, opts: { bitWidth: number }) {
-  if (count % 8 !== 0) {
-    throw 'must be a multiple of 8';
-  }
-
-  const values = new Array(count).fill(0);
-  for (let b = 0; b < opts.bitWidth * count; ++b) {
-    if (cursor.buffer[cursor.offset + Math.floor(b / 8)] & (1 << b % 8)) {
-      values[Math.floor(b / opts.bitWidth)] |= 1 << b % opts.bitWidth;
+// opts.bitWidth is undefined when the boolean values are being passed
+// decode a bitpacked value
+// setting old code to true here only results in the RLE/bitpacked hybrid test failing, so we know that code is bad.
+// cursor:  Cursor containing the data to be decoded
+// count: the number of values expected to result from the decoding
+// opts:  bitWidth is required.
+// returns: a DecodedArray
+export function decodeRunBitpacked(cursor: Cursor, count: number, opts: { bitWidth: number }): Array<number> {
+  const run_old_code = true;
+  let output = new Array(count).fill(0);
+  if (run_old_code) {
+    if (count % 8 !== 0) {
+      throw 'must be a multiple of 8';
     }
-  }
 
-  cursor.offset += opts.bitWidth * (count / 8);
-  return values;
+    for (let b = 0; b < opts.bitWidth * count; ++b) {
+      if (cursor.buffer[cursor.offset + Math.floor(b / 8)] & (1 << (b % 8))) {
+        output[Math.floor(b / opts.bitWidth)] |= (1 << b % opts.bitWidth);
+      }
+    }
+
+    cursor.offset += opts.bitWidth * (count / 8);
+  } else {
+    const view = new DataView(cursor.buffer.buffer, cursor.offset);
+    const reader = {view, offset: 0}
+    const header = readVarInt(reader);
+    readBitPacked(reader, header, opts.bitWidth, output, 0)
+  }
+  return output;
 }
 
-function decodeRunRepeated(cursor: Cursor, count: number, opts: { bitWidth: number }) {
-  const bytesNeededForFixedBitWidth = Math.ceil(opts.bitWidth / 8);
+// decode an RLE value
+// Note that the RLE encoding method is only supported for the following types of data:
+//
+// Repetition and definition levels
+// Dictionary indices
+// Boolean values in data pages, as an alternative to PLAIN encoding
+// See https://parquet.apache.org/docs/file-format/data-pages/encodings/
+// setting this to run old code lets the RLE/bitpacked hybrid documentation example still pass.
+// So maybe this code is fine.
+export function decodeRunRepeated(cursor: Cursor, count: number, opts: { bitWidth: number }): Array<number> {
+  let output = new Array(count).fill(0);
+  var bytesNeededForFixedBitWidth = Math.ceil(opts.bitWidth / 8);
   let value = 0;
 
   for (let i = 0; i < bytesNeededForFixedBitWidth; ++i) {
@@ -133,26 +161,26 @@ function decodeRunRepeated(cursor: Cursor, count: number, opts: { bitWidth: numb
     cursor.offset += 1;
   }
 
-  return new Array(count).fill(value);
+  output = new Array(count).fill(value);
+  return output;
 }
 
-export const decodeValues = function (
-  _: string,
-  cursor: Cursor,
-  count: number,
-  opts: { bitWidth: number; disableEnvelope?: boolean }
-) {
+// cursor:  contains buffer + offset for data
+// count:  the number of items expected to decode
+// opts:  must include bitWidth, disableEnvelope is optional, specify true to use all bytes, false to skip first four
+//        bytes
+export const decodeValues = function (_: string, cursor: Cursor, count: number, opts: {
+  bitWidth: number,
+  disableEnvelope?: boolean
+}) {
   if (!('bitWidth' in opts)) {
     throw 'bitWidth is required';
   }
-
+  let values = [];
+  let res;
   if (!opts.disableEnvelope) {
     cursor.offset += 4;
   }
-
-  let values = [];
-  let res;
-
   while (values.length < count) {
     const header = varint.decode(cursor.buffer, cursor.offset);
     cursor.offset += varint.encodingLength(header);

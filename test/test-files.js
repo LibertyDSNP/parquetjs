@@ -81,7 +81,7 @@ describe('test-files', function () {
   });
 
   // repeated values
-  it.skip('nation.dict.parquet loads', async function () {
+  it('nation.dict.parquet loads', async function() {
     await check('nation.dict.parquet', ['nation_key', 'name', 'region_key', 'comment_col']);
   });
 
