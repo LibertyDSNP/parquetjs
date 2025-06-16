@@ -112,7 +112,7 @@ function shredRecordInternal(
           // wrap in a buffer, since not supported by parquet_thrift
           values.push(Buffer.from(record[fieldName]));
         } else {
-          throw Object.prototype.toString.call(record[fieldName]) + ' is not supported';
+          throw new Error(Object.prototype.toString.call(record[fieldName]) + ' is not supported');
         }
       } else {
         values.push(record[fieldName]);
@@ -121,11 +121,11 @@ function shredRecordInternal(
 
     // check values
     if (values.length == 0 && !!record && field.repetitionType === 'REQUIRED') {
-      throw 'missing required field: ' + field.name;
+      throw new Error('missing required field: ' + field.name);
     }
 
     if (values.length > 1 && field.repetitionType !== 'REPEATED') {
-      throw 'too many values for field: ' + field.name;
+      throw new Error('too many values for field: ' + field.name);
     }
 
     // push null

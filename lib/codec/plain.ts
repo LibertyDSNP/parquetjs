@@ -104,7 +104,7 @@ function decodeValues_DECIMAL(cursor: Cursor, count: number, opts: Options) {
 
   const name = opts.name || undefined;
   if (!precision) {
-    throw `missing option: precision (required for DECIMAL) for column: ${name}`;
+    throw new Error(`missing option: precision (required for DECIMAL) for column: ${name}`);
   }
 
   const values = [];
@@ -273,7 +273,7 @@ function decodeValues_BYTE_ARRAY(cursor: Cursor, count: number) {
 
 function encodeValues_FIXED_LEN_BYTE_ARRAY(values: Uint8Array[], opts: Options) {
   if (!opts.typeLength) {
-    throw 'missing option: typeLength (required for FIXED_LEN_BYTE_ARRAY)';
+    throw new Error('missing option: typeLength (required for FIXED_LEN_BYTE_ARRAY)');
   }
 
   const returnedValues: Buffer[] = [];
@@ -281,7 +281,7 @@ function encodeValues_FIXED_LEN_BYTE_ARRAY(values: Uint8Array[], opts: Options) 
     returnedValues[i] = Buffer.from(values[i]);
 
     if (returnedValues[i].length !== opts.typeLength) {
-      throw 'invalid value for FIXED_LEN_BYTE_ARRAY: ' + returnedValues[i];
+      throw new Error('invalid value for FIXED_LEN_BYTE_ARRAY: ' + returnedValues[i]);
     }
   }
 
@@ -292,7 +292,7 @@ function decodeValues_FIXED_LEN_BYTE_ARRAY(cursor: Cursor, count: number, opts: 
   const values = [];
   const typeLength = opts.typeLength ?? (opts.column ? opts.column.typeLength : undefined);
   if (!typeLength) {
-    throw 'missing option: typeLength (required for FIXED_LEN_BYTE_ARRAY)';
+    throw new Error('missing option: typeLength (required for FIXED_LEN_BYTE_ARRAY)');
   }
 
   for (let i = 0; i < count; ++i) {
@@ -340,7 +340,7 @@ export const encodeValues = function (type: ValidValueTypes | string, values: un
       return encodeValues_FIXED_LEN_BYTE_ARRAY(values as Uint8Array[], opts);
 
     default:
-      throw 'unsupported type: ' + type;
+      throw new Error('unsupported type: ' + type);
   }
 };
 
@@ -371,6 +371,6 @@ export const decodeValues = function (type: ValidValueTypes | string, cursor: Cu
       return decodeValues_FIXED_LEN_BYTE_ARRAY(cursor, count, opts);
 
     default:
-      throw 'unsupported type: ' + type;
+      throw new Error('unsupported type: ' + type);
   }
 };

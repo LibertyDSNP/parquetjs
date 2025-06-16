@@ -197,7 +197,7 @@ export class ParquetReader {
     opts = opts || {};
 
     if (!PARQUET_VERSIONS.includes(metadata.version)) {
-      throw 'invalid parquet version';
+      throw new Error('invalid parquet version');
     }
 
     // Default to false for backward compatibility
@@ -583,7 +583,7 @@ export class ParquetEnvelopeReader {
   readHeader() {
     return this.read(0, PARQUET_MAGIC.length).then((buf: Buffer) => {
       if (buf.toString() != PARQUET_MAGIC) {
-        throw 'not valid parquet file';
+        throw new Error('not valid parquet file');
       }
     });
   }
@@ -603,12 +603,12 @@ export class ParquetEnvelopeReader {
 
     if (typeof path === 'string') {
       if (!parsedRowGroup) {
-        throw `Missing RowGroup ${row_group}`;
+        throw new Error(`Missing RowGroup ${row_group}`);
       }
       column = parsedRowGroup.columns.find((d) => d.meta_data!.path_in_schema.join(',') === path);
 
       if (!column) {
-        throw `Column ${path} Not Found`;
+        throw new Error(`Column ${path} Not Found`);
       }
     } else {
       column = path;
@@ -792,13 +792,13 @@ export class ParquetEnvelopeReader {
     const trailerBuf = await this.read(offset, trailerLen);
 
     if (trailerBuf.subarray(4).toString() != PARQUET_MAGIC) {
-      throw 'not a valid parquet file';
+      throw new Error('not a valid parquet file');
     }
 
     const metadataSize = trailerBuf.readUInt32LE(0);
     const metadataOffset = (this.fileSize as number) - metadataSize - trailerLen;
     if (metadataOffset < PARQUET_MAGIC.length) {
-      throw 'invalid metadata size';
+      throw new Error('invalid metadata size');
     }
 
     const metadataBuf = await this.read(metadataOffset, metadataSize);
@@ -819,7 +819,7 @@ function decodeValues(
   opts: Options | { bitWidth: number }
 ) {
   if (!(encoding in parquet_codec)) {
-    throw 'invalid encoding: ' + encoding;
+    throw new Error('invalid encoding: ' + encoding);
   }
 
   return parquet_codec[encoding].decodeValues(type, cursor, count, opts as Options);
@@ -899,7 +899,7 @@ async function decodePage(cursor: Cursor, opts: Options): Promise<PageData> {
       };
       break;
     default:
-      throw `invalid page type: ${pageType}`;
+      throw new Error(`invalid page type: ${pageType}`);
   }
 
   pageHeader.offset = headerOffset;

@@ -48,7 +48,7 @@ export const encodeValues = function (
   opts: { bitWidth: number; disableEnvelope?: boolean }
 ) {
   if (!('bitWidth' in opts)) {
-    throw 'bitWidth is required';
+    throw new Error('bitWidth is required');
   }
 
   switch (type) {
@@ -59,7 +59,7 @@ export const encodeValues = function (
       break;
 
     default:
-      throw 'unsupported type: ' + type;
+      throw new Error('unsupported type: ' + type);
   }
 
   let buf = Buffer.alloc(0);
@@ -107,7 +107,7 @@ export const encodeValues = function (
 
 function decodeRunBitpacked(cursor: Cursor, count: number, opts: { bitWidth: number }) {
   if (count % 8 !== 0) {
-    throw 'must be a multiple of 8';
+    throw new Error('must be a multiple of 8');
   }
 
   const values = new Array(count).fill(0);
@@ -143,7 +143,7 @@ export const decodeValues = function (
   opts: { bitWidth: number; disableEnvelope?: boolean }
 ) {
   if (!('bitWidth' in opts)) {
-    throw 'bitWidth is required';
+    throw new Error('bitWidth is required');
   }
 
   if (!opts.disableEnvelope) {
@@ -169,7 +169,7 @@ export const decodeValues = function (
   values = values.slice(0, count);
 
   if (values.length !== count) {
-    throw 'invalid RLE encoding';
+    throw new Error('invalid RLE encoding');
   }
 
   return values;

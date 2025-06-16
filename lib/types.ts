@@ -272,7 +272,7 @@ function isParquetType(type: string | undefined): type is ParquetType {
  */
 export function toPrimitive(type: string | undefined, value: unknown, field?: ParquetField | Options) {
   if (!isParquetType(type)) {
-    throw 'invalid type: ' + type || 'undefined';
+    throw new Error('invalid type: ' + type || 'undefined');
   }
   return getParquetTypeDataObject(type, field).toPrimitive(value);
 }
@@ -283,7 +283,7 @@ export function toPrimitive(type: string | undefined, value: unknown, field?: Pa
  */
 export function fromPrimitive(type: string | undefined, value: unknown, field?: ParquetField | Options) {
   if (!isParquetType(type)) {
-    throw 'invalid type: ' + type || 'undefined';
+    throw new Error('invalid type: ' + type || 'undefined');
   }
 
   const typeFromPrimitive = getParquetTypeDataObject(type, field).fromPrimitive;
@@ -309,7 +309,7 @@ function toPrimitive_FLOAT(value: number | string) {
   } else if (typeof value === 'number') {
     return value;
   }
-  throw 'invalid value for FLOAT: ' + value;
+  throw new Error('invalid value for FLOAT: ' + value);
 }
 
 function toPrimitive_DOUBLE(value: number | string) {
@@ -319,7 +319,7 @@ function toPrimitive_DOUBLE(value: number | string) {
   } else if (typeof value === 'number') {
     return value;
   }
-  throw 'invalid value for DOUBLE: ' + value;
+  throw new Error('invalid value for DOUBLE: ' + value);
 }
 
 function toPrimitive_INT8(value: number | bigint | string) {
@@ -330,7 +330,7 @@ function toPrimitive_INT8(value: number | bigint | string) {
 
     return v;
   } catch {
-    throw 'invalid value for INT8: ' + value;
+    throw new Error('invalid value for INT8: ' + value);
   }
 }
 
@@ -342,7 +342,7 @@ function toPrimitive_UINT8(value: number | bigint | string) {
 
     return v;
   } catch {
-    throw 'invalid value for UINT8: ' + value;
+    throw new Error('invalid value for UINT8: ' + value);
   }
 }
 
@@ -354,7 +354,7 @@ function toPrimitive_INT16(value: number | bigint | string) {
 
     return v;
   } catch {
-    throw 'invalid value for INT16: ' + value;
+    throw new Error('invalid value for INT16: ' + value);
   }
 }
 
@@ -366,7 +366,7 @@ function toPrimitive_UINT16(value: number | bigint | string) {
 
     return v;
   } catch {
-    throw 'invalid value for UINT16: ' + value;
+    throw new Error('invalid value for UINT16: ' + value);
   }
 }
 
@@ -378,7 +378,7 @@ function toPrimitive_INT32(value: number | bigint | string) {
 
     return v;
   } catch {
-    throw 'invalid value for INT32: ' + value;
+    throw new Error('invalid value for INT32: ' + value);
   }
 }
 
@@ -390,7 +390,7 @@ function toPrimitive_UINT32(value: number | bigint | string) {
 
     return v;
   } catch {
-    throw 'invalid value for UINT32: ' + value;
+    throw new Error('invalid value for UINT32: ' + value);
   }
 }
 
@@ -405,7 +405,7 @@ function toPrimitive_INT64(value: number | bigint | string) {
 
     return v;
   } catch {
-    throw 'invalid value for INT64: ' + value;
+    throw new Error('invalid value for INT64: ' + value);
   }
 }
 
@@ -419,7 +419,7 @@ function toPrimitive_UINT64(value: number | bigint | string) {
 
     return v;
   } catch {
-    throw 'invalid value for UINT64: ' + value;
+    throw new Error('invalid value for UINT64: ' + value);
   }
 }
 
@@ -434,7 +434,7 @@ function toPrimitive_INT96(value: number | bigint | string) {
 
     return v;
   } catch {
-    throw 'invalid value for INT96: ' + value;
+    throw new Error('invalid value for INT96: ' + value);
   }
 }
 
@@ -492,11 +492,11 @@ function toNumberInternal(typeName: string, value: string | number): number {
       numberValue = value;
       break;
     default:
-      throw `${typeName} has an invalid type: ${typeof value}`;
+      throw new Error(`${typeName} has an invalid type: ${typeof value}`);
   }
   // Year 2255 bug. Should eventually switch to bigint
   if (numberValue < 0 || numberValue >= Number.MAX_SAFE_INTEGER) {
-    throw `${typeName} value is out of bounds: ${numberValue}`;
+    throw new Error(`${typeName} value is out of bounds: ${numberValue}`);
   }
   return numberValue;
 }
@@ -508,7 +508,7 @@ function toPrimitive_TIME_MILLIS(value: string | number) {
 function toPrimitive_TIME_MICROS(value: string | number | bigint) {
   const v = BigInt(value);
   if (v < 0n) {
-    throw 'TIME_MICROS value is out of bounds: ' + value;
+    throw new Error('TIME_MICROS value is out of bounds: ' + value);
   }
   return v;
 }
@@ -550,12 +550,12 @@ function toPrimitive_TIMESTAMP_MICROS(value: Date | string | number | bigint) {
     // Will throw if NaN
     const v = BigInt(value);
     if (v < 0n) {
-      throw 'out of bounds';
+      throw new Error('out of bounds');
     }
 
     return v;
   } catch (_e) {
-    throw 'TIMESTAMP_MICROS value is out of bounds: ' + value;
+    throw new Error('TIMESTAMP_MICROS value is out of bounds: ' + value);
   }
 }
 
@@ -566,7 +566,7 @@ function fromPrimitive_TIMESTAMP_MICROS(value: number | bigint) {
 
 function toPrimitive_INTERVAL(value: INTERVAL) {
   if (!value.months || !value.days || !value.milliseconds) {
-    throw 'value for INTERVAL must be object { months: ..., days: ..., milliseconds: ... }';
+    throw new Error('value for INTERVAL must be object { months: ..., days: ..., milliseconds: ... }');
   }
 
   const buf = Buffer.alloc(12);
@@ -587,7 +587,7 @@ function fromPrimitive_INTERVAL(value: string) {
 
 function checkValidValue(lowerRange: number | bigint, upperRange: number | bigint, v: number | bigint) {
   if (v < lowerRange || v > upperRange) {
-    throw 'invalid value';
+    throw new Error('invalid value');
   }
 }
 

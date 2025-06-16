@@ -16,6 +16,7 @@ export default tseslint.config(
   {
     rules: {
       'no-loss-of-precision': 'off',
+      'no-throw-literal': 'error',
       // TODO: Fix/ignore in tests and remove
       '@typescript-eslint/no-loss-of-precision': 'warn',
       // TODO: Fix and remove

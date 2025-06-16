@@ -95,7 +95,7 @@ export class ParquetWriter {
    */
   async appendRow(row: Record<string, unknown>) {
     if (this.closed || this.envelopeWriter === null) {
-      throw 'writer was closed';
+      throw new Error('writer was closed');
     }
 
     parquet_shredder.shredRecord(this.schema, row, this.rowBuffer);
@@ -123,7 +123,7 @@ export class ParquetWriter {
    */
   async close(callback?: () => void) {
     if (this.closed) {
-      throw 'writer was closed';
+      throw new Error('writer was closed');
     }
 
     this.closed = true;
@@ -313,7 +313,7 @@ export class ParquetEnvelopeWriter {
     }
 
     if (this.schema.fieldList.length === 0) {
-      throw 'cannot write parquet file with zero fieldList';
+      throw new Error('cannot write parquet file with zero fieldList');
     }
 
     return this.writeSection(encodeFooter(this.schema, this.rowCount, this.rowGroups, userMetadata));
@@ -383,7 +383,7 @@ export class ParquetTransformer extends stream.Transform {
  */
 function encodeValues(type: string, encoding: ParquetCodec, values: number[], opts: any) {
   if (!(encoding in parquet_codec)) {
-    throw 'invalid encoding: ' + encoding;
+    throw new Error('invalid encoding: ' + encoding);
   }
 
   return parquet_codec[encoding].encodeValues(type, values, opts);

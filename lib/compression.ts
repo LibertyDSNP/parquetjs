@@ -35,7 +35,7 @@ export const PARQUET_COMPRESSION_METHODS: PARQUET_COMPRESSION_METHODS = {
  */
 export async function deflate(method: string, value: unknown): Promise<Buffer> {
   if (!(method in PARQUET_COMPRESSION_METHODS)) {
-    throw 'invalid compression method: ' + method;
+    throw new Error('invalid compression method: ' + method);
   }
 
   return PARQUET_COMPRESSION_METHODS[method].deflate(value);
@@ -63,7 +63,7 @@ async function deflate_brotli(value: Uint8Array) {
  */
 export async function inflate(method: string, value: unknown): Promise<Buffer> {
   if (!(method in PARQUET_COMPRESSION_METHODS)) {
-    throw 'invalid compression method: ' + method;
+    throw new Error('invalid compression method: ' + method);
   }
 
   return await PARQUET_COMPRESSION_METHODS[method].inflate(value);
