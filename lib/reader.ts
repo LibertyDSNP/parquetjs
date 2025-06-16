@@ -389,7 +389,10 @@ export class ParquetReader {
    * reading rows
    */
   async close() {
-    await this.envelopeReader!.close();
+    if (this.envelopeReader) {
+      await this.envelopeReader.close();
+    }
+
     this.envelopeReader = null;
     this.metadata = null;
   }

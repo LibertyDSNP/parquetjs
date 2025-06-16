@@ -88,6 +88,14 @@ describe('ParquetReader', function () {
     });
   });
 
+  describe('#close', function () {
+    it('can be called multiple times', async function () {
+      const reader = await parquet.ParquetReader.openFile(path.join(__dirname, 'test-files', 'fruits.parquet'));
+      await reader.close();
+      await reader.close();
+    });
+  });
+
   describe('#asyncIterator', function () {
     it('responds to for await', async function () {
       const reader = await parquet.ParquetReader.openFile(path.join(__dirname, 'test-files', 'fruits.parquet'));
