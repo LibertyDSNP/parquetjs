@@ -33,7 +33,6 @@
     "@eslint/js": "^9.32.0",
     "@smithy/util-stream": "^4.2.3",
     "@types/chai": "^5.2.2",
-    "@types/eslint__js": "^9.14.0",
     "@types/json-schema": "^7.0.15",
     "@types/mocha": "^10.0.10",
     "@types/node": "^24.1.0",

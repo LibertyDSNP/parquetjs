@@ -64,9 +64,7 @@
         "GEOMETRY": null,
         "GEOGRAPHY": null
       },
-      "path": [
-        "time_field"
-      ],
+      "path": ["time_field"],
       "repetitionType": "REQUIRED",
       "encoding": "PLAIN",
       "compression": "UNCOMPRESSED",
@@ -105,9 +103,7 @@
         "GEOMETRY": null,
         "GEOGRAPHY": null
       },
-      "path": [
-        "time_field"
-      ],
+      "path": ["time_field"],
       "repetitionType": "REQUIRED",
       "encoding": "PLAIN",
       "compression": "UNCOMPRESSED",
