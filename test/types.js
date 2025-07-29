@@ -4,7 +4,7 @@ const chai = require('chai');
 const assert = chai.assert;
 
 describe('toPrimitive* should give the correct values back', function () {
-  it('toPrimitive(INT_8, 127n)', function () {
+  (it('toPrimitive(INT_8, 127n)', function () {
     assert.equal(toPrimitive('INT_8', 127n), 127n);
   }),
     it('toPrimitive(UINT_8, 255n)', function () {
@@ -30,11 +30,11 @@ describe('toPrimitive* should give the correct values back', function () {
     }),
     it('toPrimitive(INT96, 9223372036854775807n)', function () {
       assert.equal(toPrimitive('INT96', 9223372036854775807n), 9223372036854775807n);
-    });
+    }));
 });
 
 describe('toPrimitive INT* should give the correct values back with string value', function () {
-  it('toPrimitive(INT_8, "127")', function () {
+  (it('toPrimitive(INT_8, "127")', function () {
     assert.equal(toPrimitive('INT_8', '127'), 127n);
   }),
     it('toPrimitive(UINT_8, "255")', function () {
@@ -60,12 +60,12 @@ describe('toPrimitive INT* should give the correct values back with string value
     }),
     it('toPrimitive(INT96, "9223372036854775807")', function () {
       assert.equal(toPrimitive('INT96', '9223372036854775807'), 9223372036854775807n);
-    });
+    }));
 });
 
 describe('toPrimitive INT* should throw when given invalid value', function () {
-  describe('Testing toPrimitive_INT_8 values', function () {
-    it('toPrimitive(INT_8, 128) is too large', function () {
+  (describe('Testing toPrimitive_INT_8 values', function () {
+    (it('toPrimitive(INT_8, 128) is too large', function () {
       assert.throws(() => toPrimitive('INT_8', 128));
     }),
       it('toPrimitive(INT_8, -256) is too small', function () {
@@ -73,10 +73,10 @@ describe('toPrimitive INT* should throw when given invalid value', function () {
       }),
       it('toPrimitive(INT_8, "asd12@!$1") is given gibberish and should throw', function () {
         assert.throws(() => toPrimitive('INT_8', 'asd12@!$1'));
-      });
+      }));
   }),
     describe('Testing toPrimitive_UINT8 values', function () {
-      it('toPrimitive(UINT_8, 128) is too large', function () {
+      (it('toPrimitive(UINT_8, 128) is too large', function () {
         assert.throws(() => toPrimitive('UINT_8', 256));
       }),
         it('toPrimitive(UINT_8, -256) is too small', function () {
@@ -84,10 +84,10 @@ describe('toPrimitive INT* should throw when given invalid value', function () {
         }),
         it('toPrimitive(UINT_8, "asd12@!$1") is given gibberish and should throw', function () {
           assert.throws(() => toPrimitive('UINT_8', 'asd12@!$1'));
-        });
+        }));
     }),
     describe('Testing toPrimitive_INT16 values', function () {
-      it('toPrimitive(INT_16, 9999999) is too large', function () {
+      (it('toPrimitive(INT_16, 9999999) is too large', function () {
         assert.throws(() => toPrimitive('INT_16', 9999999));
       }),
         it('toPrimitive(INT_16, -9999999) is too small', function () {
@@ -95,10 +95,10 @@ describe('toPrimitive INT* should throw when given invalid value', function () {
         }),
         it('toPrimitive(INT_16, "asd12@!$1") is given gibberish and should throw', function () {
           assert.throws(() => toPrimitive('INT_16', 'asd12@!$1'));
-        });
+        }));
     }),
     describe('Testing toPrimitive_UINT16 values', function () {
-      it('toPrimitive(UINT_16, 9999999999999) is too large', function () {
+      (it('toPrimitive(UINT_16, 9999999999999) is too large', function () {
         assert.throws(() => toPrimitive('UINT_16', 9999999999999));
       }),
         it('toPrimitive(UINT_16, -999999999999) is too small', function () {
@@ -106,10 +106,10 @@ describe('toPrimitive INT* should throw when given invalid value', function () {
         }),
         it('toPrimitive(UINT_16, "asd12@!$1") is given gibberish and should throw', function () {
           assert.throws(() => toPrimitive('UINT_16', 'asd12@!$1'));
-        });
+        }));
     }),
     describe('Testing toPrimitive_INT32 values', function () {
-      it('toPrimitive(INT_32, 999999999999) is too large', function () {
+      (it('toPrimitive(INT_32, 999999999999) is too large', function () {
         assert.throws(() => toPrimitive('INT_32', 999999999999));
       }),
         it('toPrimitive(INT_32, -999999999999) is too small', function () {
@@ -117,10 +117,10 @@ describe('toPrimitive INT* should throw when given invalid value', function () {
         }),
         it('toPrimitive(INT_32, "asd12@!$1") is given gibberish and should throw', function () {
           assert.throws(() => toPrimitive('INT_32', 'asd12@!$1'));
-        });
+        }));
     }),
     describe('Testing toPrimitive_UINT32 values', function () {
-      it('toPrimitive(UINT_32, 999999999999) is too large', function () {
+      (it('toPrimitive(UINT_32, 999999999999) is too large', function () {
         assert.throws(() => toPrimitive('UINT_32', 999999999999999));
       }),
         it('toPrimitive(UINT_32, -999999999999) is too small', function () {
@@ -128,10 +128,10 @@ describe('toPrimitive INT* should throw when given invalid value', function () {
         }),
         it('toPrimitive(UINT_32, "asd12@!$1") is given gibberish and should throw', function () {
           assert.throws(() => toPrimitive('UINT_32', 'asd12@!$1'));
-        });
+        }));
     }),
     describe('Testing toPrimitive_INT64 values', function () {
-      it('toPrimitive(INT_64, "9999999999999999999999") is too large', function () {
+      (it('toPrimitive(INT_64, "9999999999999999999999") is too large', function () {
         assert.throws(() => toPrimitive('INT_64', 9999999999999999999999));
       }),
         it('toPrimitive(INT_64, "-9999999999999999999999999") is too small', function () {
@@ -139,10 +139,10 @@ describe('toPrimitive INT* should throw when given invalid value', function () {
         }),
         it('toPrimitive(INT_64, "asd12@!$1") is given gibberish and should throw', function () {
           assert.throws(() => toPrimitive('INT_64', 'asd12@!$1'));
-        });
+        }));
     }),
     describe('Testing toPrimitive_UINT64 values', function () {
-      it('toPrimitive(UINT_64, 9999999999999999999999) is too large', function () {
+      (it('toPrimitive(UINT_64, 9999999999999999999999) is too large', function () {
         assert.throws(() => toPrimitive('UINT_64', 9999999999999999999999));
       }),
         it('toPrimitive(UINT_64, -999999999999) is too small', function () {
@@ -150,10 +150,10 @@ describe('toPrimitive INT* should throw when given invalid value', function () {
         }),
         it('toPrimitive(UINT_64, "asd12@!$1") is given gibberish and should throw', function () {
           assert.throws(() => toPrimitive('UINT_64', 'asd12@!$1'));
-        });
+        }));
     }),
     describe('Testing toPrimitive_INT96 values', function () {
-      it('toPrimitive(UINT_96, 9999999999999999999999) is too large', function () {
+      (it('toPrimitive(UINT_96, 9999999999999999999999) is too large', function () {
         assert.throws(() => toPrimitive('INT_96', 9999999999999999999999));
       }),
         it('toPrimitive(UINT_96, -9999999999999999999999) is too small', function () {
@@ -161,8 +161,8 @@ describe('toPrimitive INT* should throw when given invalid value', function () {
         }),
         it('toPrimitive(UINT_96, "asd12@!$1") is given gibberish and should throw', function () {
           assert.throws(() => toPrimitive('INT_96', 'asd12@!$1'));
-        });
-    });
+        }));
+    }));
 
   describe('toPrimitive ', function () {
     // eslint-disable-next-line mocha/no-setup-in-describe

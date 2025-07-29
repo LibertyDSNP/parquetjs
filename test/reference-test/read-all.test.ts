@@ -37,6 +37,7 @@ describe('Read Test for all files', function () {
 
   for (const filename of listOfFiles) {
     if (onlyTest && onlyTest !== filename) continue;
+
     it(`Reading ${filename}`, async function () {
       const reader = await parquet.ParquetReader.openFile(path.join(__dirname, 'files', filename));
       const schema = reader.getSchema();
