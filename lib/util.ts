@@ -8,6 +8,9 @@ import { Int64 } from 'thrift';
 // Use this so users only need to implement the minimal amount of the WriteStream interface
 export type WriteStreamMinimal = Pick<WriteStream, 'write' | 'end'>;
 
+const WRITE = Symbol.for('write');
+const READ = Symbol.for('read');
+
 /**
  * We need to patch Thrift's TFramedTransport class bc the TS type definitions
  * do not define a `readPos` field, even though the class implementation has
@@ -73,7 +76,7 @@ export const serializeThrift = function (obj: ThriftObject) {
 
   const protocol = new thrift.TCompactProtocol(transport);
   //@ts-expect-error, https://issues.apache.org/jira/browse/THRIFT-3872
-  obj.write(protocol);
+  obj[WRITE](protocol);
   transport.flush();
 
   return Buffer.concat(output);
@@ -88,7 +91,7 @@ export const decodeThrift = function (obj: ThriftObject, buf: Buffer, offset?: n
   transport.readPos = offset;
   const protocol = new thrift.TCompactProtocol(transport);
   //@ts-expect-error, https://issues.apache.org/jira/browse/THRIFT-3872
-  obj.read(protocol);
+  obj[READ](protocol);
   return transport.readPos - offset;
 };
 

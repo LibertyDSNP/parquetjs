@@ -48,7 +48,9 @@
   "fields": {
     "person": {
       "name": "person",
-      "path": ["person"],
+      "path": [
+        "person"
+      ],
       "repetitionType": "REQUIRED",
       "rLevelMax": 0,
       "dLevelMax": 0,
@@ -59,7 +61,10 @@
           "name": "name",
           "primitiveType": "BYTE_ARRAY",
           "originalType": "UTF8",
-          "path": ["person", "name"],
+          "path": [
+            "person",
+            "name"
+          ],
           "repetitionType": "REQUIRED",
           "encoding": "PLAIN",
           "compression": "UNCOMPRESSED",
@@ -69,7 +74,10 @@
         "age": {
           "name": "age",
           "primitiveType": "INT64",
-          "path": ["person", "age"],
+          "path": [
+            "person",
+            "age"
+          ],
           "repetitionType": "REQUIRED",
           "encoding": "PLAIN",
           "compression": "UNCOMPRESSED",
@@ -80,7 +88,9 @@
     },
     "people": {
       "name": "people",
-      "path": ["people"],
+      "path": [
+        "people"
+      ],
       "repetitionType": "REQUIRED",
       "rLevelMax": 0,
       "dLevelMax": 0,
@@ -89,7 +99,10 @@
       "fields": {
         "list": {
           "name": "list",
-          "path": ["people", "list"],
+          "path": [
+            "people",
+            "list"
+          ],
           "repetitionType": "REPEATED",
           "rLevelMax": 1,
           "dLevelMax": 1,
@@ -98,7 +111,11 @@
           "fields": {
             "element": {
               "name": "element",
-              "path": ["people", "list", "element"],
+              "path": [
+                "people",
+                "list",
+                "element"
+              ],
               "repetitionType": "REQUIRED",
               "rLevelMax": 1,
               "dLevelMax": 1,
@@ -109,7 +126,12 @@
                   "name": "name",
                   "primitiveType": "BYTE_ARRAY",
                   "originalType": "UTF8",
-                  "path": ["people", "list", "element", "name"],
+                  "path": [
+                    "people",
+                    "list",
+                    "element",
+                    "name"
+                  ],
                   "repetitionType": "REQUIRED",
                   "encoding": "PLAIN",
                   "compression": "UNCOMPRESSED",
@@ -119,7 +141,12 @@
                 "age": {
                   "name": "age",
                   "primitiveType": "INT64",
-                  "path": ["people", "list", "element", "age"],
+                  "path": [
+                    "people",
+                    "list",
+                    "element",
+                    "age"
+                  ],
                   "repetitionType": "REQUIRED",
                   "encoding": "PLAIN",
                   "compression": "UNCOMPRESSED",
@@ -137,7 +164,9 @@
   "fieldList": [
     {
       "name": "person",
-      "path": ["person"],
+      "path": [
+        "person"
+      ],
       "repetitionType": "REQUIRED",
       "rLevelMax": 0,
       "dLevelMax": 0,
@@ -148,7 +177,10 @@
           "name": "name",
           "primitiveType": "BYTE_ARRAY",
           "originalType": "UTF8",
-          "path": ["person", "name"],
+          "path": [
+            "person",
+            "name"
+          ],
           "repetitionType": "REQUIRED",
           "encoding": "PLAIN",
           "compression": "UNCOMPRESSED",
@@ -158,7 +190,10 @@
         "age": {
           "name": "age",
           "primitiveType": "INT64",
-          "path": ["person", "age"],
+          "path": [
+            "person",
+            "age"
+          ],
           "repetitionType": "REQUIRED",
           "encoding": "PLAIN",
           "compression": "UNCOMPRESSED",
@@ -171,7 +206,10 @@
       "name": "name",
       "primitiveType": "BYTE_ARRAY",
       "originalType": "UTF8",
-      "path": ["person", "name"],
+      "path": [
+        "person",
+        "name"
+      ],
       "repetitionType": "REQUIRED",
       "encoding": "PLAIN",
       "compression": "UNCOMPRESSED",
@@ -181,7 +219,10 @@
     {
       "name": "age",
       "primitiveType": "INT64",
-      "path": ["person", "age"],
+      "path": [
+        "person",
+        "age"
+      ],
       "repetitionType": "REQUIRED",
       "encoding": "PLAIN",
       "compression": "UNCOMPRESSED",
@@ -190,7 +231,9 @@
     },
     {
       "name": "people",
-      "path": ["people"],
+      "path": [
+        "people"
+      ],
       "repetitionType": "REQUIRED",
       "rLevelMax": 0,
       "dLevelMax": 0,
@@ -199,7 +242,10 @@
       "fields": {
         "list": {
           "name": "list",
-          "path": ["people", "list"],
+          "path": [
+            "people",
+            "list"
+          ],
           "repetitionType": "REPEATED",
           "rLevelMax": 1,
           "dLevelMax": 1,
@@ -208,7 +254,11 @@
           "fields": {
             "element": {
               "name": "element",
-              "path": ["people", "list", "element"],
+              "path": [
+                "people",
+                "list",
+                "element"
+              ],
               "repetitionType": "REQUIRED",
               "rLevelMax": 1,
               "dLevelMax": 1,
@@ -219,7 +269,12 @@
                   "name": "name",
                   "primitiveType": "BYTE_ARRAY",
                   "originalType": "UTF8",
-                  "path": ["people", "list", "element", "name"],
+                  "path": [
+                    "people",
+                    "list",
+                    "element",
+                    "name"
+                  ],
                   "repetitionType": "REQUIRED",
                   "encoding": "PLAIN",
                   "compression": "UNCOMPRESSED",
@@ -229,7 +284,12 @@
                 "age": {
                   "name": "age",
                   "primitiveType": "INT64",
-                  "path": ["people", "list", "element", "age"],
+                  "path": [
+                    "people",
+                    "list",
+                    "element",
+                    "age"
+                  ],
                   "repetitionType": "REQUIRED",
                   "encoding": "PLAIN",
                   "compression": "UNCOMPRESSED",
@@ -245,7 +305,10 @@
     },
     {
       "name": "list",
-      "path": ["people", "list"],
+      "path": [
+        "people",
+        "list"
+      ],
       "repetitionType": "REPEATED",
       "rLevelMax": 1,
       "dLevelMax": 1,
@@ -254,7 +317,11 @@
       "fields": {
         "element": {
           "name": "element",
-          "path": ["people", "list", "element"],
+          "path": [
+            "people",
+            "list",
+            "element"
+          ],
           "repetitionType": "REQUIRED",
           "rLevelMax": 1,
           "dLevelMax": 1,
@@ -265,7 +332,12 @@
               "name": "name",
               "primitiveType": "BYTE_ARRAY",
               "originalType": "UTF8",
-              "path": ["people", "list", "element", "name"],
+              "path": [
+                "people",
+                "list",
+                "element",
+                "name"
+              ],
               "repetitionType": "REQUIRED",
               "encoding": "PLAIN",
               "compression": "UNCOMPRESSED",
@@ -275,7 +347,12 @@
             "age": {
               "name": "age",
               "primitiveType": "INT64",
-              "path": ["people", "list", "element", "age"],
+              "path": [
+                "people",
+                "list",
+                "element",
+                "age"
+              ],
               "repetitionType": "REQUIRED",
               "encoding": "PLAIN",
               "compression": "UNCOMPRESSED",
@@ -288,7 +365,11 @@
     },
     {
       "name": "element",
-      "path": ["people", "list", "element"],
+      "path": [
+        "people",
+        "list",
+        "element"
+      ],
       "repetitionType": "REQUIRED",
       "rLevelMax": 1,
       "dLevelMax": 1,
@@ -299,7 +380,12 @@
           "name": "name",
           "primitiveType": "BYTE_ARRAY",
           "originalType": "UTF8",
-          "path": ["people", "list", "element", "name"],
+          "path": [
+            "people",
+            "list",
+            "element",
+            "name"
+          ],
           "repetitionType": "REQUIRED",
           "encoding": "PLAIN",
           "compression": "UNCOMPRESSED",
@@ -309,7 +395,12 @@
         "age": {
           "name": "age",
           "primitiveType": "INT64",
-          "path": ["people", "list", "element", "age"],
+          "path": [
+            "people",
+            "list",
+            "element",
+            "age"
+          ],
           "repetitionType": "REQUIRED",
           "encoding": "PLAIN",
           "compression": "UNCOMPRESSED",
@@ -322,7 +413,12 @@
       "name": "name",
       "primitiveType": "BYTE_ARRAY",
       "originalType": "UTF8",
-      "path": ["people", "list", "element", "name"],
+      "path": [
+        "people",
+        "list",
+        "element",
+        "name"
+      ],
       "repetitionType": "REQUIRED",
       "encoding": "PLAIN",
       "compression": "UNCOMPRESSED",
@@ -332,7 +428,12 @@
     {
       "name": "age",
       "primitiveType": "INT64",
-      "path": ["people", "list", "element", "age"],
+      "path": [
+        "people",
+        "list",
+        "element",
+        "age"
+      ],
       "repetitionType": "REQUIRED",
       "encoding": "PLAIN",
       "compression": "UNCOMPRESSED",
