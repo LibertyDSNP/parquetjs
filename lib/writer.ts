@@ -11,6 +11,7 @@ import { Options } from './codec/types';
 import { ParquetSchema } from './schema';
 import Int64 from 'node-int64';
 import SplitBlockBloomFilter from './bloom/sbbf';
+import { isUint8Array } from 'util/types';
 
 /**
  * Parquet File Magic String
@@ -415,6 +416,46 @@ function encodeStatistics(statistics: parquet_thrift.Statistics, column: Parquet
   return new parquet_thrift.Statistics(statistics);
 }
 
+function compareStatisticsBuffer<T extends Uint8Array>(
+  potential: T,
+  statistics: parquet_thrift.Statistics
+): { min_value?: T; max_value?: T } {
+  const result: { min_value?: T; max_value?: T } = {};
+  // === 1 means the first value is greater
+  if (statistics.max_value !== undefined && Buffer.compare(potential, statistics.max_value) === 1) {
+    result.max_value = potential;
+  }
+  // Flip the order for min
+  if (statistics.min_value !== undefined && Buffer.compare(statistics.min_value, potential) === 1) {
+    result.min_value = potential;
+  }
+  return result;
+}
+
+function compareStatisticsGtLt<T>(
+  potential: T,
+  statistics: parquet_thrift.Statistics
+): { min_value?: T; max_value?: T } {
+  const result: { min_value?: T; max_value?: T } = {};
+  // === 1 means the first value is greater
+  if (statistics.max_value !== undefined && potential > statistics.max_value) {
+    result.max_value = potential;
+  }
+  // Flip the order for min
+  if (statistics.min_value !== undefined && statistics.min_value > potential) {
+    result.min_value = potential;
+  }
+  return result;
+}
+
+function compareStatistics<T extends Uint8Array | number | string | bigint | boolean>(
+  potential: T,
+  statistics: parquet_thrift.Statistics
+): { min_value?: T; max_value?: T } {
+  if (isUint8Array(potential)) return compareStatisticsBuffer(potential, statistics);
+  return compareStatisticsGtLt(potential, statistics);
+}
+
 async function encodePages(
   schema: ParquetSchema,
   rowBuffer: parquet_shredder.RecordBuffer,
@@ -444,11 +485,13 @@ async function encodePages(
     if (field.statistics !== false) {
       statistics = {};
       [...values.distinct_values!].forEach((v, i) => {
-        if (i === 0 || v > statistics.max_value!) {
+        if (i === 0) {
           statistics.max_value = v;
-        }
-        if (i === 0 || v < statistics.min_value!) {
           statistics.min_value = v;
+        } else {
+          const { min_value, max_value } = compareStatistics(v, statistics);
+          if (min_value !== undefined) statistics.min_value = min_value;
+          if (max_value !== undefined) statistics.max_value = max_value;
         }
       });
 
@@ -656,11 +699,18 @@ async function encodeColumnChunk(
     const page = pages[i];
 
     if (opts.column.statistics !== false) {
-      if (page.statistics.max_value! > statistics.max_value! || i == 0) {
+      if (i === 0) {
         statistics.max_value = page.statistics.max_value;
-      }
-      if (page.statistics.min_value! < statistics.min_value! || i == 0) {
         statistics.min_value = page.statistics.min_value;
+      } else {
+        if (page.statistics.min_value !== undefined) {
+          const { min_value } = compareStatistics(page.statistics.min_value, statistics);
+          if (min_value !== undefined) statistics.min_value = min_value;
+        }
+        if (page.statistics.max_value !== undefined) {
+          const { max_value } = compareStatistics(page.statistics.max_value, statistics);
+          if (max_value !== undefined) statistics.max_value = max_value;
+        }
       }
       statistics.null_count.setValue(statistics.null_count.valueOf() + (page.statistics.null_count?.valueOf() || 0));
       page.distinct_values.forEach((value: unknown) => distinct_values.add(value));
