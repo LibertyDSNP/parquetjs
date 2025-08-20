@@ -79,4 +79,31 @@ describe('Metadata MinMax', function () {
       expect(stats?.max).to.deep.equal(max);
     });
   });
+
+
+  describe('Timestamp Comparison', function () {
+    it('correctly chooses the min and max for timestamps', async function () {
+      const intSchema = new ParquetSchema({
+        rank: { type: 'TIMESTAMP_MICROS' },
+      });
+      const testFile = 'min-max-int.parquet';
+      const writer = await ParquetWriter.openFile(intSchema, testFile);
+
+      const min = 33_000;
+      const mid = 222_000;
+      const max = 911_933_000;
+      await writer.appendRow({ rank: min });
+      await writer.appendRow({ rank: mid });
+      await writer.appendRow({ rank: max });
+      await writer.close();
+
+      const reader = await ParquetReader.openFile(testFile);
+
+      const stats = reader.metadata!.row_groups[0].columns[0].meta_data!.statistics;
+
+      expect(+(stats?.min as unknown as Date)).to.deep.equal(33);
+      expect(+(stats?.max as unknown as Date)).to.deep.equal(911_933);
+
+    })
+  })
 });
