@@ -11,7 +11,6 @@ import { Options } from './codec/types';
 import { ParquetSchema } from './schema';
 import Int64 from 'node-int64';
 import SplitBlockBloomFilter from './bloom/sbbf';
-import { isUint8Array } from 'util/types';
 
 /**
  * Parquet File Magic String
@@ -452,7 +451,7 @@ function compareStatistics<T extends Uint8Array | number | string | bigint | boo
   potential: T,
   statistics: parquet_thrift.Statistics
 ): { min_value?: T; max_value?: T } {
-  if (isUint8Array(potential)) return compareStatisticsBuffer(potential, statistics);
+  if (parquet_types.isUint8Array(potential)) return compareStatisticsBuffer(potential, statistics);
   return compareStatisticsGtLt(potential, statistics);
 }
 
