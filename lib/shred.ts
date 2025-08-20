@@ -75,11 +75,15 @@ export const shredRecord = function (schema: ParquetSchema, record: Record<strin
     const record = recordShredded[path];
     const column = buffer.columnData![path];
 
-    for (let i = 0; i < record.rlevels!.length; i++) {
-      column.rlevels!.push(record.rlevels![i]);
-      column.dlevels!.push(record.dlevels![i]);
-      if (record.values![i] !== undefined) {
-        column.values!.push(record.values![i]);
+    // Efficient array concatenation instead of O(n²) push operations
+    if (record.rlevels && record.rlevels.length > 0) {
+      column.rlevels!.push(...record.rlevels);
+      column.dlevels!.push(...record.dlevels!);
+      
+      // Filter and concatenate values that are not undefined
+      const validValues = record.values!.filter(v => v !== undefined);
+      if (validValues.length > 0) {
+        column.values!.push(...validValues);
       }
     }
 

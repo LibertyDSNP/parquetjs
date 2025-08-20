@@ -164,9 +164,8 @@ export const decodeValues = function (
       res = decodeRunRepeated(cursor, header >> 1, opts);
     }
 
-    for (let i = 0; i < res.length; i++) {
-      values.push(res[i]);
-    }
+    // Efficient array concatenation instead of O(n²) push operations
+    values.push(...res);
   }
   values = values.slice(0, count);
 

@@ -946,12 +946,18 @@ async function decodePages(buffer: Buffer, opts: Options) {
 
     const length = pageData.rlevels != undefined ? pageData.rlevels.length : 0;
 
-    for (let i = 0; i < length; i++) {
-      data.rlevels!.push(pageData.rlevels![i]);
-      data.dlevels!.push(pageData.dlevels![i]);
-      const value = pageData.values![i];
-      if (value !== undefined) {
-        data.values!.push(value);
+    // Efficient array concatenation instead of O(n²) push operations
+    if (length > 0) {
+      // Concatenate arrays directly instead of element-by-element push
+      data.rlevels!.push(...pageData.rlevels!);
+      data.dlevels!.push(...pageData.dlevels!);
+      
+      // For values, we need to filter out undefined values
+      if (pageData.values && pageData.values.length > 0) {
+        const validValues = pageData.values.filter(v => v !== undefined);
+        if (validValues.length > 0) {
+          data.values!.push(...validValues);
+        }
       }
     }
     data.count! += pageData.count!;
