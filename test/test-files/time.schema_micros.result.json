@@ -23,7 +23,11 @@
         "UNKNOWN": null,
         "JSON": null,
         "BSON": null,
-        "UUID": null
+        "UUID": null,
+        "FLOAT16": null,
+        "VARIANT": null,
+        "GEOMETRY": null,
+        "GEOGRAPHY": null
       },
       "encoding": "PLAIN",
       "compression": "UNCOMPRESSED"
@@ -54,7 +58,11 @@
         "UNKNOWN": null,
         "JSON": null,
         "BSON": null,
-        "UUID": null
+        "UUID": null,
+        "FLOAT16": null,
+        "VARIANT": null,
+        "GEOMETRY": null,
+        "GEOGRAPHY": null
       },
       "path": ["time_field"],
       "repetitionType": "REQUIRED",
@@ -89,7 +97,11 @@
         "UNKNOWN": null,
         "JSON": null,
         "BSON": null,
-        "UUID": null
+        "UUID": null,
+        "FLOAT16": null,
+        "VARIANT": null,
+        "GEOMETRY": null,
+        "GEOGRAPHY": null
       },
       "path": ["time_field"],
       "repetitionType": "REQUIRED",

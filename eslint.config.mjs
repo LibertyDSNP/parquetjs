@@ -7,7 +7,7 @@ import globals from 'globals';
 
 export default tseslint.config(
   eslint.configs.recommended,
-  mochaPlugin.configs.flat.recommended,
+  mochaPlugin.configs.recommended,
   ...tseslint.configs.strict,
   ...tseslint.configs.stylistic,
   {
@@ -55,6 +55,7 @@ export default tseslint.config(
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
+      'mocha/consistent-spacing-between-blocks': 'off',
     },
   }
 );
