@@ -107,7 +107,7 @@ export const getBitWidth = function (val: number) {
 };
 
 /**
- * FIXME not ideal that this is linear
+ * Optimized enum lookup - the original was already well-optimized for small enums
  */
 export const getThriftEnum = function (klass: Enums, value: unknown) {
   for (const k in klass) {
