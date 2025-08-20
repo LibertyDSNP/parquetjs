@@ -518,14 +518,14 @@ async function encodePages(
       page,
       statistics,
       first_row_index,
-      distinct_values: values.distinct_values!,
+      distinct_values: new Set(values.distinct_values!),
       num_values: values.dlevels!.length,
     });
 
-    values.distinct_values = new Set();
-    values.values = [];
-    values.rlevels = [];
-    values.dlevels = [];
+    values.distinct_values!.clear();
+    values.values!.length = 0;
+    values.rlevels!.length = 0;
+    values.dlevels!.length = 0;
     values.count = 0;
   }
 
@@ -759,7 +759,9 @@ async function encodeRowGroup(schema: ParquetSchema, data: parquet_shredder.Reco
   metadata.columns = [];
   metadata.total_byte_size = new Int64(0);
 
-  let body = Buffer.alloc(0);
+  const bodyParts: Buffer[] = [];
+  let totalBodyLength = 0;
+  
   for (const field of schema.fieldList) {
     if (field.isNested) {
       continue;
@@ -767,7 +769,7 @@ async function encodeRowGroup(schema: ParquetSchema, data: parquet_shredder.Reco
 
     const cchunkData = await encodeColumnChunk(data.pages![field.path.join(',')], {
       column: field,
-      baseOffset: opts.baseOffset!.valueOf() + body.length,
+      baseOffset: opts.baseOffset!.valueOf() + totalBodyLength,
       pageSize: opts.pageSize || 0,
       rowCount: data.rowCount || 0,
       useDataPageV2: opts.useDataPageV2 ?? true,
@@ -780,8 +782,11 @@ async function encodeRowGroup(schema: ParquetSchema, data: parquet_shredder.Reco
     metadata.columns.push(cchunk);
     metadata.total_byte_size = new Int64(metadata.total_byte_size.valueOf() + cchunkData.body.length);
 
-    body = Buffer.concat([body, cchunkData.body]);
+    bodyParts.push(cchunkData.body);
+    totalBodyLength += cchunkData.body.length;
   }
+
+  const body = Buffer.concat(bodyParts);
 
   return { body, metadata };
 }

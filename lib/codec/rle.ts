@@ -62,7 +62,7 @@ export const encodeValues = function (
       throw new Error('unsupported type: ' + type);
   }
 
-  let buf = Buffer.alloc(0);
+  const buffers: Buffer[] = [];
   let run = [];
   let repeats = 0;
 
@@ -72,7 +72,7 @@ export const encodeValues = function (
     if (repeats === 0 && run.length % 8 === 0 && values[i] === values[i + 1]) {
       // If we have any data in runs we need to encode them
       if (run.length) {
-        buf = Buffer.concat([buf, encodeRunBitpacked(run, opts)]);
+        buffers.push(encodeRunBitpacked(run, opts));
         run = [];
       }
       repeats = 1;
@@ -81,7 +81,7 @@ export const encodeValues = function (
     } else {
       // If values changes we need to post any previous repeated values
       if (repeats) {
-        buf = Buffer.concat([buf, encodeRunRepeated(values[i - 1], repeats, opts)]);
+        buffers.push(encodeRunRepeated(values[i - 1], repeats, opts));
         repeats = 0;
       }
       run.push(values[i]);
@@ -89,10 +89,12 @@ export const encodeValues = function (
   }
 
   if (repeats) {
-    buf = Buffer.concat([buf, encodeRunRepeated(values[values.length - 1], repeats, opts)]);
+    buffers.push(encodeRunRepeated(values[values.length - 1], repeats, opts));
   } else if (run.length) {
-    buf = Buffer.concat([buf, encodeRunBitpacked(run, opts)]);
+    buffers.push(encodeRunBitpacked(run, opts));
   }
+
+  const buf = Buffer.concat(buffers);
 
   if (opts.disableEnvelope) {
     return buf;
