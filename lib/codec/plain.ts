@@ -14,8 +14,8 @@ function encodeValues_BOOLEAN(values: boolean[]) {
   return buf;
 }
 
-function decodeValues_BOOLEAN(cursor: Cursor, count: number) {
-  const values = [];
+function decodeValues_BOOLEAN(cursor: Cursor, count: number): boolean[] {
+  const values: boolean[] = [];
 
   for (let i = 0; i < count; ++i) {
     const b = cursor.buffer[cursor.offset + Math.floor(i / 8)];
@@ -41,8 +41,8 @@ function encodeValues_INT32(values: number[], opts: Options) {
   return buf;
 }
 
-function decodeValues_INT32(cursor: Cursor, count: number, opts: Options) {
-  let values = [];
+function decodeValues_INT32(cursor: Cursor, count: number, opts: Options): number[] {
+  let values: number[] = [];
   const name = opts.name || opts.column?.name || undefined;
   try {
     if (opts.originalType === 'DECIMAL') {
@@ -76,8 +76,8 @@ function encodeValues_INT64(values: number[], opts: Options) {
   return buf;
 }
 
-function decodeValues_INT64(cursor: Cursor, count: number, opts: Options) {
-  let values = [];
+function decodeValues_INT64(cursor: Cursor, count: number, opts: Options): (number | bigint)[] {
+  let values: (number | bigint)[] = [];
   const name = opts.name || opts.column?.name || undefined;
   try {
     if (opts.originalType === 'DECIMAL' || opts.column?.originalType === 'DECIMAL') {
@@ -97,7 +97,7 @@ function decodeValues_INT64(cursor: Cursor, count: number, opts: Options) {
   return values;
 }
 
-function decodeValues_DECIMAL(cursor: Cursor, count: number, opts: Options) {
+function decodeValues_DECIMAL(cursor: Cursor, count: number, opts: Options): number[] {
   const precision = opts.precision;
   // Default scale to 0 per spec
   const scale = opts.scale || 0;
@@ -107,7 +107,7 @@ function decodeValues_DECIMAL(cursor: Cursor, count: number, opts: Options) {
     throw new Error(`missing option: precision (required for DECIMAL) for column: ${name}`);
   }
 
-  const values = [];
+  const values: number[] = [];
 
   // by default we prepare the offset and bufferFunction to work with 32bit integers
   let offset = 4;
@@ -146,8 +146,8 @@ function encodeValues_INT96(values: number[]) {
   return buf;
 }
 
-function decodeValues_INT96(cursor: Cursor, count: number, opts?: Options) {
-  const values = [];
+function decodeValues_INT96(cursor: Cursor, count: number, opts?: Options): (Date | number)[] {
+  const values: (Date | number)[] = [];
   // Default to false for backward compatibility
   const treatAsTimestamp = opts?.treatInt96AsTimestamp === true;
 
@@ -208,8 +208,8 @@ function encodeValues_FLOAT(values: number[]) {
   return buf;
 }
 
-function decodeValues_FLOAT(cursor: Cursor, count: number) {
-  const values = [];
+function decodeValues_FLOAT(cursor: Cursor, count: number): number[] {
+  const values: number[] = [];
 
   for (let i = 0; i < count; ++i) {
     values.push(cursor.buffer.readFloatLE(cursor.offset));
@@ -228,8 +228,8 @@ function encodeValues_DOUBLE(values: number[]) {
   return buf;
 }
 
-function decodeValues_DOUBLE(cursor: Cursor, count: number) {
-  const values = [];
+function decodeValues_DOUBLE(cursor: Cursor, count: number): number[] {
+  const values: number[] = [];
 
   for (let i = 0; i < count; ++i) {
     values.push(cursor.buffer.readDoubleLE(cursor.offset));
@@ -258,8 +258,8 @@ function encodeValues_BYTE_ARRAY(values: Uint8Array[]) {
   return buf;
 }
 
-function decodeValues_BYTE_ARRAY(cursor: Cursor, count: number) {
-  const values = [];
+function decodeValues_BYTE_ARRAY(cursor: Cursor, count: number): Buffer[] {
+  const values: Buffer[] = [];
 
   for (let i = 0; i < count; ++i) {
     const len = cursor.buffer.readUInt32LE(cursor.offset);
@@ -288,8 +288,8 @@ function encodeValues_FIXED_LEN_BYTE_ARRAY(values: Uint8Array[], opts: Options) 
   return Buffer.concat(returnedValues);
 }
 
-function decodeValues_FIXED_LEN_BYTE_ARRAY(cursor: Cursor, count: number, opts: Options) {
-  const values = [];
+function decodeValues_FIXED_LEN_BYTE_ARRAY(cursor: Cursor, count: number, opts: Options): Buffer[] {
+  const values: Buffer[] = [];
   const typeLength = opts.typeLength ?? (opts.column ? opts.column.typeLength : undefined);
   if (!typeLength) {
     throw new Error('missing option: typeLength (required for FIXED_LEN_BYTE_ARRAY)');
@@ -344,7 +344,10 @@ export const encodeValues = function (type: ValidValueTypes | string, values: un
   }
 };
 
-export const decodeValues = function (type: ValidValueTypes | string, cursor: Cursor, count: number, opts: Options) {
+// Union type for all possible decoded values from PLAIN codec
+export type PlainDecodedValue = boolean | number | bigint | Date | Buffer;
+
+export const decodeValues = function (type: ValidValueTypes | string, cursor: Cursor, count: number, opts: Options): PlainDecodedValue[] {
   switch (type) {
     case 'BOOLEAN':
       return decodeValues_BOOLEAN(cursor, count);

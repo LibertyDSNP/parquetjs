@@ -6,7 +6,7 @@ import * as parquet_codec from './codec';
 import * as parquet_compression from './compression';
 import * as parquet_types from './types';
 import * as bloomFilterWriter from './bloomFilterIO/bloomFilterWriter';
-import { WriterOptions, ParquetCodec, ParquetField, ColumnMetaDataExt, RowGroupExt, Page } from './declare';
+import { WriterOptions, ParquetCodec, ParquetField, ColumnMetaDataExt, RowGroupExt, Page, AllDecodedValue } from './declare';
 import { Options } from './codec/types';
 import { ParquetSchema } from './schema';
 import Int64 from 'node-int64';
@@ -381,7 +381,7 @@ export class ParquetTransformer extends stream.Transform {
 /**
  * Encode a consecutive array of data using one of the parquet encodings
  */
-function encodeValues(type: string, encoding: ParquetCodec, values: number[], opts: any) {
+function encodeValues(type: string, encoding: ParquetCodec, values: AllDecodedValue[], opts: any) {
   if (!(encoding in parquet_codec)) {
     throw new Error('invalid encoding: ' + encoding);
   }
@@ -537,7 +537,7 @@ async function encodePages(
  */
 async function encodeDataPage(
   column: ParquetField,
-  values: number[],
+  values: AllDecodedValue[],
   rlevels: number[],
   dlevels: number[],
   statistics: parquet_thrift.Statistics
@@ -591,7 +591,7 @@ async function encodeDataPage(
 async function encodeDataPageV2(
   column: ParquetField,
   rowCount: number,
-  values: number[],
+  values: AllDecodedValue[],
   rlevels: number[],
   dlevels: number[],
   statistics: parquet_thrift.Statistics

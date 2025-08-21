@@ -1,6 +1,6 @@
 'use strict';
 // Thanks to https://github.com/kbajalc/parquets for some of the code.
-import { PrimitiveType, OriginalType, ParquetType, FieldDefinition, ParquetField } from './declare';
+import { PrimitiveType, OriginalType, ParquetType, FieldDefinition, ParquetField, AllDecodedValue } from './declare';
 import { Options } from './codec/types';
 import type { Document as BsonDocument } from 'bson';
 // BSON uses top level awaits, so use require for now
@@ -270,7 +270,7 @@ function isParquetType(type: string | undefined): type is ParquetType {
  * Convert a value from it's native representation to the internal/underlying
  * primitive type
  */
-export function toPrimitive(type: string | undefined, value: unknown, field?: ParquetField | Options) {
+export function toPrimitive(type: string | undefined, value: unknown, field?: ParquetField | Options): AllDecodedValue {
   if (!isParquetType(type)) {
     throw new Error('invalid type: ' + type || 'undefined');
   }
