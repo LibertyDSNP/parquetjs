@@ -80,7 +80,6 @@ describe('Metadata MinMax', function () {
     });
   });
 
-
   describe('Timestamp Comparison', function () {
     it('correctly chooses the min and max for timestamps', async function () {
       const intSchema = new ParquetSchema({
@@ -103,7 +102,6 @@ describe('Metadata MinMax', function () {
 
       expect(+(stats?.min as unknown as Date)).to.deep.equal(33);
       expect(+(stats?.max as unknown as Date)).to.deep.equal(911_933);
-
-    })
-  })
+    });
+  });
 });

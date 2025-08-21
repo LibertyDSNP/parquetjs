@@ -447,7 +447,7 @@ function compareStatisticsGtLt<T>(
   return result;
 }
 
-function compareStatistics<T extends Uint8Array | number | string | bigint | boolean | Date >(
+function compareStatistics<T extends Uint8Array | number | string | bigint | boolean | Date>(
   potential: T,
   statistics: parquet_thrift.Statistics
 ): { min_value?: T; max_value?: T } {
