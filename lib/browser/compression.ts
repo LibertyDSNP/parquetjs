@@ -49,7 +49,7 @@ function deflate_identity(value: ArrayBuffer | Buffer | Uint8Array) {
   return buffer_from_result(value);
 }
 
-async function deflate_gzip(value: ArrayBuffer | Buffer | string) {
+async function deflate_gzip(value: ArrayBuffer | string) {
   const cs = new CompressionStream('gzip');
   const pipedCs = new Response(value).body?.pipeThrough(cs);
   return buffer_from_result(await new Response(pipedCs).arrayBuffer());
@@ -79,7 +79,7 @@ async function inflate_identity(value: ArrayBuffer | Buffer | Uint8Array): Promi
   return buffer_from_result(value);
 }
 
-async function inflate_gzip(value: Buffer | ArrayBuffer | string) {
+async function inflate_gzip(value: ArrayBuffer | string) {
   const ds = new DecompressionStream('gzip');
   const pipedDs = new Response(value).body?.pipeThrough(ds);
   return buffer_from_result(await new Response(pipedDs).arrayBuffer());
