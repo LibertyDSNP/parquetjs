@@ -14,6 +14,7 @@ import {
   RowGroupExt,
   Page,
   AllDecodedValue,
+  RawStatistics,
 } from './declare';
 import { Options } from './codec/types';
 import { ParquetSchema } from './schema';
@@ -433,7 +434,10 @@ function encodeStatisticsValue(value: any, column: ParquetField | Options) {
   return value;
 }
 
-function encodeStatistics(statistics: parquet_thrift.Statistics, column: ParquetField | Options) {
+function encodeStatistics(
+  statistics: RawStatistics<AllDecodedValue>,
+  column: ParquetField | Options
+): parquet_thrift.Statistics {
   statistics = Object.assign({}, statistics);
   statistics.min_value =
     statistics.min_value === undefined ? null : encodeStatisticsValue(statistics.min_value, column);
@@ -443,12 +447,12 @@ function encodeStatistics(statistics: parquet_thrift.Statistics, column: Parquet
   statistics.max = statistics.max_value;
   statistics.min = statistics.min_value;
 
-  return new parquet_thrift.Statistics(statistics);
+  return new parquet_thrift.Statistics(statistics as RawStatistics<Buffer>);
 }
 
-function compareStatisticsBuffer<T extends Uint8Array>(
+function compareStatisticsBuffer<T extends Buffer>(
   potential: T,
-  statistics: parquet_thrift.Statistics
+  statistics: RawStatistics<T>
 ): { min_value?: T; max_value?: T } {
   const result: { min_value?: T; max_value?: T } = {};
   // === 1 means the first value is greater
@@ -462,9 +466,9 @@ function compareStatisticsBuffer<T extends Uint8Array>(
   return result;
 }
 
-function compareStatisticsGtLt<T>(
+function compareStatisticsGtLt<T extends Exclude<AllDecodedValue, Buffer>>(
   potential: T,
-  statistics: parquet_thrift.Statistics
+  statistics: RawStatistics<T>
 ): { min_value?: T; max_value?: T } {
   const result: { min_value?: T; max_value?: T } = {};
   // === 1 means the first value is greater
@@ -478,12 +482,13 @@ function compareStatisticsGtLt<T>(
   return result;
 }
 
-function compareStatistics<T extends Uint8Array | number | string | bigint | boolean>(
+function compareStatistics<T extends AllDecodedValue>(
   potential: T,
-  statistics: parquet_thrift.Statistics
+  statistics: RawStatistics<T>
 ): { min_value?: T; max_value?: T } {
-  if (parquet_types.isUint8Array(potential)) return compareStatisticsBuffer(potential, statistics);
-  return compareStatisticsGtLt(potential, statistics);
+  if (parquet_types.isUint8Array(potential))
+    return compareStatisticsBuffer(potential, statistics as RawStatistics<Buffer>) as any;
+  return compareStatisticsGtLt(potential, statistics as RawStatistics<Exclude<AllDecodedValue, Buffer>>) as any;
 }
 
 async function encodePages(
@@ -511,35 +516,30 @@ async function encodePages(
       values.values!.forEach((v) => splitBlockBloomFilter.insert(v));
     }
 
-    let statistics: parquet_thrift.Statistics = {};
+    let rawStatistics: RawStatistics<AllDecodedValue> = {};
     if (field.statistics !== false) {
-      statistics = {};
+      rawStatistics = {};
       [...values.distinct_values!].forEach((v, i) => {
         if (i === 0) {
-          statistics.max_value = v;
-          statistics.min_value = v;
+          rawStatistics.max_value = v;
+          rawStatistics.min_value = v;
         } else {
-          const { min_value, max_value } = compareStatistics(v, statistics);
-          if (min_value !== undefined) statistics.min_value = min_value;
-          if (max_value !== undefined) statistics.max_value = max_value;
+          const { min_value, max_value } = compareStatistics(v, rawStatistics);
+          if (min_value !== undefined) rawStatistics.min_value = min_value;
+          if (max_value !== undefined) rawStatistics.max_value = max_value;
         }
       });
 
-      statistics.null_count = new Int64(values.dlevels!.length - values.values!.length);
-      statistics.distinct_count = new Int64(values.distinct_values!.size);
+      rawStatistics.null_count = new Int64(values.dlevels!.length - values.values!.length);
+      rawStatistics.distinct_count = new Int64(values.distinct_values!.size);
     }
 
+    const statistics: parquet_thrift.Statistics = encodeStatistics(rawStatistics, field);
+
     if (opts.useDataPageV2) {
-      page = await encodeDataPageV2(
-        field,
-        values.count!,
-        values.values!,
-        values.rlevels!,
-        values.dlevels!,
-        statistics!
-      );
+      page = await encodeDataPageV2(field, values.count!, values.values!, values.rlevels!, values.dlevels!, statistics);
     } else {
-      page = await encodeDataPage(field, values.values || [], values.rlevels || [], values.dlevels || [], statistics!);
+      page = await encodeDataPage(field, values.values || [], values.rlevels || [], values.dlevels || [], statistics);
     }
 
     const pages = rowBuffer.pages![field.path.join(',')];
@@ -605,7 +605,7 @@ async function encodeDataPage(
   pageHeader.data_page_header = new parquet_thrift.DataPageHeader();
   pageHeader.data_page_header.num_values = dlevels.length;
   if (column.statistics !== false) {
-    pageHeader.data_page_header.statistics = encodeStatistics(statistics, column);
+    pageHeader.data_page_header.statistics = statistics;
   }
 
   pageHeader.data_page_header.encoding = parquet_thrift.Encoding[column.encoding!];
@@ -661,7 +661,7 @@ async function encodeDataPageV2(
   pageHeader.data_page_header_v2.num_rows = rowCount;
 
   if (column.statistics !== false) {
-    pageHeader.data_page_header_v2.statistics = encodeStatistics(statistics, column);
+    pageHeader.data_page_header_v2.statistics = statistics;
   }
 
   pageHeader.uncompressed_page_size = rLevelsBuf.length + dLevelsBuf.length + valuesBuf.length;

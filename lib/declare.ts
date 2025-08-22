@@ -289,3 +289,14 @@ export interface Page {
   num_values: number;
   count?: number;
 }
+
+export interface RawStatistics<T extends AllDecodedValue> {
+  max?: T;
+  min?: T;
+  null_count?: Int64;
+  distinct_count?: Int64;
+  max_value?: T;
+  min_value?: T;
+  is_max_value_exact?: boolean;
+  is_min_value_exact?: boolean;
+}

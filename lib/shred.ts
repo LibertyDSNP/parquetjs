@@ -182,6 +182,7 @@ function shredRecordInternal(
           data[path].dlevels!.push(field.dLevelMax);
           data[path].count! += 1;
         } else {
+          console.log('value', value);
           throw new Error(`Invalid value type for field ${fieldName}: ${typeof value}`);
         }
       }
