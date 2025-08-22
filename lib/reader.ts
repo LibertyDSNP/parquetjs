@@ -22,6 +22,7 @@ import {
   NewPageHeader,
   RowGroupExt,
   ColumnChunkExt,
+  AllDecodedValue,
 } from './declare';
 import { Cursor, Options } from './codec/types';
 import { GetObjectCommand, HeadObjectCommand, S3Client } from '@aws-sdk/client-s3';
@@ -820,7 +821,7 @@ function decodeValues(
   cursor: Cursor,
   count: number,
   opts: Options | { bitWidth: number }
-) {
+): AllDecodedValue[] | number[] {
   if (!(encoding in parquet_codec)) {
     throw new Error('invalid encoding: ' + encoding);
   }
@@ -1000,7 +1001,7 @@ async function decodeDictionaryPage(cursor: Cursor, header: parquet_thrift.PageH
   );
 }
 
-async function decodeDataPage(cursor: Cursor, header: parquet_thrift.PageHeader, opts: Options) {
+async function decodeDataPage(cursor: Cursor, header: parquet_thrift.PageHeader, opts: Options): Promise<PageData> {
   const cursorEnd = cursor.offset + header.compressed_page_size;
 
   const dataPageHeader = header.data_page_header!;
@@ -1067,16 +1068,28 @@ async function decodeDataPage(cursor: Cursor, header: parquet_thrift.PageHeader,
 
   cursor.offset = cursorEnd;
 
-  return {
-    dlevels: dLevels,
-    rlevels: rLevels,
-    values: values,
-    count: valueCount,
-    useDictionary: valueEncoding === 'PLAIN_DICTIONARY' || valueEncoding === 'RLE_DICTIONARY',
-  };
+  const isDictionaryEncoding = valueEncoding === 'PLAIN_DICTIONARY' || valueEncoding === 'RLE_DICTIONARY';
+  
+  if (isDictionaryEncoding) {
+    return {
+      dlevels: dLevels,
+      rlevels: rLevels,
+      values: values as number[],
+      count: valueCount,
+      useDictionary: true,
+    };
+  } else {
+    return {
+      dlevels: dLevels,
+      rlevels: rLevels,
+      values: values as AllDecodedValue[],
+      count: valueCount,
+      useDictionary: false,
+    };
+  }
 }
 
-async function decodeDataPageV2(cursor: Cursor, header: parquet_thrift.PageHeader, opts: Options) {
+async function decodeDataPageV2(cursor: Cursor, header: parquet_thrift.PageHeader, opts: Options): Promise<PageData> {
   const cursorEnd = cursor.offset + header.compressed_page_size;
   const dataPageHeaderV2 = header.data_page_header_v2!;
 
@@ -1130,13 +1143,25 @@ async function decodeDataPageV2(cursor: Cursor, header: parquet_thrift.PageHeade
     ...opts.column!,
   });
 
-  return {
-    dlevels: dLevels,
-    rlevels: rLevels,
-    values: values,
-    count: valueCount,
-    useDictionary: valueEncoding === 'PLAIN_DICTIONARY' || valueEncoding === 'RLE_DICTIONARY',
-  };
+  const isDictionaryEncoding = valueEncoding === 'PLAIN_DICTIONARY' || valueEncoding === 'RLE_DICTIONARY';
+  
+  if (isDictionaryEncoding) {
+    return {
+      dlevels: dLevels,
+      rlevels: rLevels,
+      values: values as number[],
+      count: valueCount,
+      useDictionary: true,
+    };
+  } else {
+    return {
+      dlevels: dLevels,
+      rlevels: rLevels,
+      values: values as AllDecodedValue[],
+      count: valueCount,
+      useDictionary: false,
+    };
+  }
 }
 
 function decodeSchema(schemaElements: parquet_thrift.SchemaElement[]) {

@@ -161,18 +161,28 @@ export interface Parameter {
 // Union type combining all possible decoded values from all Parquet codecs
 export type AllDecodedValue = PlainDecodedValue | RleDecodedValue | PlainDictionaryDecodedValue | DeltaBinaryPackedDecodedValue | DeltaLengthByteArrayDecodedValue | DeltaByteArrayDecodedValue | ByteStreamSplitDecodedValue | BitPackedDecodedValue;
 
-export interface PageData {
+interface BasePageData {
   rlevels?: number[];
   dlevels?: number[];
   distinct_values?: Set<AllDecodedValue>;
-  values?: AllDecodedValue[]; // Never contains null or undefined - guaranteed by codec implementations
   pageHeaders?: PageHeader[];
   pageHeader?: PageHeader;
   count?: number;
   dictionary?: AllDecodedValue[];
   column?: parquet_thrift.ColumnChunk;
-  useDictionary?: boolean;
 }
+
+interface DictionaryPageData extends BasePageData {
+  useDictionary: true;
+  values?: number[]; // Dictionary indices
+}
+
+interface DirectPageData extends BasePageData {
+  useDictionary?: false;
+  values?: AllDecodedValue[]; // Direct decoded values
+}
+
+export type PageData = DictionaryPageData | DirectPageData;
 
 export declare class PageHeader {
   type: PageType;
