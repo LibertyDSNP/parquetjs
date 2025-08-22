@@ -1,6 +1,20 @@
 import * as parquet_types from './types';
 import { ParquetSchema } from './schema';
-import { Page, PageData, ParquetField } from './declare';
+import { Page, PageData, ParquetField, AllDecodedValue, DirectPageData } from './declare';
+
+// Type guard to validate if a value is a valid input for Parquet processing
+function isValidParquetValue(value: unknown): value is AllDecodedValue {
+  return (
+    value !== null &&
+    value !== undefined &&
+    (typeof value === 'boolean' ||
+      typeof value === 'number' ||
+      typeof value === 'bigint' ||
+      value instanceof Date ||
+      Buffer.isBuffer(value) ||
+      typeof value === 'string')
+  );
+}
 
 /**
  * 'Shred' a record into a list of <value, repetition_level, definition_level>
@@ -35,7 +49,7 @@ export interface RecordBuffer {
 
 export const shredRecord = function (schema: ParquetSchema, record: Record<string, unknown>, buffer: RecordBuffer) {
   /* shred the record, this may raise an exception */
-  const recordShredded: Record<string, PageData> = {};
+  const recordShredded: Record<string, DirectPageData> = {};
   for (const field of schema.fieldList) {
     recordShredded[field.path.join(',')] = {
       dlevels: [],
@@ -43,6 +57,7 @@ export const shredRecord = function (schema: ParquetSchema, record: Record<strin
       values: [],
       distinct_values: new Set(),
       count: 0,
+      useDictionary: false,
     };
   }
 
@@ -63,6 +78,7 @@ export const shredRecord = function (schema: ParquetSchema, record: Record<strin
         values: [],
         distinct_values: new Set(),
         count: 0,
+        useDictionary: false, // During shredding, we always use direct values
       };
       buffer.pages[path] = [];
     }
@@ -74,16 +90,23 @@ export const shredRecord = function (schema: ParquetSchema, record: Record<strin
     const path = field.path.join(',');
     const record = recordShredded[path];
     const column = buffer.columnData![path];
+    if (!column.values) column.values = [];
 
     // Efficient array concatenation instead of O(n²) push operations
     if (record.rlevels && record.rlevels.length > 0) {
       column.rlevels!.push(...record.rlevels);
       column.dlevels!.push(...record.dlevels!);
-      
+
       // Filter and concatenate values that are not undefined
-      const validValues = record.values!.filter(v => v !== undefined);
+      const validValues = record.values!.filter((v): v is AllDecodedValue => v !== undefined);
       if (validValues.length > 0) {
-        column.values!.push(...validValues);
+        // During shredding, we always use direct values (not dictionary indices)
+        if (!column.useDictionary) {
+          column.values.push(...validValues);
+        } else {
+          // This shouldn't happen during shredding, but handle gracefully
+          throw new Error('Dictionary encoding should not be used during shredding phase');
+        }
       }
     }
 
@@ -96,7 +119,7 @@ export const shredRecord = function (schema: ParquetSchema, record: Record<strin
 function shredRecordInternal(
   fields: Record<string, ParquetField>,
   record: Record<string, unknown> | null,
-  data: Record<string, PageData>,
+  data: Record<string, DirectPageData>,
   rlvl: number,
   dlvl: number
 ) {
@@ -151,11 +174,16 @@ function shredRecordInternal(
       if (field.isNested && isDefined(field.fields)) {
         shredRecordInternal(field.fields, values[i] as Record<string, unknown>, data, rlvl_i, field.dLevelMax);
       } else {
-        data[path].distinct_values!.add(values[i]);
-        data[path].values!.push(parquet_types.toPrimitive(fieldType as string, values[i], field));
-        data[path].rlevels!.push(rlvl_i);
-        data[path].dlevels!.push(field.dLevelMax);
-        data[path].count! += 1;
+        const value = values[i];
+        if (isValidParquetValue(value)) {
+          data[path].distinct_values!.add(value);
+          data[path].values!.push(parquet_types.toPrimitive(fieldType as string, value, field));
+          data[path].rlevels!.push(rlvl_i);
+          data[path].dlevels!.push(field.dLevelMax);
+          data[path].count! += 1;
+        } else {
+          throw new Error(`Invalid value type for field ${fieldName}: ${typeof value}`);
+        }
       }
     }
   }

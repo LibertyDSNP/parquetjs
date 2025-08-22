@@ -24,7 +24,16 @@ import SplitBlockBloomFilter from './bloom/sbbf';
 import { createSBBFParams } from './bloomFilterIO/bloomFilterWriter';
 import Int64 from 'node-int64';
 
-export type ParquetCodec = 'PLAIN' | 'RLE' | 'PLAIN_DICTIONARY' | 'RLE_DICTIONARY' | 'DELTA_BINARY_PACKED' | 'DELTA_LENGTH_BYTE_ARRAY' | 'DELTA_BYTE_ARRAY' | 'BYTE_STREAM_SPLIT' | 'BIT_PACKED';
+export type ParquetCodec =
+  | 'PLAIN'
+  | 'RLE'
+  | 'PLAIN_DICTIONARY'
+  | 'RLE_DICTIONARY'
+  | 'DELTA_BINARY_PACKED'
+  | 'DELTA_LENGTH_BYTE_ARRAY'
+  | 'DELTA_BYTE_ARRAY'
+  | 'BYTE_STREAM_SPLIT'
+  | 'BIT_PACKED';
 export type ParquetCompression = 'UNCOMPRESSED' | 'GZIP' | 'SNAPPY' | 'LZO' | 'BROTLI' | 'LZ4';
 export type RepetitionType = 'REQUIRED' | 'OPTIONAL' | 'REPEATED';
 export type ParquetType = PrimitiveType | OriginalType;
@@ -159,7 +168,15 @@ export interface Parameter {
 }
 
 // Union type combining all possible decoded values from all Parquet codecs
-export type AllDecodedValue = PlainDecodedValue | RleDecodedValue | PlainDictionaryDecodedValue | DeltaBinaryPackedDecodedValue | DeltaLengthByteArrayDecodedValue | DeltaByteArrayDecodedValue | ByteStreamSplitDecodedValue | BitPackedDecodedValue;
+export type AllDecodedValue =
+  | PlainDecodedValue
+  | RleDecodedValue
+  | PlainDictionaryDecodedValue
+  | DeltaBinaryPackedDecodedValue
+  | DeltaLengthByteArrayDecodedValue
+  | DeltaByteArrayDecodedValue
+  | ByteStreamSplitDecodedValue
+  | BitPackedDecodedValue;
 
 interface BasePageData {
   rlevels?: number[];
@@ -177,7 +194,7 @@ interface DictionaryPageData extends BasePageData {
   values?: number[]; // Dictionary indices
 }
 
-interface DirectPageData extends BasePageData {
+export interface DirectPageData extends BasePageData {
   useDictionary?: false;
   values?: AllDecodedValue[]; // Direct decoded values
 }
