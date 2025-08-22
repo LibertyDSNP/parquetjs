@@ -422,7 +422,7 @@ function encodeValues(type: string, encoding: ParquetCodec, values: AllDecodedVa
 }
 
 function encodeStatisticsValue(value: any, column: ParquetField | Options) {
-  if (value === undefined) {
+  if (value === undefined || value === null) {
     return Buffer.alloc(0);
   }
   if (column.originalType) {
@@ -439,10 +439,8 @@ function encodeStatistics(
   column: ParquetField | Options
 ): parquet_thrift.Statistics {
   statistics = Object.assign({}, statistics);
-  statistics.min_value =
-    statistics.min_value === undefined ? null : encodeStatisticsValue(statistics.min_value, column);
-  statistics.max_value =
-    statistics.max_value === undefined ? null : encodeStatisticsValue(statistics.max_value, column);
+  statistics.min_value = encodeStatisticsValue(statistics.min_value, column);
+  statistics.max_value = encodeStatisticsValue(statistics.max_value, column);
 
   statistics.max = statistics.max_value;
   statistics.min = statistics.min_value;
