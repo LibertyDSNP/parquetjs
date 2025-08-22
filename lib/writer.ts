@@ -6,7 +6,15 @@ import * as parquet_codec from './codec';
 import * as parquet_compression from './compression';
 import * as parquet_types from './types';
 import * as bloomFilterWriter from './bloomFilterIO/bloomFilterWriter';
-import { WriterOptions, ParquetCodec, ParquetField, ColumnMetaDataExt, RowGroupExt, Page, AllDecodedValue } from './declare';
+import {
+  WriterOptions,
+  ParquetCodec,
+  ParquetField,
+  ColumnMetaDataExt,
+  RowGroupExt,
+  Page,
+  AllDecodedValue,
+} from './declare';
 import { Options } from './codec/types';
 import { ParquetSchema } from './schema';
 import Int64 from 'node-int64';
@@ -386,7 +394,30 @@ function encodeValues(type: string, encoding: ParquetCodec, values: AllDecodedVa
     throw new Error('invalid encoding: ' + encoding);
   }
 
-  return parquet_codec[encoding].encodeValues(type, values, opts);
+  if (encoding === 'PLAIN_DICTIONARY' || encoding === 'RLE_DICTIONARY') {
+    throw new Error('Dictionary encodings are not yet implemented in writer!');
+  }
+
+  // Handle different codec input type requirements
+  switch (encoding) {
+    case 'PLAIN':
+      return parquet_codec.PLAIN.encodeValues(type, values, opts);
+      
+    case 'RLE':
+    case 'DELTA_BINARY_PACKED': 
+    case 'BIT_PACKED':
+      return parquet_codec[encoding].encodeValues(type, values as number[], opts);
+      
+    case 'DELTA_LENGTH_BYTE_ARRAY':
+    case 'DELTA_BYTE_ARRAY':
+      return parquet_codec[encoding].encodeValues(type, values as (Buffer | Uint8Array | string)[], opts);
+      
+    case 'BYTE_STREAM_SPLIT':
+      return parquet_codec.BYTE_STREAM_SPLIT.encodeValues(type, values as (number | Buffer | Uint8Array)[], opts);
+      
+    default:
+      throw new Error(`Unsupported encoding: ${encoding}`);
+  }
 }
 
 function encodeStatisticsValue(value: any, column: ParquetField | Options) {
@@ -761,7 +792,7 @@ async function encodeRowGroup(schema: ParquetSchema, data: parquet_shredder.Reco
 
   const bodyParts: Buffer[] = [];
   let totalBodyLength = 0;
-  
+
   for (const field of schema.fieldList) {
     if (field.isNested) {
       continue;
