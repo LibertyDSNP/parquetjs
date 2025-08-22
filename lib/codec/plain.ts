@@ -1,5 +1,6 @@
 import INT53 from 'int53';
 import { Cursor, Options } from './types';
+import { isAnyArrayBuffer } from 'util/types';
 
 function encodeValues_BOOLEAN(values: boolean[]) {
   const buf = Buffer.alloc(Math.ceil(values.length / 8));
@@ -347,7 +348,12 @@ export const encodeValues = function (type: ValidValueTypes | string, values: un
 // Union type for all possible decoded values from PLAIN codec
 export type PlainDecodedValue = boolean | number | bigint | Date | Buffer;
 
-export const decodeValues = function (type: ValidValueTypes | string, cursor: Cursor, count: number, opts: Options): PlainDecodedValue[] {
+export const decodeValues = function (
+  type: ValidValueTypes | string,
+  cursor: Cursor,
+  count: number,
+  opts: Options
+): PlainDecodedValue[] {
   switch (type) {
     case 'BOOLEAN':
       return decodeValues_BOOLEAN(cursor, count);

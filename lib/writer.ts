@@ -747,8 +747,8 @@ async function encodeColumnChunk(
 
       // If the number of values and the count of nulls are the same, this is a null page
       columnIndex.null_pages.push(page.num_values === statistics.null_count.valueOf());
-      columnIndex.max_values.push(encodeStatisticsValue(page.statistics.max_value, opts.column));
-      columnIndex.min_values.push(encodeStatisticsValue(page.statistics.min_value, opts.column));
+      if (page.statistics.max_value !== undefined) columnIndex.max_values.push(page.statistics.max_value);
+      if (page.statistics.min_value !== undefined) columnIndex.min_values.push(page.statistics.min_value);
     }
 
     const pageLocation = new parquet_thrift.PageLocation();
@@ -765,7 +765,7 @@ async function encodeColumnChunk(
 
   if (opts.column.statistics !== false) {
     statistics.distinct_count = new Int64(distinct_values.size);
-    metadata.statistics = encodeStatistics(statistics, opts.column);
+    metadata.statistics = statistics;
     if (opts.pageIndex !== false) {
       metadata.columnIndex = columnIndex;
     }
