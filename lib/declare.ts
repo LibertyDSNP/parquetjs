@@ -5,6 +5,7 @@ import parquet_thrift, { LogicalType } from '../gen-nodejs/parquet_types';
 import type { PlainDecodedValue } from './codec/plain';
 import type { RleDecodedValue } from './codec/rle';
 import type { PlainDictionaryDecodedValue } from './codec/plain_dictionary';
+import type { RleDictionaryDecodedValue } from './codec/rle_dictionary';
 import type { DeltaBinaryPackedDecodedValue } from './codec/delta_binary_packed';
 import type { DeltaLengthByteArrayDecodedValue } from './codec/delta_length_byte_array';
 import type { DeltaByteArrayDecodedValue } from './codec/delta_byte_array';
@@ -172,6 +173,7 @@ export type AllDecodedValue =
   | PlainDecodedValue
   | RleDecodedValue
   | PlainDictionaryDecodedValue
+  | RleDictionaryDecodedValue
   | DeltaBinaryPackedDecodedValue
   | DeltaLengthByteArrayDecodedValue
   | DeltaByteArrayDecodedValue
