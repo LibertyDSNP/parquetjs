@@ -1,6 +1,10 @@
 // Thanks to https://github.com/kbajalc/parquets
 
 import parquet_thrift, { LogicalType } from '../gen-nodejs/parquet_types';
+// Import codec types for creating union type
+import type { PlainDecodedValue } from './codec/plain';
+import type { RleDecodedValue } from './codec/rle';
+import type { PlainDictionaryDecodedValue } from './codec/plain_dictionary';
 import {
   Statistics,
   OffsetIndex,
@@ -149,15 +153,18 @@ export interface Parameter {
   headers?: string;
 }
 
+// Union type combining all possible decoded values from all Parquet codecs
+export type AllDecodedValue = PlainDecodedValue | RleDecodedValue | PlainDictionaryDecodedValue;
+
 export interface PageData {
   rlevels?: number[];
   dlevels?: number[];
-  distinct_values?: Set<any>;
-  values?: number[];
+  distinct_values?: Set<AllDecodedValue>;
+  values?: AllDecodedValue[]; // Never contains null or undefined - guaranteed by codec implementations
   pageHeaders?: PageHeader[];
   pageHeader?: PageHeader;
   count?: number;
-  dictionary?: unknown[];
+  dictionary?: AllDecodedValue[];
   column?: parquet_thrift.ColumnChunk;
   useDictionary?: boolean;
 }

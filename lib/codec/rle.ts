@@ -5,7 +5,9 @@
 import varint from 'varint';
 import { Cursor } from './types';
 
-function encodeRunBitpacked(values: number[], opts: { bitWidth: number }) {
+export type RleDecodedValue = number;
+
+function encodeRunBitpacked(values: number[], opts: { bitWidth: number }): Buffer {
   for (let i = 0; i < values.length % 8; i++) {
     values.push(0);
   }
@@ -20,7 +22,7 @@ function encodeRunBitpacked(values: number[], opts: { bitWidth: number }) {
   return Buffer.concat([Buffer.from(varint.encode(((values.length / 8) << 1) | 1)), buf]);
 }
 
-function encodeRunRepeated(value: number, count: number, opts: { bitWidth: number }) {
+function encodeRunRepeated(value: number, count: number, opts: { bitWidth: number }): Buffer {
   const buf = Buffer.alloc(Math.ceil(opts.bitWidth / 8));
   let remainingValue = value;
 
@@ -34,6 +36,7 @@ function encodeRunRepeated(value: number, count: number, opts: { bitWidth: numbe
   return Buffer.concat([Buffer.from(varint.encode(count << 1)), buf]);
 }
 
+// TODO: Type differently?
 function unknownToParsedInt(value: string | number) {
   if (typeof value === 'string') {
     return parseInt(value, 10);
@@ -46,7 +49,7 @@ export const encodeValues = function (
   type: string,
   values: number[],
   opts: { bitWidth: number; disableEnvelope?: boolean }
-) {
+): Buffer {
   if (!('bitWidth' in opts)) {
     throw new Error('bitWidth is required');
   }
@@ -107,7 +110,7 @@ export const encodeValues = function (
   return envelope;
 };
 
-function decodeRunBitpacked(cursor: Cursor, count: number, opts: { bitWidth: number }) {
+function decodeRunBitpacked(cursor: Cursor, count: number, opts: { bitWidth: number }): number[] {
   if (count % 8 !== 0) {
     throw new Error('must be a multiple of 8');
   }
@@ -143,7 +146,7 @@ export const decodeValues = function (
   cursor: Cursor,
   count: number,
   opts: { bitWidth: number; disableEnvelope?: boolean }
-) {
+): number[] {
   if (!('bitWidth' in opts)) {
     throw new Error('bitWidth is required');
   }
