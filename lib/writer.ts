@@ -402,19 +402,19 @@ function encodeValues(type: string, encoding: ParquetCodec, values: AllDecodedVa
   switch (encoding) {
     case 'PLAIN':
       return parquet_codec.PLAIN.encodeValues(type, values, opts);
-      
+
     case 'RLE':
-    case 'DELTA_BINARY_PACKED': 
+    case 'DELTA_BINARY_PACKED':
     case 'BIT_PACKED':
       return parquet_codec[encoding].encodeValues(type, values as number[], opts);
-      
+
     case 'DELTA_LENGTH_BYTE_ARRAY':
     case 'DELTA_BYTE_ARRAY':
       return parquet_codec[encoding].encodeValues(type, values as (Buffer | Uint8Array | string)[], opts);
-      
+
     case 'BYTE_STREAM_SPLIT':
       return parquet_codec.BYTE_STREAM_SPLIT.encodeValues(type, values as (number | Buffer | Uint8Array)[], opts);
-      
+
     default:
       throw new Error(`Unsupported encoding: ${encoding}`);
   }
@@ -580,14 +580,14 @@ async function encodeDataPage(
   });
 
   /* encode repetition and definition levels */
-  let rLevelsBuf = Buffer.alloc(0);
+  let rLevelsBuf: Buffer = Buffer.alloc(0);
   if (column.rLevelMax > 0) {
     rLevelsBuf = encodeValues(PARQUET_RDLVL_TYPE, PARQUET_RDLVL_ENCODING, rlevels, {
       bitWidth: parquet_util.getBitWidth(column.rLevelMax),
     });
   }
 
-  let dLevelsBuf = Buffer.alloc(0);
+  let dLevelsBuf: Buffer = Buffer.alloc(0);
   if (column.dLevelMax > 0) {
     dLevelsBuf = encodeValues(PARQUET_RDLVL_TYPE, PARQUET_RDLVL_ENCODING, dlevels, {
       bitWidth: parquet_util.getBitWidth(column.dLevelMax),
@@ -636,7 +636,7 @@ async function encodeDataPageV2(
   const valuesBufCompressed = await parquet_compression.deflate(column.compression!, valuesBuf);
 
   /* encode repetition and definition levels */
-  let rLevelsBuf = Buffer.alloc(0);
+  let rLevelsBuf: Buffer = Buffer.alloc(0);
   if (column.rLevelMax > 0) {
     rLevelsBuf = encodeValues(PARQUET_RDLVL_TYPE, PARQUET_RDLVL_ENCODING, rlevels, {
       bitWidth: parquet_util.getBitWidth(column.rLevelMax),
@@ -644,7 +644,7 @@ async function encodeDataPageV2(
     });
   }
 
-  let dLevelsBuf = Buffer.alloc(0);
+  let dLevelsBuf: Buffer = Buffer.alloc(0);
   if (column.dLevelMax > 0) {
     dLevelsBuf = encodeValues(PARQUET_RDLVL_TYPE, PARQUET_RDLVL_ENCODING, dlevels, {
       bitWidth: parquet_util.getBitWidth(column.dLevelMax),
