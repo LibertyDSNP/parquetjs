@@ -719,7 +719,7 @@ async function encodeColumnChunk(
   offsetIndex.page_locations = [];
 
   /* prepare statistics */
-  const statistics: parquet_thrift.Statistics = {};
+  const statistics = new parquet_thrift.Statistics();
   const distinct_values = new Set();
   statistics.null_count = new Int64(0);
   statistics.distinct_count = new Int64(0);
@@ -732,14 +732,23 @@ async function encodeColumnChunk(
       if (i === 0) {
         statistics.max_value = page.statistics.max_value;
         statistics.min_value = page.statistics.min_value;
+        // Set deprecated fields for backward compatibility
+        statistics.max = page.statistics.max_value;
+        statistics.min = page.statistics.min_value;
       } else {
         if (page.statistics.min_value !== undefined) {
           const { min_value } = compareStatistics(page.statistics.min_value, statistics);
-          if (min_value !== undefined) statistics.min_value = min_value;
+          if (min_value !== undefined) {
+            statistics.min_value = min_value;
+            statistics.min = min_value; // Set deprecated field
+          }
         }
         if (page.statistics.max_value !== undefined) {
           const { max_value } = compareStatistics(page.statistics.max_value, statistics);
-          if (max_value !== undefined) statistics.max_value = max_value;
+          if (max_value !== undefined) {
+            statistics.max_value = max_value;
+            statistics.max = max_value; // Set deprecated field
+          }
         }
       }
       statistics.null_count.setValue(statistics.null_count.valueOf() + (page.statistics.null_count?.valueOf() || 0));
