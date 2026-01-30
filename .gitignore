@@ -3,7 +3,6 @@ node_modules
 *.parquet
 npm-debug.log
 .nyc_output
-dist
 !test/test-files/*.parquet
 !test/reference-test/files/*.parquet
 examples/server/package-lock.json
