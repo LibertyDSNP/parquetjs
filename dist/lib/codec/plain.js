@@ -221,7 +221,7 @@ function decodeValues_DOUBLE(cursor, count) {
     }
     return values;
 }
-const STR_PAD = 8;
+const STR_PAD = 32;
 function _slowEncodeBufferEnd_BYTE_ARRAY(values, begin_buf, fromIndex) {
     let rest_len = 0;
     for (let j = fromIndex; j < values.length; j++) {

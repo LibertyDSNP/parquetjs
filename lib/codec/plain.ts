@@ -251,7 +251,7 @@ function decodeValues_DOUBLE(cursor: Cursor, count: number) {
   return values;
 }
 
-const STR_PAD = 8;
+const STR_PAD = 32;
 
 function _slowEncodeBufferEnd_BYTE_ARRAY(
   values: (Uint8Array | string)[],
