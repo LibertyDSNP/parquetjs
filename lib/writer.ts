@@ -578,14 +578,14 @@ async function encodeDataPage(
   });
 
   /* encode repetition and definition levels */
-  let rLevelsBuf = Buffer.alloc(0);
+  let rLevelsBuf: Buffer = Buffer.alloc(0);
   if (column.rLevelMax > 0) {
     rLevelsBuf = encodeValues(PARQUET_RDLVL_TYPE, PARQUET_RDLVL_ENCODING, rlevels, {
       bitWidth: parquet_util.getBitWidth(column.rLevelMax),
     });
   }
 
-  let dLevelsBuf = Buffer.alloc(0);
+  let dLevelsBuf: Buffer = Buffer.alloc(0);
   if (column.dLevelMax > 0) {
     dLevelsBuf = encodeValues(PARQUET_RDLVL_TYPE, PARQUET_RDLVL_ENCODING, dlevels, {
       bitWidth: parquet_util.getBitWidth(column.dLevelMax),
@@ -634,7 +634,7 @@ async function encodeDataPageV2(
   const valuesBufCompressed = await parquet_compression.deflate(column.compression!, valuesBuf);
 
   /* encode repetition and definition levels */
-  let rLevelsBuf = Buffer.alloc(0);
+  let rLevelsBuf: Buffer = Buffer.alloc(0);
   if (column.rLevelMax > 0) {
     rLevelsBuf = encodeValues(PARQUET_RDLVL_TYPE, PARQUET_RDLVL_ENCODING, rlevels, {
       bitWidth: parquet_util.getBitWidth(column.rLevelMax),
@@ -642,7 +642,7 @@ async function encodeDataPageV2(
     });
   }
 
-  let dLevelsBuf = Buffer.alloc(0);
+  let dLevelsBuf: Buffer = Buffer.alloc(0);
   if (column.dLevelMax > 0) {
     dLevelsBuf = encodeValues(PARQUET_RDLVL_TYPE, PARQUET_RDLVL_ENCODING, dlevels, {
       bitWidth: parquet_util.getBitWidth(column.dLevelMax),
@@ -788,7 +788,7 @@ async function encodeRowGroup(schema: ParquetSchema, data: parquet_shredder.Reco
   metadata.columns = [];
   metadata.total_byte_size = new Int64(0);
 
-  let body = Buffer.alloc(0);
+  let body: Buffer = Buffer.alloc(0);
   for (const field of schema.fieldList) {
     if (field.isNested) {
       continue;

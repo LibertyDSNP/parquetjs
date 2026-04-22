@@ -645,7 +645,10 @@ describe('ParquetCodec::PLAIN', function () {
     const encoded = parquet_codec_plain.encodeValues('BYTE_ARRAY', values);
     const cursor = { offset: 0, buffer: encoded };
     const decoded = parquet_codec_plain.decodeValues('BYTE_ARRAY', cursor, values.length, {});
-    assert.deepEqual(decoded, values.map((s) => Buffer.from(s, 'utf8')));
+    assert.deepEqual(
+      decoded,
+      values.map((s) => Buffer.from(s, 'utf8'))
+    );
   });
 
   it('should encode BYTE_ARRAY values', function () {

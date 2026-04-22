@@ -222,6 +222,34 @@ function decodeValues_DOUBLE(cursor, count) {
     return values;
 }
 const STR_PAD = 8;
+function _slowEncodeBufferEnd_BYTE_ARRAY(values, begin_buf, fromIndex) {
+    let rest_len = 0;
+    for (let j = fromIndex; j < values.length; j++) {
+        const x = values[j];
+        rest_len += 4 + (typeof x === 'string' ? Buffer.byteLength(x, 'utf8') : x.length);
+    }
+    const rest_buf = Buffer.allocUnsafe(rest_len);
+    for (let j = fromIndex, rest_pos = 0; j < values.length; j++) {
+        const x = values[j];
+        if (typeof x === 'string') {
+            const l = rest_buf.write(x, rest_pos + 4, 'utf8');
+            rest_buf.writeUInt32LE(l, rest_pos);
+            rest_pos += 4 + l;
+        }
+        else {
+            const l = x.length;
+            rest_buf.writeUInt32LE(l, rest_pos);
+            if (Buffer.isBuffer(x)) {
+                x.copy(rest_buf, rest_pos + 4);
+            }
+            else {
+                rest_buf.set(x, rest_pos + 4);
+            }
+            rest_pos += 4 + l;
+        }
+    }
+    return Buffer.concat([begin_buf, rest_buf]);
+}
 function encodeValues_BYTE_ARRAY(values) {
     let buf_len = 0;
     for (let i = 0; i < values.length; i++) {
@@ -230,54 +258,32 @@ function encodeValues_BYTE_ARRAY(values) {
     }
     const buf = Buffer.allocUnsafe(buf_len);
     let buf_pos = 0;
-    for (let i = 0; i < values.length; i++) {
-        const v = values[i];
-        if (typeof v === 'string') {
-            const len = buf.write(v, buf_pos + 4, 'utf8');
-            const end_pos = buf_pos + 4 + len;
-            if (end_pos >= buf_len) {
-                // slow finish
-                const begin_buf = buf.subarray(0, buf_pos);
-                let rest_len = 0;
-                for (let j = i; j < values.length; j++) {
-                    const x = values[j];
-                    rest_len += 4 + (typeof x === 'string' ? Buffer.byteLength(x, 'utf8') : x.length);
-                }
-                const rest_buf = Buffer.allocUnsafe(rest_len);
-                for (let j = i, rest_pos = 0; j < values.length; j++) {
-                    const x = values[j];
-                    if (typeof x === 'string') {
-                        const l = rest_buf.write(x, rest_pos + 4, 'utf8');
-                        rest_buf.writeUInt32LE(l, rest_pos);
-                        rest_pos += 4 + l;
-                    }
-                    else {
-                        const l = x.length;
-                        rest_buf.writeUInt32LE(l, rest_pos);
-                        if (Buffer.isBuffer(x)) {
-                            x.copy(rest_buf, rest_pos + 4);
-                        }
-                        else {
-                            rest_buf.set(x, rest_pos + 4);
-                        }
-                        rest_pos += 4 + l;
-                    }
-                }
-                return Buffer.concat([begin_buf, rest_buf]);
-            }
-            buf.writeUInt32LE(len, buf_pos);
-            buf_pos = end_pos;
-        }
-        else {
-            buf.writeUInt32LE(v.length, buf_pos);
-            if (Buffer.isBuffer(v)) {
-                v.copy(buf, buf_pos + 4);
+    let i = 0;
+    try {
+        for (; i < values.length; i++) {
+            const v = values[i];
+            if (typeof v === 'string') {
+                const len = buf.write(v, buf_pos + 4, 'utf8');
+                buf.writeUInt32LE(len, buf_pos);
+                buf_pos += 4 + len;
             }
             else {
-                buf.set(v, buf_pos + 4);
+                buf.writeUInt32LE(v.length, buf_pos);
+                if (Buffer.isBuffer(v)) {
+                    v.copy(buf, buf_pos + 4);
+                }
+                else {
+                    buf.set(v, buf_pos + 4);
+                }
+                buf_pos += 4 + v.length;
             }
-            buf_pos += 4 + v.length;
         }
+    }
+    catch (e) {
+        if (e instanceof RangeError) {
+            return _slowEncodeBufferEnd_BYTE_ARRAY(values, buf.subarray(0, buf_pos), i);
+        }
+        throw e;
     }
     return buf_pos < buf.length ? buf.subarray(0, buf_pos) : buf;
 }
