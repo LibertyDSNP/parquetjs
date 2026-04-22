@@ -636,6 +636,18 @@ describe('ParquetCodec::PLAIN', function () {
     assert_util.assertArrayEqualEpsilon(vals, [42.0, 23.5, 17.0, 4.2, 9000]);
   });
 
+  it('should encode BYTE_ARRAY values with many multi-byte emoji strings without throwing', function () {
+    // Each emoji5 string: jsLength=10, byteLength=20, allocated=10+STR_PAD(8)=18 per entry.
+    // Each write advances buf_pos by 20 (actual) vs 18 (allocated), drifting +2 per string.
+    // After 10 strings buf_pos+4 exceeds buf_len, causing ERR_OUT_OF_RANGE on the 11th write.
+    const emoji5 = '🎉🎉🎉🎉🎉';
+    const values = Array(11).fill(emoji5);
+    const encoded = parquet_codec_plain.encodeValues('BYTE_ARRAY', values);
+    const cursor = { offset: 0, buffer: encoded };
+    const decoded = parquet_codec_plain.decodeValues('BYTE_ARRAY', cursor, values.length, {});
+    assert.deepEqual(decoded, values.map((s) => Buffer.from(s, 'utf8')));
+  });
+
   it('should encode BYTE_ARRAY values', function () {
     let buf = parquet_codec_plain.encodeValues('BYTE_ARRAY', ['one', Buffer.from([0xde, 0xad, 0xbe, 0xef]), 'three']);
 
