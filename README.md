@@ -23,7 +23,7 @@ This is a forked repository with code from various sources:
 
 ## Installation
 
-_parquet.js requires node.js >= 18.18.2_
+_parquet.js requires node.js >= 20.20.2_
 
 ```
   $ npm install @dsnp/parquetjs
