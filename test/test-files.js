@@ -227,7 +227,7 @@ describe('test-files', function () {
 
   describe('RLE', function () {
     // Tracked in https://github.com/LibertyDSNP/parquetjs/issues/113
-    it.skip('rle_boolean_encoding.parquet loads', async function () {
+    it('rle_boolean_encoding.parquet loads', async function () {
       const data = await readData('rle/rle_boolean_encoding.parquet');
       assert.deepEqual(data[0], { datatype_boolean: true });
       assert.deepEqual(data[1], { datatype_boolean: false });

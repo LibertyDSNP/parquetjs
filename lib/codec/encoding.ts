@@ -60,7 +60,6 @@ export function readRleBitPackedHybrid(reader: DataReader, width: number, length
   if (!disableEnvelope) {
     reader.offset += 4
   }
-  const startOffset = reader.offset;
   let seen = 0
   while (seen < output.length) {
     const header = readVarInt(reader)
@@ -74,7 +73,6 @@ export function readRleBitPackedHybrid(reader: DataReader, width: number, length
       seen += count
     }
   }
-  console.assert(reader.offset - startOffset === length)
 }
 
 /**

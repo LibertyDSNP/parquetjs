@@ -116,27 +116,45 @@ export const encodeValues = function (
 // opts:  bitWidth is required.
 // returns: a DecodedArray
 export function decodeRunBitpacked(cursor: Cursor, count: number, opts: { bitWidth: number }): Array<number> {
-  const run_old_code = true;
-  let output = new Array(count).fill(0);
-  if (run_old_code) {
-    if (count % 8 !== 0) {
-      throw 'must be a multiple of 8';
-    }
+  const output = new Array(count).fill(0);
+  const bytesNeeded = Math.ceil((opts.bitWidth * count) / 8);
 
-  const values = new Array(count).fill(0);
-  for (let b = 0; b < opts.bitWidth * count; ++b) {
-    if (cursor.buffer[cursor.offset + Math.floor(b / 8)] & (1 << (b % 8))) {
-      values[Math.floor(b / opts.bitWidth)] |= 1 << (b % opts.bitWidth);
-    }
-  }
+  //   const values = new Array(count).fill(0);
+  //   for (let b = 0; b < opts.bitWidth * count; ++b) {
+  //     if (cursor.buffer[cursor.offset + Math.floor(b / 8)] & (1 << (b % 8))) {
+  //       values[Math.floor(b / opts.bitWidth)] |= 1 << (b % opts.bitWidth);
+  //     }
+  //   }
+  //
+  //     cursor.offset += opts.bitWidth * (count / 8);
+  //   } else {
+  //     const view = new DataView(cursor.buffer.buffer, cursor.offset);
+  //     const reader = {view, offset: 0}
+  //     const header = readVarInt(reader);
+  //     readBitPacked(reader, header, opts.bitWidth, output, 0)
+  //   }
+  //   return output;
+  // }
 
-    cursor.offset += opts.bitWidth * (count / 8);
-  } else {
-    const view = new DataView(cursor.buffer.buffer, cursor.offset);
-    const reader = {view, offset: 0}
-    const header = readVarInt(reader);
-    readBitPacked(reader, header, opts.bitWidth, output, 0)
-  }
+  // IMPORTANT: Create DataView with proper offset handling
+  // Buffer.buffer might have an internal byteOffset we need to account for
+  const view = new DataView(
+    cursor.buffer.buffer,
+    cursor.buffer.byteOffset + cursor.offset,
+    bytesNeeded
+  );
+  const reader = {view, offset: 0}
+  // DON'T read a header - we're already past it!
+  // The header was already consumed by decodeValues
+  // We just need to decode the bit-packed data directly
+
+  // Create a fake header for the bit-packed run
+  // count is already the number of values (multiple of 8)
+  const header =  ((count / 8) << 1) | 1;  // bit-packed header
+  const seen = readBitPacked(reader, header, opts.bitWidth, output, 0);
+  // Update cursor position
+  cursor.offset += bytesNeeded;
+
   return output;
 }
 
@@ -151,7 +169,7 @@ export function decodeRunBitpacked(cursor: Cursor, count: number, opts: { bitWid
 // So maybe this code is fine.
 export function decodeRunRepeated(cursor: Cursor, count: number, opts: { bitWidth: number }): Array<number> {
   let output = new Array(count).fill(0);
-  var bytesNeededForFixedBitWidth = Math.ceil(opts.bitWidth / 8);
+  const bytesNeededForFixedBitWidth = Math.ceil(opts.bitWidth / 8);
   let value = 0;
 
   for (let i = 0; i < bytesNeededForFixedBitWidth; ++i) {

@@ -112,7 +112,9 @@ export const getBitWidth = function (val: number) {
  */
 export const getThriftEnum = function (klass: Enums, value: unknown) {
   for (const k in klass) {
+    console.log(`Does ${klass[k]} ${value}?`)
     if (klass[k] === value) {
+      console.log("FOUND!")
       return k;
     }
   }

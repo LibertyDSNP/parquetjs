@@ -11,7 +11,7 @@ export const decodeValues = function (type: string, cursor: Cursor, count: numbe
     view: new DataView(cursor.buffer.buffer, cursor.offset),
     offset: 0,
   }
-  let output: DecodedArray = new Array(count);
+  const output: DecodedArray = new Array(count);
   const disableEnvelope = true;
   readRleBitPackedHybrid(reader, bitWidth, count, output, disableEnvelope)
   return output;
