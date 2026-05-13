@@ -9,7 +9,7 @@
 
 Feature Description
 ---------------
-A description of of the feature you want to add
+A description of the feature you want to add
 
 Feature Justification
 ---------------
