@@ -186,7 +186,7 @@ from ours), you decide your own deletion policy, of course.
 
 ## Fixing Security Vulnerabilities
 
-As outlined in [SECURITY.md](https://github.com/LibertyDSNP/meta/blob/main/SECURITY.md),
+As outlined in [SECURITY.md](SECURITY.md),
 if you discover a security vulnerability that you feel is sensitive enough that 
 it should not be posted publicly, please 
 [report it](mailto:security@projectliberty.io).
