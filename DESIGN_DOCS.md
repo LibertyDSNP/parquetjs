@@ -72,7 +72,7 @@ The process for adding a new DSNP Design Document is much like any other Pull Re
 
 ## Writing style
 Remember that the first goal of the Design Document is to explain a solution to others so they can understand it well enough to start writing stories and then implement the solution.
-The next goal is explain the solution to the public.
+The next goal is to explain the solution to the public.
 Also keep in mind that these documents will be written in English, and some readers may not be fluent in English. 
 
 ### General
