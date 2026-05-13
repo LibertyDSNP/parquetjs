@@ -68,7 +68,7 @@
     "build:node": "tsc -b",
     "build:browser": "node esbuild.mjs",
     "type": "tsc --noEmit",
-    "lint": "eslint . && npx prettier . --check",
+    "lint": "eslint --quiet . && npx prettier . --check",
     "lint:fix": "eslint --fix .",
     "format": "npx prettier . --write",
     "test": "mocha 'test/{,!(browser)/**}/*.{js,ts}'",
