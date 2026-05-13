@@ -8,10 +8,7 @@ to suit its specific needs.
 As a relatively new project, Project Liberty is moving quickly in a 
 quasi-["rocket ship"](https://opentechstrategies.com/archetypes-files/open-source-archetypes-v2.pdf#section*.10) 
 mode to get our open source technologies to market.  When you see
-something is missing, please let us know by submitting an issue in the
-appropriate repository or by alerting us in the
-[Forums](https://forums.projectliberty.io/)).
-
+something is missing, please let us know by submitting an issue.
 A few useful resources:
 
 - General Questions + Support: [See the Forums](https://forums.projectliberty.io/)

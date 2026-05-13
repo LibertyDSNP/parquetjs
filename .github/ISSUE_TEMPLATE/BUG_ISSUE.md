@@ -7,7 +7,7 @@
 ---
 Issue description
 ---------------
-A short description of bug and what you believe the intended outcome should have been.
+A short description of the bug and what you believe the intended outcome should have been.
 Thanks for reporting an issue!
 
 Expected vs. Actual
