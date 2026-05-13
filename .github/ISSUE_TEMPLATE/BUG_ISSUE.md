@@ -1,6 +1,6 @@
 ---
     name: Bug Report
-    about: Report an issue found in the DSNP example client
+    about: Report an issue found in @dsnp/parquetjs
     title: ""
     labels: "bug"
     assignees: ""
