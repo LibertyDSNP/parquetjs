@@ -47,7 +47,7 @@ We use the typical GitHub [pull request
 (PR)](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests)
 development workflow.
 
-For trivial chnges -- like fixing a spelling mistake or an off-by-one
+For trivial changes -- like fixing a spelling mistake or an off-by-one
 error -- simply create a PR.
 
 For non-trivial changes, we encourage you to first post about your plans in an issue 
