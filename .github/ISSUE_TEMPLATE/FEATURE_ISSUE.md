@@ -1,6 +1,6 @@
 ---
     name: Feature Request
-    about: Request a new feature or feature expansion for the DSNP example client
+    about: Request a new feature or feature expansion for @dsnp/parquetjs
     title: ""
     labels: "enhancement"
     assignees: ""
