@@ -30,3 +30,18 @@ export interface Cursor {
   offset: number;
   size?: number;
 }
+
+export interface DataReader {
+    view: DataView
+    offset: number
+}
+
+export type DecodedArray =
+  Uint8Array |
+  Int32Array |
+  BigInt64Array |
+  BigUint64Array |
+  Float32Array |
+  Float64Array |
+  any[]
+
