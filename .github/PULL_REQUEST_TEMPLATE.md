@@ -1,22 +1,33 @@
-# Problem
+Purpose
+---------------
+tl;dr context for this pull request
 
-problem statement
+Related GitHub Issues
+---------------
+Mention the issues this is related to or addresses
+
 Solution
-========
-What I/we did to solve this problem
+---------------
+A short description of what you have done to implement/fix the above mentioned feature or bug
 
-with @pairperson1
+@ any other developers who who worked on the PR with you
 
-## Change summary:
 
-- Tidy, well formulated commit message
-- Another great commit message
-- Something else I/we did
+Change summary
+---------------
+* A detailed list of bulleted
+* changes that go into detail about
+* the specifics of the changes
+* to the codebase
 
-## Steps to Verify:
 
-1. A setup step / beginning state
-1. What to do next
-1. Any other instructions
-1. Expected behavior
-1. Suggestions for testing
+Steps to Verify
+----------------
+1. A numbered list of steps
+2. To verify that this feature/bug
+3. is now working
+
+
+Additional details
+----------------
+- Any supplemental material
