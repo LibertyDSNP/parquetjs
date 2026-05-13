@@ -10,7 +10,7 @@ Solution
 ---------------
 A short description of what you have done to implement/fix the above mentioned feature or bug
 
-@ any other developers who who worked on the PR with you
+@ any other developers who worked on the PR with you
 
 
 Change summary
