@@ -6,17 +6,16 @@
     assignees: ""
 ---
 
+## Feature Description
 
-Feature Description
----------------
 A description of the feature you want to add
 
-Feature Justification
----------------
+## Feature Justification
+
 A reason for why this feature should be added
 
-Acceptance Criteria
----------------
+## Acceptance Criteria
+
 - [ ] a list of testable things
 - [ ] that should be there
 - [ ] if the feature is fully implemented.
