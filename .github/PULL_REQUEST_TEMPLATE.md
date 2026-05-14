@@ -1,22 +1,30 @@
-# Problem
+## Purpose
 
-problem statement
-Solution
-========
-What I/we did to solve this problem
+tl;dr context for this pull request
 
-with @pairperson1
+## Related GitHub Issues
 
-## Change summary:
+Mention the issues this is related to or addresses
 
-- Tidy, well formulated commit message
-- Another great commit message
-- Something else I/we did
+## Solution
 
-## Steps to Verify:
+A short description of what you have done to implement/fix the above mentioned feature or bug
 
-1. A setup step / beginning state
-1. What to do next
-1. Any other instructions
-1. Expected behavior
-1. Suggestions for testing
+@ any other developers who worked on the PR with you
+
+## Change summary
+
+- A detailed list of bulleted
+- changes that go into detail about
+- the specifics of the changes
+- to the codebase
+
+## Steps to Verify
+
+1. A numbered list of steps
+2. To verify that this feature/bug
+3. is now working
+
+## Additional details
+
+- Any supplemental material
